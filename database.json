@@ -1,0 +1,56 @@
+{
+  "users": [
+    {
+      "id": "admin_001",
+      "username": "admin",
+      "email": "admin@ordopass.com",
+      "password": "admin123",
+      "nom": "Administrateur",
+      "prenom": "System",
+      "role": "admin",
+      "createdAt": "2026-01-13T14:48:25.066Z",
+      "lastLogin": "2026-01-13T14:53:37.380Z"
+    },
+    {
+      "id": "medecin_test_001",
+      "username": "testmedecin",
+      "email": "test@medecin.com",
+      "password": "test123",
+      "nom": "Dupont",
+      "prenom": "Jean",
+      "dateNaissance": "1980-01-01",
+      "specialite": "Généraliste",
+      "numeroInscription": "MED123456",
+      "etablissement": "Cabinet Test",
+      "role": "medecin",
+      "createdAt": "2026-01-13T14:48:25.075Z",
+      "lastLogin": "2026-01-13T14:54:23.769Z"
+    },
+    {
+      "id": "pharmacien_test_001",
+      "username": "testpharmacien",
+      "email": "test@pharmacie.com",
+      "password": "test123",
+      "nom": "Pharmacie du Centre",
+      "adresse": "1 Rue de la Paix, Paris",
+      "telephone": "+33123456789",
+      "licenseNumber": "PHARM12345",
+      "experience": 10,
+      "role": "pharmacien",
+      "createdAt": "2026-01-13T14:48:25.075Z",
+      "lastLogin": "2026-01-13T14:53:13.211Z"
+    }
+  ],
+  "consultations": [],
+  "ordonnances": [],
+  "pharmacies": [
+    {
+      "id": "pharmacien_test_001",
+      "nom": "Pharmacie du Centre",
+      "adresse": "1 Rue de la Paix, Paris",
+      "telephone": "+33123456789",
+      "online": true,
+      "horaires": "08:00-20:00"
+    }
+  ]
+}

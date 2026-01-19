@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - OrdoPass</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .section { background: white; padding: 20px; margin: 20px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        pre { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; border-radius: 4px; overflow: auto; }
+        button { margin: 5px; padding: 10px 15px; background: #1e3c72; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #2a5298; }
+        button.danger { background: #dc3545; }
+        button.danger:hover { background: #c82333; }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h1 { color: #1e3c72; }
+        h2 { color: #2a5298; margin-top: 0; }
+        .status { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .status-online { background: #d4edda; color: #155724; }
+        .status-offline { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛠️ Debug OrdoPass</h1>
+        
+        <div class="section">
+            <h2>1. État du système</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Serveur API</h3>
+                    <div id="serverStatus">Vérification...</div>
+                </div>
+                <div class="card">
+                    <h3>LocalStorage</h3>
+                    <div id="localStorageStatus">Vérification...</div>
+                </div>
+                <div class="card">
+                    <h3>Session</h3>
+                    <div id="sessionStatus">Vérification...</div>
+                </div>
+            </div>
+            <div style="margin-top: 10px;">
+                <button onclick="testApi()">Tester API</button>
+                <button onclick="showLocalStorage()">Afficher LocalStorage</button>
+                <button onclick="checkSession()">Vérifier Session</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>2. Données LocalStorage</h2>
+            <div id="localStorageData"></div>
+            <div style="margin-top: 10px;">
+                <button onclick="clearLocalStorage()" class="danger">Effacer LocalStorage</button>
+                <button onclick="initLocalStorage()">Initialiser données test</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>3. Tests API</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Connexion</h3>
+                    <button onclick="testLogin('admin', 'admin123', 'admin')">Tester admin</button>
+                    <button onclick="testLogin('testmedecin', 'test123', 'medecin')">Tester médecin</button>
+                    <button onclick="testLogin('testpharmacien', 'test123', 'pharmacien')">Tester pharmacien</button>
+                </div>
+                <div class="card">
+                    <h3>Inscription</h3>
+                    <button onclick="testRegisterMedecin()">Inscrire médecin test</button>
+                    <button onclick="testRegisterPharmacien()">Inscrire pharmacien test</button>
+                </div>
+                <div class="card">
+                    <h3>Données</h3>
+                    <button onclick="testGetUsers()">Obtenir utilisateurs</button>
+                    <button onclick="testGetPharmacies()">Obtenir pharmacies</button>
+                </div>
+            </div>
+            <div id="testResults"></div>
+        </div>
+        
+        <div class="section">
+            <h2>4. Réinitialisation</h2>
+            <button onclick="resetTestData()" class="danger">Réinitialiser données test sur serveur</button>
+            <button onclick="window.location.href='admin_login.html?test=true'">Aller à la connexion</button>
+            <button onclick="window.location.href='index.html'">Retour à l'accueil</button>
+            <div id="resetResults" style="margin-top: 10px;"></div>
+        </div>
+        
+        <div class="section">
+            <h2>5. Logs système</h2>
+            <pre id="logs">Initialisation...</pre>
+        </div>
+    </div>
+    
+    <script src="config.js"></script>
+    <script src="api-service.js"></script>
+    <script>
+        let logs = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            logs.unshift(logEntry);
+            
+            // Garder seulement les 50 derniers logs
+            if (logs.length > 50) logs.pop();
+            
+            // Mettre à jour l'affichage
+            document.getElementById('logs').textContent = logs.join('\n');
+            
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        async function testApi() {
+            log('Test API en cours...');
+            try {
+                const result = await window.apiService.checkServerStatus();
+                
+                if (result.online) {
+                    document.getElementById('serverStatus').innerHTML = 
+                        `<span class="status status-online">EN LIGNE</span> - ${result.data.message}`;
+                    log('✅ Serveur API en ligne', 'success');
+                } else {
+                    document.getElementById('serverStatus').innerHTML = 
+                        `<span class="status status-offline">HORS LIGNE</span> - ${result.error}`;
+                    log('❌ Serveur API hors ligne', 'error');
+                }
+            } catch (error) {
+                document.getElementById('serverStatus').innerHTML = 
+                    `<span class="status status-offline">ERREUR</span> - ${error.message}`;
+                log(`❌ Erreur test API: ${error.message}`, 'error');
+            }
+        }
+        
+        function showLocalStorage() {
+            log('Affichage LocalStorage...');
+            let html = '<table style="width:100%;border-collapse:collapse;">';
+            html += '<tr><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd;">Clé</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd;">Valeur</th></tr>';
+            
+            let totalSize = 0;
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                totalSize += (key.length + value.length) * 2; // Approximation en UTF-16
+                
+                let displayValue;
+                try {
+                    const parsed = JSON.parse(value);
+                    displayValue = `<pre>${JSON.stringify(parsed, null, 2)}</pre>`;
+                } catch {
+                    displayValue = `<code>${value.substring(0, 100)}${value.length > 100 ? '...' : ''}</code>`;
+                }
+                
+                html += `<tr><td style="padding:8px;border-bottom:1px solid #ddd;"><strong>${key}</strong></td><td style="padding:8px;border-bottom:1px solid #ddd;">${displayValue}</td></tr>`;
+            }
+            
+            html += '</table>';
+            html += `<p><strong>Taille totale :</strong> ${(totalSize / 1024).toFixed(2)} KB</p>`;
+            
+            document.getElementById('localStorageData').innerHTML = html;
+            document.getElementById('localStorageStatus').innerHTML = 
+                `${localStorage.length} éléments, ${(totalSize / 1024).toFixed(2)} KB`;
+            
+            log(`LocalStorage: ${localStorage.length} éléments, ${(totalSize / 1024).toFixed(2)} KB`);
+        }
+        
+        function checkSession() {
+            log('Vérification session...');
+            const currentUser = localStorage.getItem('currentUser');
+            const ordoUser = localStorage.getItem('ordoPass_currentUser');
+            
+            let html = '<ul>';
+            html += `<li><strong>currentUser:</strong> ${currentUser ? '✓ Défini' : '✗ Non défini'}</li>`;
+            html += `<li><strong>ordoPass_currentUser:</strong> ${ordoUser ? '✓ Défini' : '✗ Non défini'}</li>`;
+            
+            if (currentUser) {
+                try {
+                    const user = JSON.parse(currentUser);
+                    html += `<li><strong>Utilisateur:</strong> ${user.username} (${user.role})</li>`;
+                    html += `<li><strong>Nom:</strong> ${user.nom || 'Non défini'}</li>`;
+                    html += `<li><strong>Email:</strong> ${user.email || 'Non défini'}</li>`;
+                } catch (e) {
+                    html += `<li class="error">❌ Données utilisateur corrompues</li>`;
+                }
+            }
+            
+            html += '</ul>';
+            
+            document.getElementById('sessionStatus').innerHTML = html;
+            log('Session vérifiée');
+        }
+        
+        function clearLocalStorage() {
+            if (confirm('Êtes-vous sûr de vouloir effacer toutes les données locales ?')) {
+                localStorage.clear();
+                log('✅ LocalStorage effacé', 'success');
+                showLocalStorage();
+                checkSession();
+            }
+        }
+        
+        function initLocalStorage() {
+            localStorage.setItem('consultations', JSON.stringify([]));
+            localStorage.setItem('ordonnances', JSON.stringify([]));
+            localStorage.setItem('patients', JSON.stringify([]));
+            localStorage.setItem('pharmacies', JSON.stringify([
+                {
+                    id: 'pharmacie_centrale_123',
+                    nom: 'Pharmacie Centrale',
+                    adresse: '123 Avenue Bourguiba, Dakar',
+                    telephone: '+221 33 821 45 67',
+                    online: true,
+                    horaires: '08:00-20:00'
+                }
+            ]));
+            localStorage.setItem('ordoPass_initialized', 'true');
+            log('✅ Données test initialisées', 'success');
+            showLocalStorage();
+        }
+        
+        async function testLogin(username, password, role) {
+            log(`Test connexion: ${username} (${role})...`);
+            try {
+                const result = await window.apiService.login(username, password, role);
+                document.getElementById('testResults').innerHTML = 
+                    `<div class="success">✅ Connexion réussie: ${result.message}</div><pre>${JSON.stringify(result.user, null, 2)}</pre>`;
+                log(`✅ Connexion ${username} réussie`, 'success');
+            } catch (error) {
+                document.getElementById('testResults').innerHTML = 
+                    `<div class="error">❌ Erreur: ${error.message}</div>`;
+                log(`❌ Erreur connexion ${username}: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testRegisterMedecin() {
+            log('Test inscription médecin...');
+            const testData = {
+                username: 'testmedecin' + Date.now(),
+                password: 'test123',
+                email: 'test' + Date.now() + '@medecin.com',
+                nom: 'Test',
+                prenom: 'Docteur',
+                specialite: 'Généraliste',
+                numeroInscription: 'MED' + Date.now().toString().slice(-6),
+                etablissement: 'Cabinet Test'
+            };
+            
+            try {
+                const result = await window.apiService.registerMedecin(testData);
+                document.getElementById('testResults').innerHTML = 
+                    `<div class="success">✅ Inscription réussie: ${result.message}</div><pre>${JSON.stringify(result.user, null, 2)}</pre>`;
+                log(`✅ Médecin ${testData.username} inscrit`, 'success');
+            } catch (error) {
+                document.getElementById('testResults').innerHTML = 
+                    `<div class="error">❌ Erreur: ${error.message}</div>`;
+                log(`❌ Erreur inscription médecin: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testRegisterPharmacien() {
+            log('Test inscription pharmacien...');
+            const testData = {
+                username: 'testpharmacien' + Date.now(),
+                password: 'test123',
+                email: 'test' + Date.now() + '@pharmacie.com',
+                nom: 'Pharmacie Test ' + Date.now().toString().slice(-4),
+                adresse: '123 Rue Test, Dakar',
+                telephone: '+221 77 123 45 67',
+                licenseNumber: 'PHARM' + Date.now().toString().slice(-6),
+                experience: 5
+            };
+            
+            try {
+                const result = await window.apiService.registerPharmacien(testData);
+                document.getElementById('testResults').innerHTML = 
+                    `<div class="success">✅ Inscription réussie: ${result.message}</div><pre>${JSON.stringify(result.user, null, 2)}</pre>`;
+                log(`✅ Pharmacien ${testData.nom} inscrit`, 'success');
+            } catch (error) {
+                document.getElementById('testResults').innerHTML = 
+                    `<div class="error">❌ Erreur: ${error.message}</div>`;
+                log(`❌ Erreur inscription pharmacien: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testGetUsers() {
+            log('Test récupération utilisateurs...');
+            try {
+                const users = await window.apiService.getUsers();
+                document.getElementById('testResults').innerHTML = 
+                    `<div class="success">✅ ${users.length} utilisateurs récupérés</div><pre>${JSON.stringify(users, null, 2)}</pre>`;
+                log(`✅ ${users.length} utilisateurs récupérés`, 'success');
+            } catch (error) {
+                document.getElementById('testResults').innerHTML = 
+                    `<div class="error">❌ Erreur: ${error.message}</div>`;
+                log(`❌ Erreur récupération utilisateurs: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testGetPharmacies() {
+            log('Test récupération pharmacies...');
+            try {
+                const pharmacies = await window.apiService.getPharmacies();
+                document.getElementById('testResults').innerHTML = 
+                    `<div class="success">✅ ${pharmacies.length} pharmacies récupérées</div><pre>${JSON.stringify(pharmacies, null, 2)}</pre>`;
+                log(`✅ ${pharmacies.length} pharmacies récupérées`, 'success');
+            } catch (error) {
+                document.getElementById('testResults').innerHTML = 
+                    `<div class="error">❌ Erreur: ${error.message}</div>`;
+                log(`❌ Erreur récupération pharmacies: ${error.message}`, 'error');
+            }
+        }
+        
+        async function resetTestData() {
+            if (!confirm('Réinitialiser toutes les données de test sur le serveur ?')) return;
+            
+            log('Réinitialisation données test...');
+            try {
+                const result = await window.apiService.resetTestData();
+                document.getElementById('resetResults').innerHTML = 
+                    `<div class="success">✅ ${result.message} (${result.users_count} utilisateurs)</div>`;
+                log(`✅ Données réinitialisées: ${result.message}`, 'success');
+            } catch (error) {
+                document.getElementById('resetResults').innerHTML = 
+                    `<div class="error">❌ Erreur: ${error.message}</div>`;
+                log(`❌ Erreur réinitialisation: ${error.message}`, 'error');
+            }
+        }
+        
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Debug OrdoPass initialisé');
+            testApi();
+            showLocalStorage();
+            checkSession();
+        });
+    </script>
+</body>
+</html>

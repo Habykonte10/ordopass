@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Inscription Pharmacien — OrdoPass</title>
+  <link rel="stylesheet" href="style2.css" />
+  <style>
+    .logo-center {
+      text-align: center;
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .logo-dropdown {
+      display: none;
+      position: absolute;
+      top: 48px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 8px 0;
+      min-width: 180px;
+      z-index: 10;
+      text-align: left;
+    }
+
+    .logo-dropdown a {
+      display: block;
+      padding: 8px 16px;
+      color: #1e3c72;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 15px;
+    }
+
+    .logo-dropdown a:hover {
+      background-color: #f3f4f6;
+    }
+
+    .logo-center:hover .logo-dropdown {
+      display: block;
+    }
+
+    .server-notice {
+      background: #e8f4fd;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #b3d9ff;
+      text-align: center;
+      color: #1e3c72;
+    }
+
+    .server-notice i {
+      color: #2a5298;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="split-layout">
+    <div class="side-image pharm-accent" style="background-image:url('images/pharmacien-bg.jpg');">
+      <div class="side-overlay" style="background: linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.2));"></div>
+      <div class="side-content">
+        <h2>Rejoignez OrdoPass</h2>
+        <p>Créez votre compte pharmacien pour accéder à la plateforme sécurisée d'ordonnances numériques.</p>
+      </div>
+    </div>
+
+    <div class="form-side">
+      <div class="form-card" style="max-width:460px;">
+        <div style="text-align:center;margin-bottom:8px;">
+          <svg viewBox="0 0 220 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="height:36px;">
+            <defs>
+              <linearGradient id="g5" x1="0" x2="1">
+                <stop offset="0" stop-color="#2a5298"/>
+                <stop offset="1" stop-color="#1e3c72"/>
+              </linearGradient>
+            </defs>
+            <text x="0" y="28" font-family="Inter, Arial" font-size="24" font-weight="700" fill="url(#g5)">
+              Ordo<tspan fill="#0ea5a0">Pass</tspan>
+            </text>
+          </svg>
+          <h2 style="margin:10px 0 0;">Créer un compte Pharmacien</h2>
+        </div>
+
+        <!-- Avertissement serveur -->
+        <div class="server-notice">
+          <i class="fas fa-server"></i>
+          <strong>Compte serveur uniquement</strong> - Vos données seront accessibles depuis n'importe quelle machine
+        </div>
+
+        <form id="registerForm">
+          <div class="form-section" id="section1">
+            <h3 style="margin-bottom:16px;color:#1e3c72;">
+              <span style="background:#0ea5a0;color:white;padding:4px 8px;border-radius:4px;margin-right:8px;">1</span>
+              Informations personnelles
+            </h3>
+            
+            <div class="form-group">
+              <label for="email">Adresse e-mail</label>
+              <input id="email" class="input" type="email" placeholder="votre@email.com" required>
+              <small class="field-hint">Votre adresse professionnelle de préférence</small>
+            </div>
+
+            <div class="form-group">
+              <label for="telephone">Téléphone</label>
+              <input id="telephone" class="input" type="tel" placeholder="+221 XX XXX XX XX" required>
+              <small class="field-hint">Format international recommandé</small>
+            </div>
+          </div>
+
+          <div class="form-section" id="section2" style="margin-top:24px;">
+            <h3 style="margin-bottom:16px;color:#1e3c72;">
+              <span style="background:#0ea5a0;color:white;padding:4px 8px;border-radius:4px;margin-right:8px;">2</span>
+              Informations professionnelles
+            </h3>
+            
+            <div class="form-group">
+              <label for="pharmacyName">Nom de la pharmacie</label>
+              <input id="pharmacyName" class="input" type="text" placeholder="Nom de votre pharmacie" required>
+              <small class="field-hint">Nom officiel de votre établissement</small>
+            </div>
+
+            <div class="form-group">
+              <label for="address">Adresse</label>
+              <input id="address" class="input" type="text" placeholder="Adresse complète de la pharmacie" required>
+              <small class="field-hint">Inclure ville et code postal</small>
+            </div>
+
+            <div class="form-group">
+              <label for="licenseNumber">Numéro de licence</label>
+              <input id="licenseNumber" class="input" type="text" placeholder="Numéro de licence professionnelle" required>
+              <small class="field-hint">Numéro délivré par l'ordre des pharmaciens</small>
+            </div>
+
+            <div class="form-group">
+              <label for="experience">Années d'expérience</label>
+              <input id="experience" class="input" type="number" placeholder="Nombre d'années d'expérience" min="0" required>
+              <small class="field-hint">Depuis l'obtention de votre diplôme</small>
+            </div>
+          </div>
+
+          <div class="form-group" id="section3">
+            <label for="password">
+              <span style="background:#0ea5a0;color:white;padding:4px 8px;border-radius:4px;margin-right:8px;">3</span>
+              Mot de passe
+            </label>
+            <input id="password" class="input" type="password" placeholder="Créez un mot de passe sécurisé" required>
+            <small class="field-hint">Minimum 8 caractères avec majuscule, minuscule et chiffre</small>
+            <div class="password-strength" style="margin-top:8px;">
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;">
+                <span id="strengthText">Force du mot de passe</span>
+                <span id="strengthPercent">0%</span>
+              </div>
+              <div style="height:4px;background:#e2e8f0;border-radius:2px;margin-top:4px;overflow:hidden;">
+                <div id="strengthBar" style="height:100%;width:0%;background:#ef4444;transition:all 0.3s ease;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="checkbox-group" style="margin:20px 0;">
+            <input type="checkbox" id="acceptConditions" required>
+            <label for="acceptConditions">
+              J'accepte les <a href="#">conditions d'utilisation</a> et la <a href="#">politique de confidentialité</a> d'OrdoPass
+            </label>
+          </div>
+
+          <input id="role" type="hidden" value="pharmacien">
+
+          <button class="btn-primary pharm-btn" type="submit" style="margin-top:16px;width:100%;">
+            <span id="submitText">Créer mon compte serveur</span>
+            <span id="submitLoader" style="display:none;">Traitement en cours...</span>
+          </button>
+
+          <div style="text-align:center;margin-top:12px;color:var(--muted);">
+            Déjà un compte ? <a href="pharmacien_login.html">Se connecter</a>
+          </div>
+
+          <div id="messageBox" class="message-box" style="display:none"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const msg = document.getElementById('messageBox');
+      const passwordInput = document.getElementById('password');
+      const strengthBar = document.getElementById('strengthBar');
+      const strengthText = document.getElementById('strengthText');
+      const strengthPercent = document.getElementById('strengthPercent');
+      const submitBtn = document.querySelector('button[type="submit"]');
+      const submitText = document.getElementById('submitText');
+      const submitLoader = document.getElementById('submitLoader');
+      
+      // Observer pour les messages
+      if (msg) {
+        const observer = new MutationObserver(() => {
+          if (msg.textContent.trim() !== '') msg.style.display = 'block';
+        });
+        observer.observe(msg, { childList: true, subtree: true });
+      }
+      
+      // Vérificateur de force du mot de passe
+      function checkPasswordStrength(password) {
+        let score = 0;
+        if (!password) return 0;
+        
+        if (password.length >= 8) score += 25;
+        if (/[A-Z]/.test(password)) score += 25;
+        if (/[0-9]/.test(password)) score += 25;
+        if (/[^A-Za-z0-9]/.test(password)) score += 25;
+        
+        // Mettre à jour l'affichage
+        strengthBar.style.width = `${score}%`;
+        strengthPercent.textContent = `${score}%`;
+        
+        if (score < 50) {
+          strengthBar.style.background = '#ef4444';
+          strengthText.textContent = 'Faible';
+        } else if (score < 75) {
+          strengthBar.style.background = '#f59e0b';
+          strengthText.textContent = 'Moyen';
+        } else {
+          strengthBar.style.background = '#10b981';
+          strengthText.textContent = 'Fort';
+        }
+        
+        return score;
+      }
+      
+      // Écouteur spécial pour le mot de passe
+      passwordInput.addEventListener('input', function() {
+        checkPasswordStrength(this.value);
+      });
+      
+      // Gestion de la soumission du formulaire
+      const registerForm = document.getElementById('registerForm');
+      if (registerForm) {
+        registerForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          // Validation des conditions
+          if (!document.getElementById('acceptConditions').checked) {
+            msg.textContent = '❌ Veuillez accepter les conditions d\'utilisation';
+            msg.className = 'message-box error';
+            return;
+          }
+          
+          // Récupération des données
+          const email = document.getElementById('email').value;
+          const telephone = document.getElementById('telephone').value;
+          const pharmacyName = document.getElementById('pharmacyName').value;
+          const address = document.getElementById('address').value;
+          const licenseNumber = document.getElementById('licenseNumber').value;
+          const experience = document.getElementById('experience').value;
+          const password = document.getElementById('password').value;
+          
+          // Validation côté client supplémentaire
+          if (password.length < 8) {
+            msg.textContent = '❌ Le mot de passe doit contenir au moins 8 caractères';
+            msg.className = 'message-box error';
+            return;
+          }
+          
+          // Afficher le loader
+          submitText.style.display = 'none';
+          submitLoader.style.display = 'inline';
+          submitBtn.disabled = true;
+          
+          try {
+            const res = await fetch('/api/register-pharmacien', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                username: email,
+                password: password,
+                role: 'pharmacien',
+                email: email,
+                telephone: telephone,
+                nom: pharmacyName,
+                adresse: address,
+                licenseNumber: licenseNumber,
+                experience: experience
+              })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+              msg.textContent = '✅ Compte créé avec succès sur le serveur ! Redirection...';
+              msg.className = 'message-box success';
+              
+              // Stocker l'utilisateur
+              localStorage.setItem('currentUser', JSON.stringify(data.user));
+              
+              setTimeout(() => {
+                window.location.href = 'pharmacien_dashboard.html';
+              }, 1500);
+            } else {
+              msg.textContent = '❌ ' + (data.error || 'Erreur lors de la création');
+              msg.className = 'message-box error';
+              submitText.style.display = 'inline';
+              submitLoader.style.display = 'none';
+              submitBtn.disabled = false;
+            }
+          } catch (err) {
+            console.error('Erreur:', err);
+            msg.textContent = '❌ Erreur de connexion au serveur. Veuillez réessayer plus tard.';
+            msg.className = 'message-box error';
+            submitText.style.display = 'inline';
+            submitLoader.style.display = 'none';
+            submitBtn.disabled = false;
+          }
+        });
+      }
+
+      // Focus sur le premier champ
+      document.getElementById('email').focus();
+    });
+  </script>
+</body>
+</html>

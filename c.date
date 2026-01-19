@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Connexion Admin - OrdoPass</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+    
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .login-card {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    .logo {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .logo h1 {
+      color: #1e3c72;
+      font-size: 32px;
+      margin-bottom: 5px;
+    }
+    
+    .logo p {
+      color: #6b7280;
+      font-size: 16px;
+    }
+    
+    .admin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #1e3c72;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      margin-top: 10px;
+    }
+    
+    .form-group {
+      margin-bottom: 24px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #374151;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .btn-login {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: white;
+      border: none;
+      padding: 16px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .btn-login:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+    }
+    
+    .btn-login:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    
+    .message-box {
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    .message-box.success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      display: block;
+    }
+    
+    .message-box.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      display: block;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      color: #6b7280;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+    
+    .back-link:hover {
+      color: #1e3c72;
+      text-decoration: underline;
+    }
+    
+    .instructions {
+      background: #f3f4f6;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 25px 0;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .instructions h3 {
+      color: #1e3c72;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    
+    .instructions ul {
+      margin-left: 20px;
+      color: #6b7280;
+    }
+    
+    .instructions li {
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+    
+    .security-notice {
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      color: #6b7280;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="logo">
+      <h1>🔐 Connexion Admin</h1>
+      <p>Interface d'administration OrdoPass</p>
+      <div class="admin-badge">
+        <i class="fas fa-user-shield"></i>
+        Accès restreint - Administrateurs uniquement
+      </div>
+    </div>
+    
+    <div class="instructions">
+      <h3><i class="fas fa-info-circle"></i> Instructions</h3>
+      <ul>
+        <li>Seuls les administrateurs peuvent créer des comptes</li>
+        <li>Le token admin est défini dans le fichier .env</li>
+        <li>Token par défaut : <strong>Haby15</strong></li>
+        <li>Après connexion, vous pourrez créer des comptes médecins et pharmaciens</li>
+      </ul>
+    </div>
+    
+    <form id="adminLoginForm">
+      <div class="form-group">
+        <label><i class="fas fa-key"></i> Token d'administration</label>
+        <input type="password" id="adminToken" placeholder="Entrez le token 'Haby15'" required />
+        <small style="color: #6b7280; margin-top: 5px; display: block;">
+          Le token est requis pour accéder à l'interface d'administration
+        </small>
+      </div>
+      
+      <button type="submit" class="btn-login" id="loginBtn">
+        <i class="fas fa-sign-in-alt"></i> Se connecter en tant qu'admin
+      </button>
+    </form>
+    
+    <div id="messageBox" class="message-box"></div>
+    
+    <a href="index.html" class="back-link">
+      <i class="fas fa-arrow-left"></i> Retour à la page d'accueil
+    </a>
+    
+    <div class="security-notice">
+      <i class="fas fa-shield-alt"></i>
+      Zone sécurisée - Accès restreint aux administrateurs autorisés
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const loginForm = document.getElementById('adminLoginForm');
+      const loginBtn = document.getElementById('loginBtn');
+      const messageBox = document.getElementById('messageBox');
+      
+      loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const token = document.getElementById('adminToken').value.trim();
+        
+        if (!token) {
+          showMessage('❌ Veuillez entrer le token d\'administration', 'error');
+          return;
+        }
+        
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Vérification...';
+        
+        try {
+          const response = await fetch('/api/admin/verify-token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ token })
+          });
+          
+          const result = await response.json();
+          
+          if (response.ok) {
+            showMessage('✅ Token vérifié avec succès. Redirection...', 'success');
+            
+            // Stocker le token dans sessionStorage
+            sessionStorage.setItem('adminToken', token);
+            
+            // Rediriger vers l'interface de création de compte
+            setTimeout(() => {
+              window.location.href = 'admin_create_account.html';
+            }, 1000);
+            
+          } else {
+            showMessage(`❌ ${result.error || 'Token invalide'}`, 'error');
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Se connecter en tant qu\'admin';
+          }
+          
+        } catch (error) {
+          console.error('Erreur:', error);
+          showMessage('❌ Erreur de connexion au serveur', 'error');
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Se connecter en tant qu\'admin';
+        }
+      });
+      
+      // Vérifier si l'admin est déjà connecté
+      const savedToken = sessionStorage.getItem('adminToken');
+      if (savedToken === 'Haby15') {
+        showMessage('⚠️ Vous êtes déjà connecté en tant qu\'admin. Redirection...', 'info');
+        setTimeout(() => {
+          window.location.href = 'admin_create_account.html';
+        }, 1500);
+      }
+    });
+    
+    function showMessage(text, type) {
+      const messageBox = document.getElementById('messageBox');
+      messageBox.textContent = text;
+      messageBox.className = `message-box ${type}`;
+    }
+  </script>
+</body>
+</html>

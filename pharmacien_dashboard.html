@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pharmacien - Ordonnances reçues</title>
+  <link rel="stylesheet" href="style1.css" />
+  <script src="https://kit.fontawesome.com/a2d9d5a64b.js" crossorigin="anonymous"></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+  <style>
+    /* 🔹 Style du bouton de déconnexion */
+    #logout {
+      display: flex !important;
+      align-items: center;
+      color: white !important;
+      background: #e74c3c;
+      border-radius: 8px;
+      margin-top: 10px;
+      padding: 10px;
+      transition: 0.3s ease;
+    }
+    #logout:hover {
+      background: #c0392b;
+    }
+
+    /* ✅ Ajustement visuel pour le contenu */
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    /* Styles pour les notifications */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 8px;
+      color: white;
+      z-index: 10000;
+      max-width: 400px;
+      animation: slideIn 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .notification-success {
+      background: #28a745;
+    }
+    
+    .notification-error {
+      background: #dc3545;
+    }
+    
+    .notification-info {
+      background: #17a2b8;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Styles pour les boutons d'action */
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: nowrap;
+    }
+    
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 13px;
+      text-decoration: none;
+    }
+    
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .view-btn { 
+      color: #2196f3; 
+      border-color: #2196f3; 
+    }
+    .view-btn:hover { 
+      background-color: #2196f3; 
+      color: white; 
+    }
+    
+    .process-btn { 
+      color: #4CAF50; 
+      border-color: #4CAF50; 
+    }
+    .process-btn:hover { 
+      background-color: #4CAF50; 
+      color: white; 
+    }
+    
+    .complete-btn { 
+      color: #9C27B0; 
+      border-color: #9C27B0; 
+    }
+    .complete-btn:hover { 
+      background-color: #9C27B0; 
+      color: white; 
+    }
+    
+    .delete-btn { 
+      color: #f44336; 
+      border-color: #f44336; 
+    }
+    .delete-btn:hover { 
+      background-color: #f44336; 
+      color: white; 
+    }
+
+    /* Ajustement de la largeur de la colonne Actions */
+    .col-actions {
+      width: 250px;
+    }
+    
+    /* Styles pour les statuts */
+    .status {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status.active {
+      background: #E3F2FD;
+      color: #1976D2;
+    }
+    
+    .status.en_cours {
+      background: #FFF3E0;
+      color: #FF9800;
+    }
+    
+    .status.envoyee {
+      background: #E8F5E9;
+      color: #4CAF50;
+    }
+    
+    .status.delivree {
+      background: #F3E5F5;
+      color: #9C27B0;
+    }
+    
+    .status.pret {
+      background: #E0F7FA;
+      color: #00BCD4;
+    }
+    
+    .status.annulee {
+      background: #f5f5f5;
+      color: #999;
+      text-decoration: line-through;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- ✅ Barre latérale -->
+    <aside class="sidebar">
+      <div class="logo">ORDO<span>PASS</span></div>
+      <nav class="menu">
+        <a href="pharmacien_dashboard.html" class="active"><i class="fa-solid fa-prescription"></i> <span>Ordonnances</span></a>
+        <a href="pharmacien_medecins.html"><i class="fa-solid fa-user-md"></i> <span>Médecins</span></a>
+        <a href="pharmacien_stock.html">
+          <i class="fa-solid fa-boxes-stacked"></i> <span>Gestion Stock</span>
+        </a>
+        <a href="pharmacien_facturation.html">
+          <i class="fa-solid fa-file-invoice-dollar"></i> <span>Facturation</span>
+        </a>
+        <a href="pharmacien_messagerie.html">
+          <i class="fa-solid fa-comment-medical"></i> <span>Messagerie</span>
+        </a>
+        <a href="pharmacien_parametres.html">
+          <i class="fa-solid fa-gear"></i> <span>Paramètres</span>
+        </a>
+        <a href="#" id="logout">
+          <i class="fa-solid fa-right-from-bracket"></i> <span>Déconnexion</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- ✅ Contenu principal -->
+    <main class="main">
+      <div class="topbar">
+        <div class="title">Ordonnances reçues</div>
+        <div class="user-box">
+          <img class="avatar" src="https://i.pravatar.cc/80?img=12" alt="avatar"/>
+          <div>
+            <div id="userName">Pharmacie</div>
+            <small style="color:#6b8392" id="userStatus">Chargement...</small>
+          </div>
+        </div>
+      </div>
+
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div>
+            <div style="font-weight:700;color:#234a6a">Ordonnances reçues</div>
+            <div style="color:#6b7f8e;font-size:14px" id="ordCount">Chargement...</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <input id="searchInput" placeholder="Rechercher patient / n° ticket..." 
+              style="padding:8px 12px;border-radius:8px;border:1px solid #e6eef6;width:250px" />
+            <button class="btn primary" id="refreshBtn"><i class="fa-solid fa-rotate"></i> Actualiser</button>
+          </div>
+        </div>
+
+        <div class="tabs" id="tabs">
+          <div class="tab active" data-filter="all">Toutes</div>
+          <div class="tab" data-filter="envoyee">À traiter</div>
+          <div class="tab" data-filter="en_cours">En cours</div>
+          <div class="tab" data-filter="pret">Prêtes</div>
+          <div class="tab" data-filter="delivree">Délivrées</div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="table" id="ordTable">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Date</th>
+                <th>Patient</th>
+                <th>Médecin</th>
+                <th>Statut</th>
+                <th class="col-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ordBody">
+              <tr>
+                <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
+                  <i class="fa-solid fa-spinner fa-spin"></i> Chargement des ordonnances...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Initialisation Socket.io pour le pharmacien
+    let pharmacienSocket = null;
+    let currentPharmacieId = null;
+    let currentPharmacieNom = null;
+
+    // Fonction pour afficher les notifications
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.className = `notification notification-${type}`;
+      notification.innerHTML = `
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()" style="background:none; border:none; color:white; margin-left:15px; cursor:pointer;">×</button>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        if (notification.parentElement) {
+          notification.remove();
+        }
+      }, 5000);
+    }
+
+    // Initialiser la connexion Socket.io
+    function initPharmacienSocket() {
+      pharmacienSocket = io();
+      
+      pharmacienSocket.on('connect', () => {
+        console.log('🔗 Pharmacien connecté à Socket.io');
+        
+        // Rejoindre la room de la pharmacie
+        if (currentPharmacieId) {
+          pharmacienSocket.emit('pharmacy_join', {
+            pharmacyId: currentPharmacieId,
+            pharmacyName: currentPharmacieNom
+          });
+          console.log(`🏥 Pharmacie ${currentPharmacieNom} a rejoint la room`);
+        }
+      });
+
+      // Recevoir les nouvelles ordonnances
+      pharmacienSocket.on('new_ordonnance', (data) => {
+        console.log('📬 Nouvelle ordonnance reçue:', data);
+        
+        // Vérifier si c'est pour cette pharmacie
+        if (data.pharmacyId === currentPharmacieId || data.pharmacieNom === currentPharmacieNom) {
+          showNotification(`📬 Nouvelle ordonnance reçue (${data.code}) de ${data.doctorName} pour ${data.patientName}`, 'success');
+          loadOrdonnancesFromAPI();
+        }
+      });
+
+      // Recevoir les mises à jour de statut
+      pharmacienSocket.on('ordonnance_status_updated', (data) => {
+        console.log('📦 Mise à jour statut ordonnance:', data);
+        loadOrdonnancesFromAPI();
+      });
+
+      pharmacienSocket.on('ordonnance_envoyee', (data) => {
+        console.log('📤 Ordonnance envoyée à une pharmacie:', data);
+        if (data.pharmacieNom === currentPharmacieNom) {
+          showNotification(`📥 Ordonnance ${data.code} reçue du Dr. ${data.medecinNom}`, 'info');
+          loadOrdonnancesFromAPI();
+        }
+      });
+
+      // Recevoir les notifications de suppression
+      pharmacienSocket.on('ordonnance_supprimee', (data) => {
+        console.log('🗑️ Ordonnance supprimée:', data);
+        if (data.pharmacieNom === currentPharmacieNom) {
+          showNotification(`🗑️ Ordonnance ${data.code} supprimée`, 'info');
+          loadOrdonnancesFromAPI();
+        }
+      });
+    }
+
+    // Charger les ordonnances depuis l'API
+    async function loadOrdonnancesFromAPI() {
+      try {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser) {
+          console.error("❌ Aucun utilisateur connecté");
+          return;
+        }
+
+        console.log(`🔍 Chargement ordonnances pour: ${currentUser.nom}`);
+        
+        const response = await fetch(`/api/pharmacien/ordonnances?nom=${encodeURIComponent(currentUser.nom)}`);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('❌ Erreur API:', errorText);
+          throw new Error(`Erreur API: ${response.status}`);
+        }
+        
+        const ordonnances = await response.json();
+        console.log(`✅ ${ordonnances.length} ordonnances reçues`);
+        
+        // Filtrer pour n'afficher que les ordonnances pertinentes (exclure annulées)
+        const ordonnancesFiltrees = ordonnances.filter(ord => 
+          ord.statut !== 'active' && ord.statut !== 'annulee'
+        );
+        
+        displayOrdonnances(ordonnancesFiltrees);
+        
+        document.getElementById('ordCount').textContent = 
+          `${ordonnancesFiltrees.length} ordonnance${ordonnancesFiltrees.length !== 1 ? 's' : ''} à traiter`;
+        
+      } catch (error) {
+        console.error('❌ Erreur chargement API:', error);
+        showNotification('❌ Erreur de chargement des ordonnances', 'error');
+        loadOrdonnancesFromLocalStorage();
+      }
+    }
+
+    // Fallback: Charger depuis localStorage
+    function loadOrdonnancesFromLocalStorage() {
+      try {
+        const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        
+        // Filtrer les ordonnances pour cette pharmacie
+        const ordonnancesPharmacie = ordonnances.filter(ord => {
+          return ord.pharmacieNom === currentUser.nom && ord.statut !== 'active' && ord.statut !== 'annulee';
+        });
+        
+        displayOrdonnances(ordonnancesPharmacie);
+        
+        document.getElementById("ordCount").textContent = 
+          `${ordonnancesPharmacie.length} ordonnance${ordonnancesPharmacie.length !== 1 ? 's' : ''} (mode local)`;
+        
+      } catch (error) {
+        console.error('❌ Erreur chargement localStorage:', error);
+        document.getElementById("ordCount").textContent = 'Aucune ordonnance';
+      }
+    }
+
+    // Afficher les ordonnances dans le tableau
+    function displayOrdonnances(ordonnances) {
+      const tbody = document.getElementById('ordBody');
+      if (!tbody) return;
+      
+      tbody.innerHTML = '';
+      
+      if (ordonnances.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
+              <i class="fa-solid fa-inbox" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+              Aucune ordonnance reçue
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      // Trier par date (plus récent en premier)
+      ordonnances.sort((a, b) => new Date(b.dateEnvoi || b.createdAt) - new Date(a.dateEnvoi || a.createdAt));
+      
+      ordonnances.forEach(ord => {
+        const tr = document.createElement('tr');
+        const statusClass = getStatusClass(ord.statut);
+        const statusText = getStatusText(ord.statut);
+        const ordId = ord._id || ord.id;
+        
+        tr.innerHTML = `
+          <td><strong style="color:#234a6a">${ord.code || 'N/A'}</strong></td>
+          <td>${ord.dateOrd || 'N/A'}</td>
+          <td>
+            <div style="font-weight:500">${ord.patientNom || 'Patient inconnu'}</div>
+            <div style="font-size:12px;color:#6b7280">${ord.patientAge || ''}</div>
+          </td>
+          <td>
+            <div style="font-weight:500">${ord.medecinNom || 'Médecin inconnu'}</div>
+            <div style="font-size:12px;color:#6b7280">${ord.medecinSpecialite || ''}</div>
+          </td>
+          <td><span class="status ${statusClass}">${statusText}</span></td>
+          <td>
+            <div class="action-buttons">
+              <button class="action-btn view-btn" onclick="voirOrdonnance('${ordId}')" title="Voir détails">
+                <i class="fa-solid fa-eye"></i> Détails
+              </button>
+              ${getActionButtons(ord.statut, ordId)}
+              <button class="action-btn delete-btn" onclick="supprimerOrdonnance('${ordId}', '${ord.code || 'cette ordonnance'}')" title="Supprimer">
+                <i class="fa-solid fa-trash"></i> Supprimer
+              </button>
+            </div>
+          </td>
+        `;
+        
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Obtenir les boutons d'action en fonction du statut
+    function getActionButtons(statut, ordId) {
+      switch(statut) {
+        case 'envoyee':
+          return `
+            <button class="action-btn process-btn" onclick="updateOrdonnanceStatus('${ordId}', 'en_cours')" title="Commencer le traitement">
+              <i class="fa-solid fa-play"></i> Traiter
+            </button>
+          `;
+        case 'en_cours':
+          return `
+            <button class="action-btn complete-btn" onclick="updateOrdonnanceStatus('${ordId}', 'pret')" title="Marquer comme prête">
+              <i class="fa-solid fa-check"></i> Prête
+            </button>
+          `;
+        case 'pret':
+          return `
+            <button class="action-btn complete-btn" onclick="updateOrdonnanceStatus('${ordId}', 'delivree')" title="Marquer comme délivrée">
+              <i class="fa-solid fa-check-double"></i> Délivrée
+            </button>
+          `;
+        default:
+          return '';
+      }
+    }
+
+    // Fonctions utilitaires
+    function getStatusClass(statut) {
+      const statusMap = {
+        'active': 'active',
+        'envoyee': 'envoyee',
+        'en_cours': 'en_cours',
+        'pret': 'pret',
+        'delivree': 'delivree',
+        'recuperee': 'delivree',
+        'annulee': 'annulee'
+      };
+      return statusMap[statut] || 'active';
+    }
+
+    function getStatusText(statut) {
+      const statusMap = {
+        'active': 'Active',
+        'envoyee': 'À traiter',
+        'en_cours': 'En cours',
+        'pret': 'Prête',
+        'delivree': 'Délivrée',
+        'recuperee': 'Récupérée',
+        'annulee': 'Annulée'
+      };
+      return statusMap[statut] || statut;
+    }
+
+    // Mettre à jour le statut d'une ordonnance
+    async function updateOrdonnanceStatus(ordonnanceId, newStatus) {
+      try {
+        const response = await fetch(`/api/ordonnances/${ordonnanceId}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ statut: newStatus })
+        });
+        
+        if (response.ok) {
+          showNotification(`✅ Statut mis à jour avec succès`, 'success');
+          
+          // Notifier via Socket.io
+          if (pharmacienSocket && pharmacienSocket.connected) {
+            pharmacienSocket.emit('update_ordonnance_status', {
+              ordonnanceId: ordonnanceId,
+              status: newStatus,
+              pharmacyId: currentPharmacieId
+            });
+          }
+          
+          // Recharger la liste
+          setTimeout(() => loadOrdonnancesFromAPI(), 500);
+          
+        } else {
+          const data = await response.json();
+          throw new Error(data.error || 'Erreur lors de la mise à jour');
+        }
+      } catch (error) {
+        console.error('❌ Erreur mise à jour statut:', error);
+        showNotification(`❌ ${error.message}`, 'error');
+      }
+    }
+
+    // Supprimer une ordonnance
+    async function supprimerOrdonnance(ordonnanceId, ordonnanceCode) {
+      if (!confirm(`Êtes-vous sûr de vouloir supprimer l'ordonnance ${ordonnanceCode} ?\n\nCette action est irréversible.`)) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/ordonnances/${ordonnanceId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          showNotification(`✅ Ordonnance ${ordonnanceCode} supprimée avec succès`, 'success');
+          
+          // Notifier via Socket.io
+          if (pharmacienSocket && pharmacienSocket.connected) {
+            pharmacienSocket.emit('supprimer_ordonnance', {
+              ordonnanceId: ordonnanceId,
+              pharmacyId: currentPharmacieId,
+              code: ordonnanceCode
+            });
+          }
+          
+          // Recharger la liste
+          setTimeout(() => loadOrdonnancesFromAPI(), 500);
+          
+        } else {
+          const data = await response.json();
+          throw new Error(data.error || 'Erreur lors de la suppression');
+        }
+      } catch (error) {
+        console.error('❌ Erreur suppression ordonnance:', error);
+        showNotification(`❌ ${error.message}`, 'error');
+      }
+    }
+
+    // ✅ Redirection vers la page de détails d'une ordonnance
+    function voirOrdonnance(id) {
+      window.location.href = `details_ordonnance.html?id=${id}`;
+    }
+
+    // ✅ Rafraîchir la page
+    document.getElementById("refreshBtn").addEventListener("click", () => {
+      loadOrdonnancesFromAPI();
+      showNotification('Liste des ordonnances actualisée', 'info');
+    });
+
+    // ✅ Déconnexion
+    document.getElementById("logout").addEventListener("click", (e) => {
+      e.preventDefault();
+      if(confirm("Voulez-vous vraiment vous déconnecter ?")) {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        
+        // Appeler l'API de déconnexion
+        if (currentUser) {
+          fetch('/api/logout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              username: currentUser.username, 
+              role: currentUser.role 
+            })
+          });
+        }
+        
+        localStorage.removeItem("currentUser");
+        window.location.href = "index.html";
+      }
+    });
+
+    // Recherche d'ordonnances
+    document.getElementById("searchInput").addEventListener("input", (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      const rows = document.querySelectorAll('#ordBody tr');
+      
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+      });
+    });
+
+    // Gestion des onglets de filtre
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        const filter = tab.getAttribute('data-filter');
+        filterOrdonnances(filter);
+      });
+    });
+
+    function filterOrdonnances(filter) {
+      const rows = document.querySelectorAll('#ordBody tr');
+      
+      rows.forEach(row => {
+        if (filter === 'all') {
+          row.style.display = '';
+          return;
+        }
+        
+        const statusElement = row.querySelector('.status');
+        if (statusElement) {
+          const statusClass = Array.from(statusElement.classList).find(cls => 
+            ['active', 'envoyee', 'en_cours', 'pret', 'delivree'].includes(cls)
+          );
+          
+          if (statusClass === filter) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        }
+      });
+    }
+
+    // Fonction de débogage
+    function debugPharmacie() {
+      console.log('=== DÉBUG PHARMACIE ===');
+      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      console.log('Pharmacie connectée:', currentUser);
+      console.log('Pharmacie ID:', currentPharmacieId);
+      console.log('Pharmacie Nom:', currentPharmacieNom);
+      
+      const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
+      console.log('Ordonnances totales:', ordonnances.length);
+      const ordonnancesPharmacie = ordonnances.filter(ord => ord.pharmacieNom === currentUser.nom);
+      console.log('Ordonnances pour cette pharmacie:', ordonnancesPharmacie.length);
+    }
+
+    // Initialisation au chargement
+    document.addEventListener('DOMContentLoaded', async function() {
+      // Vérification de session
+      const user = JSON.parse(localStorage.getItem("currentUser"));
+      if (!user || user.role !== "pharmacien") {
+        alert("⚠️ Accès refusé. Veuillez vous connecter en tant que pharmacien.");
+        window.location.href = "index.html";
+        return;
+      }
+
+      // Afficher les informations utilisateur
+      document.getElementById("userName").textContent = user.nom || "Pharmacie";
+      document.getElementById("userStatus").textContent = "Connecté";
+      
+      // Récupérer l'ID de la pharmacie
+      try {
+        const response = await fetch('/api/pharmacies');
+        if (response.ok) {
+          const pharmacies = await response.json();
+          const pharmacie = pharmacies.find(p => p.nom === user.nom);
+          if (pharmacie) {
+            currentPharmacieId = pharmacie._id;
+            currentPharmacieNom = pharmacie.nom;
+            console.log(`✅ Pharmacie identifiée: ${currentPharmacieNom} (${currentPharmacieId})`);
+          } else {
+            console.log('⚠️ Pharmacie non trouvée dans la liste');
+          }
+        }
+      } catch (error) {
+        console.log('⚠️ Impossible de récupérer les infos pharmacie:', error);
+      }
+      
+      // Initialiser Socket.io
+      initPharmacienSocket();
+      
+      // Charger les ordonnances
+      loadOrdonnancesFromAPI();
+      
+      // Vérifier si des données de test sont nécessaires
+      try {
+        const response = await fetch('/api/health');
+        if (response.ok) {
+          const health = await response.json();
+          if (health.database === 'Connected') {
+            console.log('✅ Base de données connectée');
+          }
+        }
+      } catch (error) {
+        console.log('⚠️ API health non disponible');
+      }
+      
+      // Débogage
+      debugPharmacie();
+    });
+  </script>
+</body>
+</html>

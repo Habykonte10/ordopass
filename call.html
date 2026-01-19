@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Téléconsultation - OrdoPass</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://meet.jit.si/external_api.js"></script>
+</head>
+<body>
+  <main class="main-area">
+    <div class="card">
+      <h2>Téléconsultation avec <span id="pname">-</span></h2>
+
+      <div id="jitsiContainer" style="width:100%;height:520px;border-radius:8px;overflow:hidden"></div>
+
+      <div id="mockRoom" class="video-room" style="display:none">
+        <div class="video-box">🎥 Patient</div>
+        <div class="video-box">🎥 Médecin</div>
+      </div>
+
+      <div style="margin-top:12px">
+        <button class="btn-outline" onclick="end()">Terminer</button>
+      </div>
+    </div>
+  </main>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const patient = params.get("patient") || "Patient";
+  const room = params.get("room") || ("Ordo-"+Date.now());
+  const jitsi = params.get("jitsi") === "1";
+
+  document.getElementById("pname").textContent = patient;
+
+  if(jitsi){
+    // Lancer directement Jitsi via l’API externe
+    const domain = "meet.jit.si";
+    const options = {
+      roomName: "OrdoPass-" + room,
+      parentNode: document.querySelector('#jitsiContainer'),
+      width: "100%",
+      height: 520,
+      userInfo: { displayName: "Dr. Médecin" }
+    };
+    const api = new JitsiMeetExternalAPI(domain, options);
+  } else {
+    document.getElementById("mockRoom").style.display = "flex";
+  }
+
+  function end(){
+    if(confirm("Terminer la téléconsultation ?")){
+      location.href = "teleconsultation.html";
+    }
+  }
+</script>
+</body>
+</html>

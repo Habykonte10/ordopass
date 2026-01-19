@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paramètres - Médecin | OrdoPass</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .settings-container { 
+      display: flex; 
+      gap: 30px;
+      min-height: 600px;
+    }
+    .settings-menu {
+      width: 250px; 
+      border-right: 1px solid #e1e5e9;
+      padding: 20px 0;
+      background: #f8f9fa;
+      border-radius: 12px;
+    }
+    .settings-menu button {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%; 
+      padding: 15px 20px;
+      margin-bottom: 5px; 
+      border: none; 
+      background: transparent;
+      text-align: left; 
+      cursor: pointer;
+      border-radius: 0;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      color: #5a6c7d;
+      border-right: 3px solid transparent;
+    }
+    .settings-menu button:hover { 
+      background: #e9ecef; 
+      color: #2c3e50;
+    }
+    .settings-menu button.active { 
+      background: #e3f2fd; 
+      color: #1976d2; 
+      border-right-color: #1976d2;
+    }
+    .settings-menu button i {
+      width: 20px;
+      text-align: center;
+    }
+
+    .settings-content { 
+      flex: 1; 
+      padding: 0;
+    }
+    .hidden { display: none; }
+
+    .profile-header { 
+      display: flex; 
+      align-items: center; 
+      gap: 25px;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e1e5e9;
+    }
+    .profile-header img {
+      width: 120px; 
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #3498db;
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+    .profile-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .form-grid {
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 20px;
+      margin-top: 25px;
+    }
+    .form-group { 
+      display: flex; 
+      flex-direction: column; 
+    }
+    .form-group label { 
+      font-weight: 600; 
+      margin-bottom: 8px;
+      color: #2c3e50;
+    }
+    .form-group input, .form-group select {
+      padding: 12px 15px; 
+      border: 2px solid #e1e5e9; 
+      border-radius: 8px;
+      font-size: 1em;
+      transition: border-color 0.3s ease;
+    }
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .btn-primary {
+      padding: 12px 25px;
+      background: #3498db; 
+      color: white;
+      border: none; 
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover { 
+      background: #2980b9; 
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+    .btn-primary:disabled {
+      background: #bdc3c7;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-outline {
+      padding: 12px 25px;
+      background: transparent;
+      color: #3498db;
+      border: 2px solid #3498db;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-outline:hover {
+      background: #3498db;
+      color: white;
+    }
+
+    .btn-danger {
+      padding: 12px 25px;
+      background: #e74c3c; 
+      color: white;
+      border: none; 
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-danger:hover { 
+      background: #c0392b; 
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+    }
+
+    .settings-section {
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-header {
+      margin-bottom: 25px;
+    }
+    .section-header h2 {
+      color: #2c3e50;
+      margin-bottom: 8px;
+      font-size: 1.5em;
+    }
+    .section-header p {
+      color: #7f8c8d;
+      font-size: 1em;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 30px;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #bdc3c7;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 4px;
+      bottom: 4px;
+      background: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .toggle-slider {
+      background: #3498db;
+    }
+    input:checked + .toggle-slider:before {
+      transform: translateX(30px);
+    }
+
+    .notification-item, .security-item {
+      display: flex;
+      justify-content: between;
+      align-items: center;
+      padding: 20px;
+      background: white;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    .notification-info, .security-info {
+      flex: 1;
+    }
+    .notification-info h4, .security-info h4 {
+      margin: 0 0 5px 0;
+      color: #2c3e50;
+    }
+    .notification-info p, .security-info p {
+      margin: 0;
+      color: #7f8c8d;
+      font-size: 0.9em;
+    }
+
+    .activity-item {
+      padding: 15px;
+      border-left: 4px solid #3498db;
+      background: white;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .activity-header {
+      display: flex;
+      justify-content: between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .activity-title {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    .activity-time {
+      color: #7f8c8d;
+      font-size: 0.9em;
+    }
+    .activity-details {
+      color: #5a6c7d;
+      font-size: 0.95em;
+    }
+
+    .save-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 15px;
+      background: #d4edda;
+      color: #155724;
+      border-radius: 20px;
+      font-size: 0.9em;
+      margin-left: 15px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .save-indicator.show {
+      opacity: 1;
+    }
+
+    .password-strength {
+      height: 4px;
+      background: #e1e5e9;
+      border-radius: 2px;
+      margin-top: 5px;
+      overflow: hidden;
+    }
+    .password-strength-bar {
+      height: 100%;
+      transition: all 0.3s ease;
+    }
+    .strength-weak { background: #e74c3c; width: 25%; }
+    .strength-medium { background: #f39c12; width: 50%; }
+    .strength-strong { background: #27ae60; width: 75%; }
+    .strength-very-strong { background: #2ecc71; width: 100%; }
+
+    @media (max-width: 768px) {
+      .settings-container {
+        flex-direction: column;
+      }
+      .settings-menu {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #e1e5e9;
+      }
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="dashboard-page">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo"><i class="fa-solid fa-notes-medical"></i> ORDO<span>PASS</span></div>
+    <nav>
+      <a href="medecin_dashboard.html"><i class="fa-solid fa-file-medical"></i> Consultations</a>
+      <a href="patients.html"><i class="fa-solid fa-users"></i> Patients</a>
+      <a href="teleconsultation.html"><i class="fa-solid fa-video"></i> Téléconsultation</a>
+      <a href="pharmacies.html"><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies</a>
+      <a href="medecin_messagerie.html"><i class="fa-solid fa-comment-medical"></i> Messagerie</a>
+      <a href="parametres.html"><i class="fa-solid fa-gear"></i> Paramètres</a>
+      <a href="medecin_facturation.html"><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</a>
+      <a href="medecin_rendezvous.html"><i class="fa-solid fa-calendar-check"></i> Rendez-vous</a>
+      <a href="medecin_ordonnance.html"><i class="fa-solid fa-prescription"></i> Ordonnances sécurisées</a>
+      <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-area">
+    <header class="topbar">
+      <h1><i class="fa-solid fa-gear"></i> Paramètres</h1>
+      <div class="user-info">
+        <span id="currentUserName">Dr. Fatoumata Ndiaye</span>
+        <i class="fa-solid fa-user-md"></i>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="card">
+        <div class="settings-container">
+          
+          <!-- Menu latéral -->
+          <div class="settings-menu">
+            <button class="active" data-section="profil">
+              <i class="fa-solid fa-user"></i> Mon profil
+            </button>
+            <button data-section="notifications">
+              <i class="fa-solid fa-bell"></i> Notifications
+            </button>
+            <button data-section="securite">
+              <i class="fa-solid fa-shield-halved"></i> Sécurité
+            </button>
+            <button data-section="preferences">
+              <i class="fa-solid fa-palette"></i> Préférences
+            </button>
+            <button data-section="historique">
+              <i class="fa-solid fa-clock-rotate-left"></i> Historique
+            </button>
+          </div>
+
+          <!-- Contenu -->
+          <div class="settings-content">
+            
+            <!-- Profil -->
+            <div id="profil" class="settings-section">
+              <div class="section-header">
+                <h2>Mon profil professionnel</h2>
+                <p>Gérez vos informations personnelles et professionnelles</p>
+              </div>
+
+              <div class="profile-header">
+                <img id="profile-pic" src="https://cdn-icons-png.flaticon.com/512/387/387561.png" alt="Photo médecin">
+                <div>
+                  <h3 id="profileName">Dr Fatoumata Ndiaye</h3>
+                  <p id="profileSpecialty">Médecine Générale</p>
+                  <div class="profile-actions">
+                    <input type="file" id="upload" accept="image/*" style="display:none;">
+                    <button class="btn-outline" onclick="document.getElementById('upload').click();">
+                      <i class="fa-solid fa-camera"></i> Changer photo
+                    </button>
+                    <button class="btn-danger" onclick="resetImage()">
+                      <i class="fa-solid fa-trash"></i> Supprimer
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <form id="profileForm">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>Nom complet *</label>
+                    <input type="text" id="fullName" value="Dr Fatoumata Ndiaye" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Spécialité *</label>
+                    <select id="specialty" required>
+                      <option value="Médecine Générale" selected>Médecine Générale</option>
+                      <option value="Cardiologie">Cardiologie</option>
+                      <option value="Pédiatrie">Pédiatrie</option>
+                      <option value="Dermatologie">Dermatologie</option>
+                      <option value="Gynécologie">Gynécologie</option>
+                      <option value="Autre">Autre</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Identifiant médecin</label>
+                    <input type="text" id="doctorId" value="MED-SEN-0458" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label>N° d'inscription *</label>
+                    <input type="text" id="registrationNumber" value="2015-1245-ORDME" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Téléphone *</label>
+                    <input type="tel" id="phone" value="+221 77 456 78 90" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="email" value="fatou.ndiaye@ordopass.com" required>
+                  </div>
+                  <div class="form-group full-width">
+                    <label>Adresse professionnelle *</label>
+                    <input type="text" id="address" value="Clinique Médicale, Dakar" required>
+                  </div>
+                </div>
+
+                <div style="margin-top: 30px; display: flex; align-items: center;">
+                  <button type="submit" class="btn-primary" id="saveProfileBtn">
+                    <i class="fa-solid fa-floppy-disk"></i> Enregistrer les modifications
+                  </button>
+                  <span class="save-indicator" id="saveIndicator">
+                    <i class="fa-solid fa-check"></i> Modifications sauvegardées
+                  </span>
+                </div>
+              </form>
+            </div>
+
+            <!-- Notifications -->
+            <div id="notifications" class="settings-section hidden">
+              <div class="section-header">
+                <h2>Préférences de notifications</h2>
+                <p>Configurez comment vous souhaitez recevoir les alertes et notifications</p>
+              </div>
+
+              <div class="notification-item">
+                <div class="notification-info">
+                  <h4>Nouvelles consultations</h4>
+                  <p>Recevoir une notification pour chaque nouvelle consultation programmée</p>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div class="notification-item">
+                <div class="notification-info">
+                  <h4>Rappels de rendez-vous</h4>
+                  <p>Alertes avant le début des consultations</p>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div class="notification-item">
+                <div class="notification-info">
+                  <h4>Messages des patients</h4>
+                  <p>Notifications pour les nouveaux messages dans la messagerie</p>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div class="notification-item">
+                <div class="notification-info">
+                  <h4>Alertes urgentes</h4>
+                  <p>Notifications pour les cas urgents et les rappels importants</p>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div class="notification-item">
+                <div class="notification-info">
+                  <h4>Notifications par email</h4>
+                  <p>Recevoir les notifications importantes par email</p>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div style="margin-top: 30px;">
+                <button class="btn-primary">
+                  <i class="fa-solid fa-bell"></i> Enregistrer les préférences
+                </button>
+              </div>
+            </div>
+
+            <!-- Sécurité -->
+            <div id="securite" class="settings-section hidden">
+              <div class="section-header">
+                <h2>Sécurité et connexion</h2>
+                <p>Gérez la sécurité de votre compte et vos sessions de connexion</p>
+              </div>
+
+              <div class="security-item">
+                <div class="security-info">
+                  <h4>Authentification à deux facteurs (2FA)</h4>
+                  <p>Ajoutez une couche de sécurité supplémentaire à votre compte</p>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="twoFactorAuth">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div class="form-grid" style="margin-top: 30px;">
+                <div class="form-group">
+                  <label>Mot de passe actuel *</label>
+                  <input type="password" id="currentPassword" placeholder="Entrez votre mot de passe actuel">
+                </div>
+                <div class="form-group">
+                  <label>Nouveau mot de passe *</label>
+                  <input type="password" id="newPassword" placeholder="Nouveau mot de passe">
+                  <div class="password-strength">
+                    <div class="password-strength-bar" id="passwordStrength"></div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Confirmer le mot de passe *</label>
+                  <input type="password" id="confirmPassword" placeholder="Confirmer le nouveau mot de passe">
+                </div>
+              </div>
+
+              <div style="margin-top: 30px;">
+                <button class="btn-primary" onclick="changePassword()">
+                  <i class="fa-solid fa-key"></i> Changer le mot de passe
+                </button>
+              </div>
+
+              <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e1e5e9;">
+                <h3>Sessions actives</h3>
+                <div class="activity-item">
+                  <div class="activity-header">
+                    <div class="activity-title">Chrome sur Windows</div>
+                    <div class="activity-time">Maintenant</div>
+                  </div>
+                  <div class="activity-details">Dakar, Sénégal • Cette session</div>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-header">
+                    <div class="activity-title">Safari sur iPhone</div>
+                    <div class="activity-time">Il y a 2 heures</div>
+                  </div>
+                  <div class="activity-details">Dakar, Sénégal</div>
+                </div>
+                
+                <button class="btn-outline" style="margin-top: 15px;">
+                  <i class="fa-solid fa-right-from-bracket"></i> Déconnecter toutes les autres sessions
+                </button>
+              </div>
+            </div>
+
+            <!-- Préférences -->
+            <div id="preferences" class="settings-section hidden">
+              <div class="section-header">
+                <h2>Préférences de l'application</h2>
+                <p>Personnalisez votre expérience OrdoPass</p>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Langue</label>
+                  <select id="language">
+                    <option value="fr" selected>Français</option>
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Thème</label>
+                  <select id="theme">
+                    <option value="light" selected>Clair</option>
+                    <option value="dark">Sombre</option>
+                    <option value="auto">Automatique</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Fuseau horaire</label>
+                  <select id="timezone">
+                    <option value="UTC" selected>UTC (GMT)</option>
+                    <option value="UTC+1">UTC+1 (CET)</option>
+                    <option value="UTC+0" selected>UTC+0 (GMT)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Format de date</label>
+                  <select id="dateFormat">
+                    <option value="DD/MM/YYYY" selected>DD/MM/YYYY</option>
+                    <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                    <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="margin-top: 30px;">
+                <button class="btn-primary">
+                  <i class="fa-solid fa-save"></i> Appliquer les préférences
+                </button>
+              </div>
+            </div>
+
+            <!-- Historique -->
+            <div id="historique" class="settings-section hidden">
+              <div class="section-header">
+                <h2>Historique d'activité</h2>
+                <p>Suivez vos connexions et actions récentes sur la plateforme</p>
+              </div>
+
+              <div class="activity-item">
+                <div class="activity-header">
+                  <div class="activity-title">Connexion réussie</div>
+                  <div class="activity-time">Aujourd'hui, 14:30</div>
+                </div>
+                <div class="activity-details">Chrome sur Windows • Adresse IP: 197.155.12.45</div>
+              </div>
+
+              <div class="activity-item">
+                <div class="activity-header">
+                  <div class="activity-title">Modification du profil</div>
+                  <div class="activity-time">Aujourd'hui, 14:25</div>
+                </div>
+                <div class="activity-details">Numéro de téléphone mis à jour</div>
+              </div>
+
+              <div class="activity-item">
+                <div class="activity-header">
+                  <div class="activity-title">Ordonnance créée</div>
+                  <div class="activity-time">Aujourd'hui, 11:15</div>
+                </div>
+                <div class="activity-details">Pour le patient: Awa Diop • Code: ORD123456</div>
+              </div>
+
+              <div class="activity-item">
+                <div class="activity-header">
+                  <div class="activity-title">Consultation ajoutée</div>
+                  <div class="activity-time">Hier, 16:45</div>
+                </div>
+                <div class="activity-details">Nouvelle consultation pour Leslie Alexander</div>
+              </div>
+
+              <div class="activity-item">
+                <div class="activity-header">
+                  <div class="activity-title">Connexion depuis un nouvel appareil</div>
+                  <div class="activity-time">Hier, 09:20</div>
+                </div>
+                <div class="activity-details">Safari sur iPhone • Adresse IP: 197.155.12.46</div>
+              </div>
+
+              <div style="margin-top: 20px; text-align: center;">
+                <button class="btn-outline">
+                  <i class="fa-solid fa-download"></i> Exporter l'historique
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Données utilisateur
+    let userData = {
+      fullName: "Dr Fatoumata Ndiaye",
+      specialty: "Médecine Générale",
+      doctorId: "MED-SEN-0458",
+      registrationNumber: "2015-1245-ORDME",
+      phone: "+221 77 456 78 90",
+      email: "fatou.ndiaye@ordopass.com",
+      address: "Clinique Médicale, Dakar",
+      profilePicture: "https://cdn-icons-png.flaticon.com/512/387/387561.png"
+    };
+
+    // Éléments DOM
+    const uploadInput = document.getElementById("upload");
+    const profilePic = document.getElementById("profile-pic");
+    const profileForm = document.getElementById("profileForm");
+    const saveIndicator = document.getElementById("saveIndicator");
+    const currentUserName = document.getElementById("currentUserName");
+    const profileName = document.getElementById("profileName");
+    const profileSpecialty = document.getElementById("profileSpecialty");
+
+    // Gestion de l'image de profil
+    uploadInput.addEventListener("change", function(){
+      const file = this.files[0];
+      if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+          alert("L'image ne doit pas dépasser 5MB");
+          return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e){
+          profilePic.src = e.target.result;
+          // Simuler sauvegarde
+          showSaveIndicator();
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function resetImage() {
+      if (confirm("Êtes-vous sûr de vouloir supprimer votre photo de profil ?")) {
+        profilePic.src = "https://cdn-icons-png.flaticon.com/512/387/387561.png";
+        uploadInput.value = "";
+        showSaveIndicator();
+      }
+    }
+
+    // Gestion du formulaire de profil
+    profileForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      
+      // Mettre à jour les données
+      userData.fullName = document.getElementById("fullName").value;
+      userData.specialty = document.getElementById("specialty").value;
+      userData.registrationNumber = document.getElementById("registrationNumber").value;
+      userData.phone = document.getElementById("phone").value;
+      userData.email = document.getElementById("email").value;
+      userData.address = document.getElementById("address").value;
+
+      // Mettre à jour l'affichage
+      currentUserName.textContent = userData.fullName;
+      profileName.textContent = userData.fullName;
+      profileSpecialty.textContent = userData.specialty;
+
+      showSaveIndicator();
+      
+      // Simuler sauvegarde API
+      simulateAPISave();
+    });
+
+    function showSaveIndicator() {
+      saveIndicator.classList.add('show');
+      setTimeout(() => {
+        saveIndicator.classList.remove('show');
+      }, 3000);
+    }
+
+    function simulateAPISave() {
+      const saveBtn = document.getElementById('saveProfileBtn');
+      const originalText = saveBtn.innerHTML;
+      
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sauvegarde...';
+      
+      setTimeout(() => {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalText;
+        console.log('Profil sauvegardé:', userData);
+      }, 1500);
+    }
+
+    // Gestion de la force du mot de passe
+    document.getElementById('newPassword')?.addEventListener('input', function(e) {
+      const password = e.target.value;
+      const strengthBar = document.getElementById('passwordStrength');
+      let strength = '';
+      
+      if (password.length === 0) {
+        strength = '';
+      } else if (password.length < 6) {
+        strength = 'strength-weak';
+      } else if (password.length < 8) {
+        strength = 'strength-medium';
+      } else if (password.length < 10) {
+        strength = 'strength-strong';
+      } else {
+        strength = 'strength-very-strong';
+      }
+      
+      strengthBar.className = 'password-strength-bar ' + strength;
+    });
+
+    function changePassword() {
+      const currentPassword = document.getElementById('currentPassword').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (!currentPassword) {
+        alert('Veuillez entrer votre mot de passe actuel');
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        alert('Les mots de passe ne correspondent pas');
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        alert('Le mot de passe doit contenir au moins 6 caractères');
+        return;
+      }
+
+      // Simuler changement de mot de passe
+      alert('Mot de passe changé avec succès');
+      document.getElementById('currentPassword').value = '';
+      document.getElementById('newPassword').value = '';
+      document.getElementById('confirmPassword').value = '';
+      document.getElementById('passwordStrength').className = 'password-strength-bar';
+    }
+
+    // Navigation entre les sections
+    const buttons = document.querySelectorAll(".settings-menu button");
+    const sections = document.querySelectorAll(".settings-section");
+
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        buttons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        
+        sections.forEach(sec => sec.classList.add("hidden"));
+        document.getElementById(btn.dataset.section).classList.remove("hidden");
+      });
+    });
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', function() {
+      // Charger les données utilisateur
+      document.getElementById('fullName').value = userData.fullName;
+      document.getElementById('specialty').value = userData.specialty;
+      document.getElementById('doctorId').value = userData.doctorId;
+      document.getElementById('registrationNumber').value = userData.registrationNumber;
+      document.getElementById('phone').value = userData.phone;
+      document.getElementById('email').value = userData.email;
+      document.getElementById('address').value = userData.address;
+    });
+  </script>
+</body>
+</html>

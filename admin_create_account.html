@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Création de Compte - Admin - OrdoPass</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+    
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .admin-card {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 700px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    .admin-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .admin-header h1 {
+      color: #1e3c72;
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
+    
+    .admin-header p {
+      color: #6b7280;
+      font-size: 16px;
+    }
+    
+    .role-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    @media (max-width: 600px) {
+      .role-selector {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .role-card {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+    
+    .role-card:hover {
+      border-color: #3b82f6;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .role-card.selected {
+      border-color: #3b82f6;
+      background: #eff6ff;
+    }
+    
+    .role-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+    
+    .medecin-icon { color: #1e3c72; }
+    .pharmacien-icon { color: #0ea5a0; }
+    
+    .form-container {
+      display: none;
+    }
+    
+    .form-container.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #374151;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    .form-group input, 
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .required::after {
+      content: " *";
+      color: #dc3545;
+    }
+    
+    .btn-admin {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: white;
+      border: none;
+      padding: 16px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .btn-admin:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+    }
+    
+    .btn-admin:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    
+    .message-box {
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    .message-box.success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      display: block;
+    }
+    
+    .message-box.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      display: block;
+    }
+    
+    .message-box.info {
+      background: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+      display: block;
+    }
+    
+    .token-section {
+      background: #f3f4f6;
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .token-section h3 {
+      color: #1e3c72;
+      margin-bottom: 15px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      color: #6b7280;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+    
+    .back-link:hover {
+      color: #1e3c72;
+      text-decoration: underline;
+    }
+    
+    .password-strength {
+      margin-top: 5px;
+      font-size: 14px;
+    }
+    
+    .strength-weak { color: #dc3545; }
+    .strength-medium { color: #ffc107; }
+    .strength-strong { color: #28a745; }
+    
+    .generated-credentials {
+      background: #e8f5e9;
+      border: 1px solid #c8e6c9;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      display: none;
+    }
+    
+    .credentials-title {
+      color: #2e7d32;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    
+    .credential-item {
+      margin-bottom: 8px;
+      padding: 8px;
+      background: white;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+    
+    .copy-btn {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .copy-btn:hover {
+      background: #388e3c;
+    }
+    
+    .success-animation {
+      animation: bounce 0.5s;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-card">
+    <div class="admin-header">
+      <h1>👑 Création de Compte Administrateur</h1>
+      <p>Interface sécurisée pour créer des comptes médecins et pharmaciens</p>
+    </div>
+    
+    <!-- Section d'authentification admin -->
+    <div class="token-section" id="tokenSection">
+      <h3><i class="fas fa-lock"></i> Authentification Administrateur</h3>
+      <div class="form-group">
+        <label class="required">Token d'administration</label>
+        <input type="password" id="adminToken" placeholder="Entrez le token 'Haby15'" />
+        <small style="color: #6b7280; margin-top: 5px; display: block;">
+          Token requis : "Haby15" (défini dans le fichier .env)
+        </small>
+      </div>
+      <button onclick="verifyAdminToken()" class="btn-admin" id="verifyTokenBtn">
+        <i class="fas fa-check-circle"></i> Vérifier le Token
+      </button>
+    </div>
+    
+    <!-- Contenu principal (caché initialement) -->
+    <div id="mainContent" style="display: none;">
+      <h2 style="margin-bottom: 20px; color: #1e3c72;">Sélectionnez le type de compte :</h2>
+      
+      <div class="role-selector">
+        <div class="role-card" onclick="selectRole('medecin')" id="roleMedecin">
+          <div class="role-icon medecin-icon">👨‍⚕️</div>
+          <h3 style="color: #1e3c72;">Médecin</h3>
+          <p style="color: #6b7280; font-size: 14px;">Créer un compte pour un médecin</p>
+        </div>
+        
+        <div class="role-card" onclick="selectRole('pharmacien')" id="rolePharmacien">
+          <div class="role-icon pharmacien-icon">💊</div>
+          <h3 style="color: #0ea5a0;">Pharmacien</h3>
+          <p style="color: #6b7280; font-size: 14px;">Créer un compte pour une pharmacie</p>
+        </div>
+      </div>
+      
+      <!-- Formulaire Médecin -->
+      <div class="form-container" id="formMedecin">
+        <form id="createMedecinForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="required">Nom d'utilisateur</label>
+              <input type="text" id="mUsername" placeholder="docteur.dupont" required />
+              <small class="help-text" style="color: #6b7280; font-size: 13px;">Utilisé pour la connexion</small>
+            </div>
+            
+            <div class="form-group">
+              <label class="required">Email</label>
+              <input type="email" id="mEmail" placeholder="docteur@example.com" required />
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="required">Mot de passe</label>
+              <input type="password" id="mPassword" placeholder="Minimum 8 caractères" required 
+                     oninput="checkPasswordStrength(this.value, 'medecin')" />
+              <div id="mPasswordStrength" class="password-strength"></div>
+            </div>
+            
+            <div class="form-group">
+              <label class="required">Confirmer le mot de passe</label>
+              <input type="password" id="mConfirmPassword" placeholder="Retapez le mot de passe" required 
+                     oninput="checkPasswordMatch('medecin')" />
+              <div id="mPasswordMatch" class="password-strength"></div>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="required">Nom</label>
+              <input type="text" id="mNom" placeholder="Dupont" required />
+            </div>
+            
+            <div class="form-group">
+              <label class="required">Prénom</label>
+              <input type="text" id="mPrenom" placeholder="Jean" required />
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="required">Spécialité</label>
+              <input type="text" id="mSpecialite" placeholder="Médecine Générale" required />
+            </div>
+            
+            <div class="form-group">
+              <label class="required">Numéro d'inscription</label>
+              <input type="text" id="mNumeroInscription" placeholder="MED123456" required />
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Date de naissance</label>
+              <input type="date" id="mDateNaissance" />
+            </div>
+            
+            <div class="form-group">
+              <label>Établissement</label>
+              <input type="text" id="mEtablissement" placeholder="Cabinet Médical Central" />
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Téléphone</label>
+            <input type="tel" id="mTelephone" placeholder="+221 77 123 45 67" />
+          </div>
+          
+          <button type="submit" class="btn-admin" id="btnCreateMedecin">
+            <i class="fas fa-user-md"></i> Créer le compte médecin
+          </button>
+        </form>
+      </div>
+      
+      <!-- Formulaire Pharmacien -->
+      <div class="form-container" id="formPharmacien">
+        <form id="createPharmacienForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="required">Nom d'utilisateur</label>
+              <input type="text" id="pUsername" placeholder="pharmacie.centrale" required />
+              <small class="help-text" style="color: #6b7280; font-size: 13px;">Utilisé pour la connexion</small>
+            </div>
+            
+            <div class="form-group">
+              <label class="required">Email</label>
+              <input type="email" id="pEmail" placeholder="contact@pharmacie.com" required />
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="required">Mot de passe</label>
+              <input type="password" id="pPassword" placeholder="Minimum 8 caractères" required 
+                     oninput="checkPasswordStrength(this.value, 'pharmacien')" />
+              <div id="pPasswordStrength" class="password-strength"></div>
+            </div>
+            
+            <div class="form-group">
+              <label class="required">Confirmer le mot de passe</label>
+              <input type="password" id="pConfirmPassword" placeholder="Retapez le mot de passe" required 
+                     oninput="checkPasswordMatch('pharmacien')" />
+              <div id="pPasswordMatch" class="password-strength"></div>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="required">Nom de la pharmacie</label>
+              <input type="text" id="pNom" placeholder="Pharmacie Centrale" required />
+            </div>
+            
+            <div class="form-group">
+              <label>Nom du responsable</label>
+              <input type="text" id="pResponsable" placeholder="M. Diallo" />
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="required">Adresse</label>
+              <input type="text" id="pAdresse" placeholder="123 Avenue Bourguiba, Dakar" required />
+            </div>
+            
+            <div class="form-group">
+              <label>Téléphone</label>
+              <input type="tel" id="pTelephone" placeholder="+221 33 821 45 67" />
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Numéro de licence</label>
+              <input type="text" id="pLicenseNumber" placeholder="PHARM-2024-001" />
+            </div>
+            
+            <div class="form-group">
+              <label>Années d'expérience</label>
+              <input type="number" id="pExperience" placeholder="5" min="0" />
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Horaires d'ouverture</label>
+            <input type="text" id="pHoraires" placeholder="Lun-Ven: 8h-19h, Sam: 8h-13h" />
+          </div>
+          
+          <button type="submit" class="btn-admin" id="btnCreatePharmacien">
+            <i class="fas fa-clinic-medical"></i> Créer le compte pharmacien
+          </button>
+        </form>
+      </div>
+      
+      <!-- Section pour afficher les identifiants générés -->
+      <div id="generatedCredentials" class="generated-credentials">
+        <div class="credentials-title">
+          <i class="fas fa-key"></i> Identifiants créés avec succès
+        </div>
+        <div class="credential-item">
+          <strong>Nom d'utilisateur:</strong> <span id="generatedUsername"></span>
+        </div>
+        <div class="credential-item">
+          <strong>Mot de passe:</strong> <span id="generatedPassword"></span>
+        </div>
+        <div class="credential-item">
+          <strong>Rôle:</strong> <span id="generatedRole"></span>
+        </div>
+        <button onclick="copyCredentials()" class="copy-btn">
+          <i class="fas fa-copy"></i> Copier les identifiants
+        </button>
+      </div>
+      
+      <!-- Messages d'état -->
+      <div id="messageBox" class="message-box"></div>
+      
+      <!-- Liens de navigation -->
+      <div style="margin-top: 30px; display: flex; justify-content: space-between; align-items: center;">
+        <a href="index.html" class="back-link">
+          <i class="fas fa-arrow-left"></i> Retour à l'accueil
+        </a>
+        <a href="admin_login.html" class="back-link">
+          <i class="fas fa-sign-in-alt"></i> Connexion Admin
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Variables globales
+    let selectedRole = '';
+    let adminTokenVerified = false;
+    let generatedCredentials = null;
+    
+    // Vérifier le token admin
+    function verifyAdminToken() {
+      const tokenInput = document.getElementById('adminToken');
+      const token = tokenInput.value.trim();
+      const verifyBtn = document.getElementById('verifyTokenBtn');
+      
+      if (!token) {
+        showMessage('❌ Veuillez entrer le token d\'administration', 'error');
+        tokenInput.focus();
+        return;
+      }
+      
+      // Désactiver le bouton pendant la vérification
+      verifyBtn.disabled = true;
+      verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Vérification...';
+      
+      // Simuler une vérification côté client (pour le token "Haby15")
+      setTimeout(() => {
+        if (token !== 'Haby15') {
+          showMessage('❌ Token invalide. Le token admin est "Haby15"', 'error');
+          verifyBtn.disabled = false;
+          verifyBtn.innerHTML = '<i class="fas fa-check-circle"></i> Vérifier le Token';
+          return;
+        }
+        
+        adminTokenVerified = true;
+        document.getElementById('tokenSection').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
+        
+        showMessage('✅ Token vérifié avec succès. Vous pouvez maintenant créer des comptes.', 'success');
+        
+        // Stocker le token dans sessionStorage
+        sessionStorage.setItem('adminToken', token);
+        
+        // Sélectionner automatiquement le rôle médecin
+        selectRole('medecin');
+      }, 1000);
+    }
+    
+    // Sélectionner un rôle
+    function selectRole(role) {
+      selectedRole = role;
+      
+      // Mettre en surbrillance la carte sélectionnée
+      document.getElementById('roleMedecin').classList.remove('selected');
+      document.getElementById('rolePharmacien').classList.remove('selected');
+      document.getElementById(`role${role.charAt(0).toUpperCase() + role.slice(1)}`).classList.add('selected');
+      
+      // Afficher le formulaire correspondant
+      document.getElementById('formMedecin').classList.remove('active');
+      document.getElementById('formPharmacien').classList.remove('active');
+      document.getElementById(`form${role.charAt(0).toUpperCase() + role.slice(1)}`).classList.add('active');
+      
+      // Réinitialiser les messages
+      document.getElementById('messageBox').style.display = 'none';
+      document.getElementById('generatedCredentials').style.display = 'none';
+    }
+    
+    // Vérifier la force du mot de passe
+    function checkPasswordStrength(password, role) {
+      const strengthDiv = document.getElementById(`${role}PasswordStrength`);
+      
+      if (!password) {
+        strengthDiv.textContent = '';
+        return;
+      }
+      
+      let strength = 0;
+      let message = '';
+      let className = '';
+      
+      // Vérification de la force
+      if (password.length >= 8) strength++;
+      if (/[A-Z]/.test(password)) strength++;
+      if (/[0-9]/.test(password)) strength++;
+      if (/[^A-Za-z0-9]/.test(password)) strength++;
+      
+      if (strength === 0) {
+        message = '❌ Trop faible';
+        className = 'strength-weak';
+      } else if (strength <= 2) {
+        message = '⚠️ Moyen';
+        className = 'strength-medium';
+      } else if (strength === 3) {
+        message = '✅ Bon';
+        className = 'strength-strong';
+      } else {
+        message = '✅ Très fort';
+        className = 'strength-strong';
+      }
+      
+      strengthDiv.textContent = message;
+      strengthDiv.className = `password-strength ${className}`;
+    }
+    
+    // Vérifier la correspondance des mots de passe
+    function checkPasswordMatch(role) {
+      const password = document.getElementById(`${role}Password`).value;
+      const confirm = document.getElementById(`${role}ConfirmPassword`).value;
+      const matchDiv = document.getElementById(`${role}PasswordMatch`);
+      
+      if (!confirm) {
+        matchDiv.textContent = '';
+        return;
+      }
+      
+      if (password === confirm) {
+        matchDiv.textContent = '✅ Correspondance OK';
+        matchDiv.className = 'password-strength strength-strong';
+      } else {
+        matchDiv.textContent = '❌ Les mots de passe ne correspondent pas';
+        matchDiv.className = 'password-strength strength-weak';
+      }
+    }
+    
+    // Générer un mot de passe aléatoire
+    function generateRandomPassword() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+      let password = '';
+      for (let i = 0; i < 12; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return password;
+    }
+    
+    // Copier les identifiants
+    function copyCredentials() {
+      if (!generatedCredentials) return;
+      
+      const text = `Identifiants OrdoPass:\n\nNom d'utilisateur: ${generatedCredentials.username}\nMot de passe: ${generatedCredentials.password}\nRôle: ${generatedCredentials.role}\n\nCes identifiants doivent être transmis de manière sécurisée.`;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        const copyBtn = document.querySelector('.copy-btn');
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copié !';
+        copyBtn.style.background = '#2e7d32';
+        
+        setTimeout(() => {
+          copyBtn.innerHTML = originalText;
+          copyBtn.style.background = '#4caf50';
+        }, 2000);
+      });
+    }
+    
+    // Afficher un message
+    function showMessage(text, type) {
+      const messageBox = document.getElementById('messageBox');
+      messageBox.textContent = text;
+      messageBox.className = `message-box ${type}`;
+      
+      // Auto-hide pour les messages de succès
+      if (type === 'success') {
+        setTimeout(() => {
+          messageBox.style.display = 'none';
+        }, 5000);
+      }
+    }
+    
+    // Initialiser l'application
+    document.addEventListener('DOMContentLoaded', function() {
+      // Vérifier si l'admin est déjà connecté
+      const savedToken = sessionStorage.getItem('adminToken');
+      if (savedToken === 'Haby15') {
+        adminTokenVerified = true;
+        document.getElementById('tokenSection').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
+        selectRole('medecin');
+      }
+      
+      // Gestion du formulaire médecin
+      document.getElementById('createMedecinForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        await createAccount('medecin');
+      });
+      
+      // Gestion du formulaire pharmacien
+      document.getElementById('createPharmacienForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        await createAccount('pharmacien');
+      });
+      
+      // Bouton pour générer un mot de passe aléatoire pour médecin
+      const mPasswordField = document.getElementById('mPassword');
+      const mPasswordGroup = mPasswordField.closest('.form-group');
+      const generateBtnM = document.createElement('button');
+      generateBtnM.type = 'button';
+      generateBtnM.innerHTML = '<i class="fas fa-random"></i> Générer';
+      generateBtnM.style.cssText = 'margin-top: 5px; padding: 5px 10px; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;';
+      generateBtnM.onclick = function() {
+        const randomPass = generateRandomPassword();
+        mPasswordField.value = randomPass;
+        document.getElementById('mConfirmPassword').value = randomPass;
+        checkPasswordStrength(randomPass, 'medecin');
+        checkPasswordMatch('medecin');
+      };
+      mPasswordGroup.appendChild(generateBtnM);
+      
+      // Bouton pour générer un mot de passe aléatoire pour pharmacien
+      const pPasswordField = document.getElementById('pPassword');
+      const pPasswordGroup = pPasswordField.closest('.form-group');
+      const generateBtnP = document.createElement('button');
+      generateBtnP.type = 'button';
+      generateBtnP.innerHTML = '<i class="fas fa-random"></i> Générer';
+      generateBtnP.style.cssText = 'margin-top: 5px; padding: 5px 10px; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;';
+      generateBtnP.onclick = function() {
+        const randomPass = generateRandomPassword();
+        pPasswordField.value = randomPass;
+        document.getElementById('pConfirmPassword').value = randomPass;
+        checkPasswordStrength(randomPass, 'pharmacien');
+        checkPasswordMatch('pharmacien');
+      };
+      pPasswordGroup.appendChild(generateBtnP);
+    });
+    
+    // Créer un compte
+    async function createAccount(role) {
+      if (!adminTokenVerified) {
+        showMessage('❌ Veuillez d\'abord vérifier votre token admin', 'error');
+        return;
+      }
+      
+      const formData = getFormData(role);
+      const validation = validateFormData(formData, role);
+      
+      if (!validation.isValid) {
+        showMessage(`❌ ${validation.message}`, 'error');
+        return;
+      }
+      
+      const btn = role === 'medecin' ? 
+        document.getElementById('btnCreateMedecin') : 
+        document.getElementById('btnCreatePharmacien');
+      
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création en cours...';
+      
+      try {
+        // Récupérer le token de sessionStorage
+        const adminToken = sessionStorage.getItem('adminToken');
+        
+        const response = await fetch('/api/admin/create-account', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Admin-Token': adminToken
+          },
+          body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          // Afficher les identifiants créés
+          generatedCredentials = {
+            username: formData.username,
+            password: formData.password,
+            role: role
+          };
+          
+          document.getElementById('generatedUsername').textContent = formData.username;
+          document.getElementById('generatedPassword').textContent = formData.password;
+          document.getElementById('generatedRole').textContent = role === 'medecin' ? 'Médecin' : 'Pharmacien';
+          
+          document.getElementById('generatedCredentials').style.display = 'block';
+          document.getElementById('generatedCredentials').classList.add('success-animation');
+          
+          showMessage(`✅ Compte ${role} créé avec succès ! Les identifiants sont affichés ci-dessous.`, 'success');
+          
+          // Réinitialiser le formulaire
+          if (role === 'medecin') {
+            document.getElementById('createMedecinForm').reset();
+          } else {
+            document.getElementById('createPharmacienForm').reset();
+          }
+          
+          // Auto-scroll vers les identifiants
+          document.getElementById('generatedCredentials').scrollIntoView({ behavior: 'smooth' });
+          
+        } else {
+          showMessage(`❌ Erreur: ${result.error || 'Échec de la création'}`, 'error');
+          if (result.details) {
+            console.error('Détails de l\'erreur:', result.details);
+          }
+        }
+        
+      } catch (error) {
+        console.error('Erreur:', error);
+        showMessage('❌ Erreur de connexion au serveur. Vérifiez que le serveur est démarré.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    }
+    
+    // Récupérer les données du formulaire
+    function getFormData(role) {
+      if (role === 'medecin') {
+        return {
+          username: document.getElementById('mUsername').value,
+          password: document.getElementById('mPassword').value,
+          email: document.getElementById('mEmail').value,
+          nom: document.getElementById('mNom').value,
+          prenom: document.getElementById('mPrenom').value,
+          dateNaissance: document.getElementById('mDateNaissance').value || undefined,
+          specialite: document.getElementById('mSpecialite').value,
+          numeroInscription: document.getElementById('mNumeroInscription').value,
+          etablissement: document.getElementById('mEtablissement').value || 'Non spécifié',
+          telephone: document.getElementById('mTelephone').value || '',
+          role: 'medecin'
+        };
+      } else {
+        return {
+          username: document.getElementById('pUsername').value,
+          password: document.getElementById('pPassword').value,
+          email: document.getElementById('pEmail').value,
+          nom: document.getElementById('pNom').value,
+          prenom: document.getElementById('pResponsable').value || '',
+          adresse: document.getElementById('pAdresse').value,
+          telephone: document.getElementById('pTelephone').value || '',
+          licenseNumber: document.getElementById('pLicenseNumber').value || '',
+          experience: document.getElementById('pExperience').value || 0,
+          etablissement: document.getElementById('pNom').value,
+          role: 'pharmacien'
+        };
+      }
+    }
+    
+    // Valider les données du formulaire
+    function validateFormData(data, role) {
+      // Vérifier les champs requis
+      const requiredFields = {
+        medecin: ['username', 'password', 'email', 'nom', 'prenom', 'specialite', 'numeroInscription'],
+        pharmacien: ['username', 'password', 'email', 'nom', 'adresse']
+      };
+      
+      const missingFields = requiredFields[role].filter(field => !data[field] || data[field].trim() === '');
+      
+      if (missingFields.length > 0) {
+        const fieldNames = {
+          username: 'Nom d\'utilisateur',
+          password: 'Mot de passe',
+          email: 'Email',
+          nom: role === 'medecin' ? 'Nom' : 'Nom de la pharmacie',
+          prenom: 'Prénom',
+          specialite: 'Spécialité',
+          numeroInscription: 'Numéro d\'inscription',
+          adresse: 'Adresse'
+        };
+        
+        const missingNames = missingFields.map(field => fieldNames[field]).join(', ');
+        return { isValid: false, message: `Champs obligatoires manquants : ${missingNames}` };
+      }
+      
+      // Vérifier la longueur du mot de passe
+      if (data.password.length < 8) {
+        return { isValid: false, message: 'Le mot de passe doit contenir au moins 8 caractères' };
+      }
+      
+      // Vérifier le format de l'email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(data.email)) {
+        return { isValid: false, message: 'Format d\'email invalide' };
+      }
+      
+      return { isValid: true, message: '' };
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rendez-vous - Médecin | OrdoPass</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- FullCalendar CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet"/>
+  
+  <style>
+    /* ✅ VOS STYLES EXISTANTS POUR LES RENDEZ-VOUS */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    
+    body {
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    
+    .dashboard-page {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    .sidebar {
+      width: 250px;
+      background: #2a5298;
+      color: white;
+      padding: 20px 0;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 0 20px;
+    }
+    
+    .logo span {
+      color: #4CAF50;
+    }
+    
+    .sidebar nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      color: white;
+      text-decoration: none;
+      transition: all 0.3s;
+      border-left: 3px solid transparent;
+    }
+    
+    .sidebar nav a:hover,
+    .sidebar nav a.active {
+      background: rgba(255, 255, 255, 0.1);
+      border-left-color: #4CAF50;
+    }
+    
+    .sidebar nav a i {
+      width: 20px;
+      text-align: center;
+    }
+    
+    .main-area {
+      flex: 1;
+      margin-left: 250px;
+      padding: 20px;
+    }
+    
+    .topbar {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    
+    .topbar h1 {
+      color: #2a5298;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    #calendar {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    
+    .fc-event {
+      cursor: pointer;
+      border: none;
+      padding: 2px 4px;
+      font-size: 12px;
+    }
+    
+    .fc-event.confirmed {
+      background: #28a745;
+      border-color: #28a745;
+    }
+    
+    .fc-event.pending {
+      background: #ffc107;
+      border-color: #ffc107;
+      color: #000;
+    }
+    
+    .fc-event.cancelled {
+      background: #dc3545;
+      border-color: #dc3545;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal-content {
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      width: 500px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      overflow-y: auto;
+    }
+    
+    .modal-content h3 {
+      color: #2a5298;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    #timeSlots {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      max-height: 200px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    
+    .time-slot {
+      padding: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s;
+      background: #f8f9fa;
+      font-size: 12px;
+    }
+    
+    .time-slot:hover {
+      border-color: #2a5298;
+      background: #e3f2fd;
+    }
+    
+    .time-slot.selected {
+      background: #2a5298;
+      color: white;
+      border-color: #2a5298;
+    }
+    
+    .time-slot.disabled {
+      background: #f5f5f5;
+      color: #999;
+      cursor: not-allowed;
+      border-color: #ddd;
+      text-decoration: line-through;
+    }
+    
+    .time-slot.taken {
+      background: #ffebee;
+      color: #c62828;
+      border-color: #ffcdd2;
+      cursor: not-allowed;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #555;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: #2a5298;
+      box-shadow: 0 0 0 2px rgba(42, 82, 152, 0.2);
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+    }
+    
+    .btn-primary {
+      background: #2a5298;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #1e3c72;
+    }
+    
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #218838;
+    }
+    
+    .btn-warning {
+      background: #ffc107;
+      color: #000;
+    }
+    
+    .btn-warning:hover {
+      background: #e0a800;
+    }
+    
+    .btn-danger {
+      background: #dc3545;
+      color: #fff;
+    }
+    
+    .btn-danger:hover {
+      background: #c82333;
+    }
+    
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #6c757d;
+      color: #6c757d;
+    }
+    
+    .btn-outline:hover {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .modal-buttons .btn {
+      flex: 1;
+    }
+    
+    .event-details {
+      margin-bottom: 15px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #2a5298;
+    }
+    
+    .event-details p {
+      margin: 5px 0;
+    }
+    
+    .event-details strong {
+      color: #2a5298;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 8px;
+    }
+    
+    .status-confirmed {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .status-cancelled {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .filters {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .filter-group label {
+      font-weight: bold;
+      color: #555;
+    }
+    
+    .filter-select {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: white;
+    }
+    
+    .patient-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 5px;
+    }
+    
+    .no-patients {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+      background: #f8f9fa;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+    
+    .no-patients i {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      color: #ccc;
+    }
+
+    .appointment-info {
+      background: #e8f4fd;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      border-left: 4px solid #2a5298;
+    }
+
+    .appointment-info p {
+      margin: 2px 0;
+      font-size: 13px;
+    }
+
+    .date-picker-container {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .date-picker-container .form-control {
+      flex: 1;
+    }
+
+    .date-picker-container .btn {
+      flex: 0 0 auto;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 70px;
+      }
+      
+      .sidebar .logo span,
+      .sidebar nav a span {
+        display: none;
+      }
+      
+      .main-area {
+        margin-left: 70px;
+      }
+      
+      .modal-content {
+        width: 95%;
+        margin: 10px;
+      }
+      
+      #timeSlots {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .filters {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .date-picker-container {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body class="dashboard-page">
+
+  <!-- ✅ SIDEBAR FIXE IDENTIQUE -->
+  <aside class="sidebar">
+    <div class="logo">
+      <i class="fa-solid fa-notes-medical"></i>
+      <span>ORDOPASS</span>
+    </div>
+    <nav>
+      <a href="medecin_dashboard.html"><i class="fa-solid fa-file-medical"></i> <span>Consultations</span></a>
+      <a href="patients.html"><i class="fa-solid fa-users"></i> <span>Patients</span></a>
+      <a href="teleconsultation.html"><i class="fa-solid fa-video"></i> <span>Téléconsultation</span></a>
+      <a href="pharmacies.html"><i class="fa-solid fa-prescription-bottle-medical"></i> <span>Pharmacies</span></a>
+      <a href="medecin_messagerie.html"><i class="fa-solid fa-comment-medical"></i> <span>Messagerie</span></a>
+      <a href="parametres.html"><i class="fa-solid fa-gear"></i> <span>Paramètres</span></a>
+      <a href="medecin_facturation.html"><i class="fa-solid fa-file-invoice-dollar"></i> <span>Facturation</span></a>
+      <a href="medecin_rendezvous.html" class="active"><i class="fa-solid fa-calendar-check"></i> <span>Rendez-vous</span></a>
+      <a href="medecin_ordonnance.html"><i class="fa-solid fa-prescription"></i> <span>Ordonnances sécurisées</span></a>
+      <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> <span>Déconnexion</span></a>
+    </nav>
+  </aside>
+
+  <!-- ✅ CONTENU PRINCIPAL -->
+  <main class="main-area">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <h1><i class="fa-solid fa-calendar-check"></i> Gestion des Rendez-vous</h1>
+      <div class="user-info">
+        <img src="https://i.pravatar.cc/40" class="avatar" alt="profil">
+        <span id="usernameDisplay"></span>
+      </div>
+    </header>
+
+    <!-- CONTENU DÉFILANT -->
+    <section class="content">
+      <!-- ✅ VOTRE CONTENU EXISTANT POUR LES RENDEZ-VOUS -->
+      <!-- Filtres -->
+      <div class="filters">
+        <div class="filter-group">
+          <label for="statusFilter">Statut :</label>
+          <select id="statusFilter" class="filter-select">
+            <option value="all">Tous les statuts</option>
+            <option value="confirmed">Confirmé</option>
+            <option value="pending">En attente</option>
+            <option value="cancelled">Annulé</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="patientFilter">Patient :</label>
+          <select id="patientFilter" class="filter-select">
+            <option value="all">Tous les patients</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="openAddModal()">
+          <i class="fa-solid fa-plus"></i> Nouveau rendez-vous
+        </button>
+      </div>
+
+      <div id="calendar"></div>
+    </section>
+  </main>
+
+  <!-- ✅ VOS MODALS ET CODE JAVASCRIPT EXISTANTS -->
+  <!-- Modal pour ajouter un rendez-vous -->
+  <div id="addModal" class="modal">
+    <div class="modal-content">
+      <h3>Nouveau Rendez-vous</h3>
+      
+      <div class="form-group">
+        <label class="form-label">Date du rendez-vous *</label>
+        <div class="date-picker-container">
+          <input type="date" class="form-control" id="selectedDateInput" min="<?php echo date('Y-m-d'); ?>" required>
+          <button class="btn btn-outline" onclick="useTodayDate()">
+            <i class="fa-solid fa-calendar-day"></i> Aujourd'hui
+          </button>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Créneaux horaires disponibles</label>
+        <div id="timeSlots"></div>
+        <small style="color: #666; display: block; margin-top: 5px;">
+          <i class="fa-solid fa-info-circle"></i> Les créneaux en rouge sont déjà réservés
+        </small>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Patient *</label>
+        <select class="form-control" id="patientSelect" required onchange="toggleNewPatientFields()">
+          <option value="">Sélectionner un patient</option>
+          <option value="new">➕ Nouveau patient</option>
+        </select>
+      </div>
+
+      <!-- Champs pour nouveau patient -->
+      <div id="newPatientFields" style="display: none;">
+        <div class="form-group">
+          <label class="form-label">Nom complet *</label>
+          <input type="text" class="form-control" id="newPatientName" placeholder="Nom et prénom">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Âge *</label>
+          <input type="number" class="form-control" id="newPatientAge" placeholder="Âge">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Téléphone</label>
+          <input type="text" class="form-control" id="newPatientPhone" placeholder="Téléphone">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Type de consultation</label>
+        <select class="form-control" id="consultationType">
+          <option value="Consultation standard">Consultation standard</option>
+          <option value="Consultation de suivi">Consultation de suivi</option>
+          <option value="Urgence">Urgence</option>
+          <option value="Téléconsultation">Téléconsultation</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Notes (optionnel)</label>
+        <textarea class="form-control" id="appointmentNotes" rows="3" placeholder="Notes supplémentaires..."></textarea>
+      </div>
+      
+      <div class="modal-buttons">
+        <button class="btn btn-outline" onclick="closeAddModal()">Annuler</button>
+        <button class="btn btn-primary" onclick="saveAppointment()">
+          <i class="fa-solid fa-save"></i> Enregistrer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal pour voir/modifier un rendez-vous -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <h3>Détails du Rendez-vous</h3>
+      
+      <div class="event-details" id="eventDetails">
+        <!-- Les détails seront chargés dynamiquement -->
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Statut</label>
+        <select class="form-control" id="editStatus">
+          <option value="pending">En attente</option>
+          <option value="confirmed">Confirmé</option>
+          <option value="cancelled">Annulé</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-control" id="editNotes" rows="3"></textarea>
+      </div>
+      
+      <div class="modal-buttons">
+        <button class="btn btn-outline" onclick="closeEditModal()">Fermer</button>
+        <button class="btn btn-warning" onclick="updateAppointment()">
+          <i class="fa-solid fa-edit"></i> Modifier
+        </button>
+        <button class="btn btn-danger" onclick="deleteAppointment()">
+          <i class="fa-solid fa-trash"></i> Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal pour voir les rendez-vous d'un jour -->
+  <div id="dayViewModal" class="modal">
+    <div class="modal-content">
+      <h3>Rendez-vous du <span id="dayViewDate"></span></h3>
+      
+      <div id="dayAppointmentsList">
+        <!-- Les rendez-vous seront chargés dynamiquement -->
+      </div>
+      
+      <div class="modal-buttons">
+        <button class="btn btn-outline" onclick="closeDayViewModal()">Fermer</button>
+        <button class="btn btn-primary" onclick="openAddModalFromDayView()">
+          <i class="fa-solid fa-plus"></i> Nouveau rendez-vous
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FullCalendar JS -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script>
+    // ✅ VOTRE CODE JAVASCRIPT EXISTANT POUR LES RENDEZ-VOUS
+    // Variables globales
+    let calendar;
+    let selectedDate = null;
+    let selectedEvent = null;
+    let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+    let patients = JSON.parse(localStorage.getItem('patients')) || [];
+
+    // ==================== INITIALISATION ====================
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🚀 Initialisation de la page rendez-vous...');
+      
+      // Initialiser les données de test si nécessaire
+      initializeTestData();
+      
+      // Charger les données
+      loadPatients();
+      loadAppointments();
+      
+      // Initialiser le calendrier
+      initializeCalendar();
+      
+      // Configurer les événements
+      setupEventListeners();
+      
+      console.log('✅ Page rendez-vous initialisée avec succès');
+    });
+
+    // ==================== FONCTIONS D'INITIALISATION ====================
+
+    // Fonction pour initialiser les données de test si nécessaire
+    function initializeTestData() {
+      // Vérifier si des patients existent dans le localStorage
+      if (patients.length === 0) {
+        patients = [
+          {
+            id: 1,
+            name: "Awa Diop",
+            age: 32,
+            phone: "+221 77 123 45 67",
+            address: "Dakar, Sénégal",
+            image: "https://i.pravatar.cc/150?u=awa-diop",
+            added: new Date().toLocaleDateString("fr-FR")
+          },
+          {
+            id: 2, 
+            name: "Leslie Alexander",
+            age: 28,
+            phone: "+221 77 987 65 43", 
+            address: "Thiès, Sénégal",
+            image: "https://i.pravatar.cc/150?u=leslie-alexander",
+            added: new Date().toLocaleDateString("fr-FR")
+          }
+        ];
+        localStorage.setItem('patients', JSON.stringify(patients));
+        console.log('📝 Patients de test créés');
+      }
+
+      // Vérifier si des rendez-vous existent dans le localStorage
+      if (appointments.length === 0) {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        appointments = [
+          {
+            id: generateId(),
+            patientId: 1,
+            patientName: "Awa Diop",
+            start: `${today.toISOString().split('T')[0]}T10:00:00`,
+            end: `${today.toISOString().split('T')[0]}T10:30:00`,
+            type: "Consultation standard",
+            status: "confirmed",
+            notes: "Fièvre persistante",
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: generateId(),
+            patientId: 2,
+            patientName: "Leslie Alexander", 
+            start: `${tomorrow.toISOString().split('T')[0]}T14:00:00`,
+            end: `${tomorrow.toISOString().split('T')[0]}T14:30:00`,
+            type: "Consultation de suivi",
+            status: "pending",
+            notes: "Contrôle post-traitement",
+            createdAt: new Date().toISOString()
+          }
+        ];
+        localStorage.setItem('appointments', JSON.stringify(appointments));
+        console.log('📅 Rendez-vous de test créés');
+      }
+    }
+
+    // Configurer les écouteurs d'événements
+    function setupEventListeners() {
+      // Déconnexion
+      document.getElementById('logoutBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+          localStorage.removeItem('currentUser');
+          window.location.href = 'login.html';
+        }
+      });
+
+      // Fermer les modals en cliquant à l'extérieur
+      document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal')) {
+          e.target.style.display = 'none';
+        }
+      });
+
+      // Écouter les changements de date
+      document.getElementById('selectedDateInput').addEventListener('change', function() {
+        selectedDate = this.value;
+        generateTimeSlots();
+      });
+
+      // Écouter les filtres
+      document.getElementById('statusFilter').addEventListener('change', applyFilters);
+      document.getElementById('patientFilter').addEventListener('change', applyFilters);
+    }
+
+    // Initialiser le calendrier
+    function initializeCalendar() {
+      const calendarEl = document.getElementById('calendar');
+      
+      calendar = new FullCalendar.Calendar(calendarEl, {
+        locale: 'fr',
+        initialView: 'dayGridMonth',
+        selectable: true,
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        buttonText: {
+          today: 'Aujourd\'hui',
+          month: 'Mois',
+          week: 'Semaine',
+          day: 'Jour'
+        },
+        dateClick: function(info) {
+          selectedDate = info.dateStr;
+          openDayViewModal(info.dateStr);
+        },
+        eventClick: function(info) {
+          selectedEvent = info.event;
+          openEditModal(info.event);
+        },
+        events: appointments.map(appointment => ({
+          id: appointment.id,
+          title: `${appointment.patientName} - ${appointment.type}`,
+          start: appointment.start,
+          end: appointment.end,
+          extendedProps: appointment,
+          className: `fc-event ${appointment.status}`
+        })),
+        eventContent: function(arg) {
+          const appointment = arg.event.extendedProps;
+          return {
+            html: `
+              <div class="fc-event-content">
+                <div><strong>${appointment.patientName}</strong></div>
+                <div>${appointment.type}</div>
+                <div><small>${formatTime(appointment.start)}</small></div>
+              </div>
+            `
+          };
+        }
+      });
+
+      calendar.render();
+      console.log('📅 Calendrier initialisé');
+    }
+
+    // ==================== GESTION DES PATIENTS ====================
+
+    // Charger les patients
+    async function loadPatients() {
+      try {
+        // Essayer d'abord l'API
+        const response = await fetch('/api/patients');
+        if (response.ok) {
+          patients = await response.json();
+          console.log('✅ Patients chargés depuis API:', patients.length);
+        } else {
+          throw new Error('API non disponible');
+        }
+      } catch (error) {
+        console.log('⚠️ API non disponible, utilisation du localStorage');
+        // Fallback sur le localStorage
+        patients = JSON.parse(localStorage.getItem('patients')) || [];
+        
+        // Si pas de données, initialiser avec des données de test
+        if (patients.length === 0) {
+          initializeTestData();
+        }
+      }
+      updatePatientSelects();
+    }
+
+    // Mettre à jour les sélecteurs de patients
+    function updatePatientSelects() {
+      const patientSelect = document.getElementById('patientSelect');
+      const patientFilter = document.getElementById('patientFilter');
+      
+      // Sauvegarder la sélection actuelle
+      const currentSelection = patientSelect.value;
+      const currentFilter = patientFilter.value;
+      
+      patientSelect.innerHTML = '<option value="">Sélectionner un patient</option>';
+      patientFilter.innerHTML = '<option value="all">Tous les patients</option>';
+      
+      if (patients.length === 0) {
+        patientSelect.innerHTML += '<option value="new">➕ Nouveau patient (aucun patient disponible)</option>';
+      } else {
+        patientSelect.innerHTML += '<option value="new">➕ Nouveau patient</option>';
+        
+        patients.forEach(patient => {
+          const option = document.createElement('option');
+          option.value = patient._id || patient.id;
+          option.textContent = patient.name;
+          patientSelect.appendChild(option.cloneNode(true));
+          patientFilter.appendChild(option);
+        });
+      }
+      
+      // Restaurer les sélections
+      patientSelect.value = currentSelection;
+      patientFilter.value = currentFilter;
+    }
+
+    // Fonction pour sauvegarder un patient localement
+    function savePatientLocally(patientData) {
+      const newPatient = {
+        id: generateId(),
+        name: patientData.name,
+        age: patientData.age,
+        phone: patientData.phone || '',
+        address: patientData.address || '',
+        image: patientData.image || 'https://i.pravatar.cc/40',
+        added: new Date().toLocaleDateString("fr-FR")
+      };
+      
+      patients.push(newPatient);
+      localStorage.setItem('patients', JSON.stringify(patients));
+      console.log('✅ Nouveau patient créé:', newPatient.name);
+      return newPatient;
+    }
+
+    // Basculer l'affichage des champs nouveau patient
+    function toggleNewPatientFields() {
+      const patientSelect = document.getElementById('patientSelect');
+      const newPatientFields = document.getElementById('newPatientFields');
+      
+      if (patientSelect.value === 'new') {
+        newPatientFields.style.display = 'block';
+      } else {
+        newPatientFields.style.display = 'none';
+      }
+    }
+
+    // ==================== GESTION DES RENDEZ-VOUS ====================
+
+    // Charger les rendez-vous
+    function loadAppointments() {
+      appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+      refreshCalendarEvents();
+    }
+
+    // Rafraîchir les événements du calendrier
+    function refreshCalendarEvents() {
+      if (!calendar) return;
+      
+      calendar.removeAllEvents();
+      
+      appointments.forEach(appointment => {
+        calendar.addEvent({
+          id: appointment.id,
+          title: `${appointment.patientName} - ${appointment.type}`,
+          start: appointment.start,
+          end: appointment.end,
+          extendedProps: appointment,
+          className: `fc-event ${appointment.status}`
+        });
+      });
+    }
+
+    // Appliquer les filtres
+    function applyFilters() {
+      const status = document.getElementById('statusFilter').value;
+      const patientId = document.getElementById('patientFilter').value;
+      
+      calendar.removeAllEvents();
+      
+      const filteredAppointments = appointments.filter(appointment => {
+        const statusMatch = status === 'all' || appointment.status === status;
+        const patientMatch = patientId === 'all' || appointment.patientId == patientId;
+        return statusMatch && patientMatch;
+      });
+      
+      filteredAppointments.forEach(appointment => {
+        calendar.addEvent({
+          id: appointment.id,
+          title: `${appointment.patientName} - ${appointment.type}`,
+          start: appointment.start,
+          end: appointment.end,
+          extendedProps: appointment,
+          className: `fc-event ${appointment.status}`
+        });
+      });
+    }
+
+    // ==================== GESTION DES MODALS ====================
+
+    // Ouvrir le modal d'ajout
+    function openAddModal() {
+      // Si aucune date n'est sélectionnée, utiliser aujourd'hui
+      if (!selectedDate) {
+        selectedDate = new Date().toISOString().split('T')[0];
+      }
+      
+      // Mettre à jour le champ de date
+      const dateInput = document.getElementById('selectedDateInput');
+      dateInput.value = selectedDate;
+      dateInput.min = new Date().toISOString().split('T')[0]; // Pas de dates passées
+      
+      // Générer les créneaux horaires
+      generateTimeSlots();
+      updatePatientSelects();
+      document.getElementById('addModal').style.display = 'flex';
+    }
+
+    // Utiliser la date d'aujourd'hui
+    function useTodayDate() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('selectedDateInput').value = today;
+      selectedDate = today;
+      generateTimeSlots();
+    }
+
+    // Fermer le modal d'ajout
+    function closeAddModal() {
+      document.getElementById('addModal').style.display = 'none';
+      resetAddForm();
+    }
+
+    // Ouvrir le modal d'édition
+    function openEditModal(event) {
+      const appointment = event.extendedProps;
+      
+      document.getElementById('eventDetails').innerHTML = `
+        <div class="appointment-info">
+          <p><strong>Patient:</strong> ${appointment.patientName}</p>
+          <p><strong>Date:</strong> ${formatDateTime(appointment.start)}</p>
+          <p><strong>Type:</strong> ${appointment.type}</p>
+          <p><strong>Statut:</strong> <span class="status-badge status-${appointment.status}">${getStatusText(appointment.status)}</span></p>
+          <p><strong>Notes:</strong> ${appointment.notes || 'Aucune note'}</p>
+          <p><strong>Créé le:</strong> ${formatDateTime(appointment.createdAt)}</p>
+        </div>
+      `;
+      
+      document.getElementById('editStatus').value = appointment.status;
+      document.getElementById('editNotes').value = appointment.notes || '';
+      
+      document.getElementById('editModal').style.display = 'flex';
+    }
+
+    // Fermer le modal d'édition
+    function closeEditModal() {
+      document.getElementById('editModal').style.display = 'none';
+    }
+
+    // Ouvrir le modal de vue journée
+    function openDayViewModal(dateStr) {
+      selectedDate = dateStr;
+      document.getElementById('dayViewDate').textContent = formatDate(dateStr);
+      
+      const dayAppointments = getAppointmentsForDate(dateStr);
+      const container = document.getElementById('dayAppointmentsList');
+      
+      if (dayAppointments.length === 0) {
+        container.innerHTML = `
+          <div class="no-patients">
+            <i class="fa-solid fa-calendar-times"></i>
+            <p>Aucun rendez-vous pour cette date</p>
+          </div>
+        `;
+      } else {
+        container.innerHTML = dayAppointments.map(appointment => `
+          <div class="appointment-info" style="cursor: pointer;" onclick="openEditModalFromList('${appointment.id}')">
+            <p><strong>${appointment.patientName}</strong> <span class="status-badge status-${appointment.status}">${getStatusText(appointment.status)}</span></p>
+            <p><strong>Heure:</strong> ${formatTime(appointment.start)}</p>
+            <p><strong>Type:</strong> ${appointment.type}</p>
+            <p><strong>Notes:</strong> ${appointment.notes || 'Aucune'}</p>
+          </div>
+        `).join('');
+      }
+      
+      document.getElementById('dayViewModal').style.display = 'flex';
+    }
+
+    // Fermer le modal de vue journée
+    function closeDayViewModal() {
+      document.getElementById('dayViewModal').style.display = 'none';
+    }
+
+    // Ouvrir l'édition depuis la liste
+    function openEditModalFromList(appointmentId) {
+      const appointment = appointments.find(a => a.id === appointmentId);
+      if (appointment) {
+        closeDayViewModal();
+        // Simuler un événement pour ouvrir le modal d'édition
+        const fakeEvent = {
+          extendedProps: appointment
+        };
+        openEditModal(fakeEvent);
+      }
+    }
+
+    // Ouvrir l'ajout depuis la vue journée
+    function openAddModalFromDayView() {
+      closeDayViewModal();
+      openAddModal();
+    }
+
+    // ==================== CRÉNEAUX HORAIRES ====================
+
+    // Générer les créneaux horaires
+    function generateTimeSlots() {
+      const timeSlotsEl = document.getElementById('timeSlots');
+      timeSlotsEl.innerHTML = '';
+      
+      // Vérifier que selectedDate est définie
+      if (!selectedDate) {
+        timeSlotsEl.innerHTML = '<div class="no-patients"><p>Veuillez sélectionner une date</p></div>';
+        return;
+      }
+      
+      const slots = generateTimeSlotsArray(8, 18); // 8h-18h
+      const dayAppointments = getAppointmentsForDate(selectedDate);
+      
+      slots.forEach(slot => {
+        const startDateTime = `${selectedDate}T${slot}`;
+        
+        // Vérifier si le créneau est disponible
+        const isTaken = isTimeSlotTaken(startDateTime);
+        const isAvailable = !isTaken && isTimeSlotAvailable(startDateTime);
+        
+        const slotEl = document.createElement('div');
+        slotEl.className = `time-slot ${isTaken ? 'taken' : isAvailable ? '' : 'disabled'}`;
+        slotEl.textContent = slot;
+        slotEl.dataset.time = slot;
+        slotEl.title = isTaken ? 'Créneau déjà réservé' : isAvailable ? 'Créneau disponible' : 'Créneau non disponible';
+        
+        if (isAvailable) {
+          slotEl.addEventListener('click', function() {
+            document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
+            this.classList.add('selected');
+          });
+        }
+        
+        timeSlotsEl.appendChild(slotEl);
+      });
+    }
+
+    // Générer les créneaux horaires
+    function generateTimeSlotsArray(startHour, endHour) {
+      const slots = [];
+      for (let h = startHour; h < endHour; h++) {
+        for (let m = 0; m < 60; m += 30) { // Créneaux de 30 minutes
+          const hh = h.toString().padStart(2, '0');
+          const mm = m.toString().padStart(2, '0');
+          slots.push(`${hh}:${mm}`);
+        }
+      }
+      return slots;
+    }
+
+    // Vérifier si un créneau est déjà pris
+    function isTimeSlotTaken(startDateTime) {
+      return appointments.some(appointment => {
+        const appointmentStart = new Date(appointment.start);
+        const newStart = new Date(startDateTime);
+        return Math.abs(appointmentStart - newStart) < (30 * 60 * 1000); // 30 minutes d'écart
+      });
+    }
+
+    // Vérifier si un créneau est disponible (logique métier supplémentaire)
+    function isTimeSlotAvailable(startDateTime) {
+      const date = new Date(startDateTime);
+      const hour = date.getHours();
+      const day = date.getDay();
+      
+      // Exemple: pas de rendez-vous le dimanche, et entre 12h-14h
+      if (day === 0 || (hour >= 12 && hour < 14)) {
+        return false;
+      }
+      
+      return true;
+    }
+
+    // Obtenir les rendez-vous pour une date spécifique
+    function getAppointmentsForDate(dateStr) {
+      return appointments.filter(appointment => {
+        const appointmentDate = appointment.start.split('T')[0];
+        return appointmentDate === dateStr;
+      }).sort((a, b) => new Date(a.start) - new Date(b.start));
+    }
+
+    // ==================== SAUVEGARDE ET MISE À JOUR ====================
+
+    // Sauvegarder un rendez-vous
+    async function saveAppointment() {
+      const selectedTime = document.querySelector('.time-slot.selected');
+      const patientSelect = document.getElementById('patientSelect');
+      const consultationType = document.getElementById('consultationType');
+      const notes = document.getElementById('appointmentNotes');
+      const dateInput = document.getElementById('selectedDateInput');
+      
+      // Validation de base
+      if (!dateInput.value) {
+        alert('Veuillez sélectionner une date');
+        return;
+      }
+      
+      selectedDate = dateInput.value;
+      
+      if (!selectedTime) {
+        alert('Veuillez sélectionner un créneau horaire');
+        return;
+      }
+
+      let patientId, patientName;
+
+      try {
+        // Gestion nouveau patient
+        if (patientSelect.value === 'new') {
+          const newName = document.getElementById('newPatientName').value.trim();
+          const newAge = document.getElementById('newPatientAge').value;
+          
+          if (!newName || !newAge) {
+            alert('Veuillez remplir le nom et l\'âge du nouveau patient');
+            return;
+          }
+
+          // Créer le nouveau patient localement
+          const newPatient = {
+            name: newName,
+            age: parseInt(newAge),
+            phone: document.getElementById('newPatientPhone').value.trim() || '',
+            address: '',
+            image: 'https://i.pravatar.cc/40'
+          };
+
+          const savedPatient = savePatientLocally(newPatient);
+          patientId = savedPatient.id;
+          patientName = savedPatient.name;
+          
+          // Recharger la liste des patients
+          updatePatientSelects();
+          
+        } else if (patientSelect.value) {
+          // Patient existant
+          const patient = patients.find(p => (p._id || p.id) == patientSelect.value);
+          if (!patient) {
+            alert('Patient non trouvé');
+            return;
+          }
+          patientId = patient._id || patient.id;
+          patientName = patient.name;
+        } else {
+          alert('Veuillez sélectionner un patient');
+          return;
+        }
+        
+        const startDateTime = `${selectedDate}T${selectedTime.dataset.time}`;
+        const endDateTime = new Date(new Date(startDateTime).getTime() + 30 * 60 * 1000).toISOString();
+        
+        const newAppointment = {
+          id: generateId(),
+          patientId: patientId,
+          patientName: patientName,
+          start: startDateTime,
+          end: endDateTime,
+          type: consultationType.value,
+          status: 'pending',
+          notes: notes.value,
+          createdAt: new Date().toISOString()
+        };
+        
+        // Sauvegarder localement
+        appointments.push(newAppointment);
+        localStorage.setItem('appointments', JSON.stringify(appointments));
+        
+        // Mettre à jour le calendrier
+        calendar.addEvent({
+          id: newAppointment.id,
+          title: `${newAppointment.patientName} - ${newAppointment.type}`,
+          start: newAppointment.start,
+          end: newAppointment.end,
+          extendedProps: newAppointment,
+          className: `fc-event ${newAppointment.status}`
+        });
+        
+        closeAddModal();
+        alert('Rendez-vous enregistré avec succès!');
+        
+      } catch (error) {
+        console.error('Erreur sauvegarde rendez-vous:', error);
+        alert('Erreur lors de l\'enregistrement du rendez-vous');
+      }
+    }
+
+    // Mettre à jour un rendez-vous
+    function updateAppointment() {
+      if (!selectedEvent) return;
+      
+      const status = document.getElementById('editStatus').value;
+      const notes = document.getElementById('editNotes').value;
+      
+      const appointmentIndex = appointments.findIndex(a => a.id === selectedEvent.id);
+      if (appointmentIndex !== -1) {
+        appointments[appointmentIndex].status = status;
+        appointments[appointmentIndex].notes = notes;
+        
+        localStorage.setItem('appointments', JSON.stringify(appointments));
+        
+        selectedEvent.remove();
+        calendar.addEvent({
+          id: appointments[appointmentIndex].id,
+          title: `${appointments[appointmentIndex].patientName} - ${appointments[appointmentIndex].type}`,
+          start: appointments[appointmentIndex].start,
+          end: appointments[appointmentIndex].end,
+          extendedProps: appointments[appointmentIndex],
+          className: `fc-event ${status}`
+        });
+        
+        closeEditModal();
+        alert('Rendez-vous mis à jour avec succès!');
+      }
+    }
+
+    // Supprimer un rendez-vous
+    function deleteAppointment() {
+      if (!selectedEvent || !confirm('Êtes-vous sûr de vouloir supprimer ce rendez-vous ?')) {
+        return;
+      }
+      
+      appointments = appointments.filter(a => a.id !== selectedEvent.id);
+      localStorage.setItem('appointments', JSON.stringify(appointments));
+      
+      selectedEvent.remove();
+      closeEditModal();
+      alert('Rendez-vous supprimé avec succès!');
+    }
+
+    // ==================== FONCTIONS UTILITAIRES ====================
+
+    function generateId() {
+      return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('fr-FR', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    }
+
+    function formatDateTime(dateTimeString) {
+      const date = new Date(dateTimeString);
+      return date.toLocaleString('fr-FR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function formatTime(dateTimeString) {
+      const date = new Date(dateTimeString);
+      return date.toLocaleTimeString('fr-FR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function getStatusText(status) {
+      switch(status) {
+        case 'confirmed': return 'Confirmé';
+        case 'pending': return 'En attente';
+        case 'cancelled': return 'Annulé';
+        default: return 'Inconnu';
+      }
+    }
+
+    function resetAddForm() {
+      document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
+      document.getElementById('patientSelect').value = '';
+      document.getElementById('consultationType').value = 'Consultation standard';
+      document.getElementById('appointmentNotes').value = '';
+      document.getElementById('newPatientFields').style.display = 'none';
+      document.getElementById('newPatientName').value = '';
+      document.getElementById('newPatientAge').value = '';
+      document.getElementById('newPatientPhone').value = '';
+    }
+
+    // ✅ AJOUT DE LA GESTION DE SESSION ET DÉCONNEXION
+    const user = JSON.parse(localStorage.getItem("currentUser"));
+    if (!user || user.role !== "medecin") {
+      alert("⚠️ Accès refusé. Veuillez vous connecter.");
+      window.location.href = "index.html";
+    }
+
+    document.getElementById("usernameDisplay").textContent = user.username;
+
+    document.getElementById("logout").addEventListener("click", function(e) {
+      e.preventDefault();
+      if(confirm("Voulez-vous vraiment vous déconnecter ?")) {
+        localStorage.removeItem("currentUser");
+        window.location.href = "index.html";
+      }
+    });
+  </script>
+</body>
+</html>

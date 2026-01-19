@@ -1,0 +1,39 @@
+/* ======= STYLE ORDONNANCE ======= */
+.ordonnance-preview {
+  margin-top: 30px;
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  border: 1px solid #ddd;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center; /* tout centré */
+}
+
+.ordonnance-preview h2 {
+  margin-bottom: 20px;
+  color: #2a5298;
+  border-bottom: 2px solid #2a5298;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+.ordonnance-preview p {
+  margin: 8px 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.ordonnance-preview .patient-info {
+  margin-top: 15px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.ordonnance-preview .med-list {
+  margin-top: 20px;
+  text-align: left;
+  display: inline-block;
+}

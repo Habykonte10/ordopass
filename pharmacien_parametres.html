@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Paramètres - Pharmacien | OrdoPass</title>
+  <link rel="stylesheet" href="style1.css" />
+  <script src="https://kit.fontawesome.com/a2e0e6ad8c.js" crossorigin="anonymous"></script>
+  <style>
+    /* 🔹 Style du bouton de déconnexion */
+    #logout {
+      display: flex !important;
+      align-items: center;
+      color: white !important;
+      background: #e74c3c;
+      border-radius: 8px;
+      margin-top: 10px;
+      padding: 10px;
+      transition: 0.3s ease;
+    }
+    #logout:hover {
+      background: #c0392b;
+    }
+
+    /* Styles spécifiques aux paramètres */
+    .settings-form {
+      max-width: 600px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      color: #234a6a;
+      margin-bottom: 8px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #e6eef6;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: #2a5298;
+      box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+    }
+    .form-group input[readonly] {
+      background-color: #f8f9fa;
+      color: #6b7f8e;
+    }
+    .btn-primary {
+      background: #2a5298;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s ease;
+    }
+    .btn-primary:hover {
+      background: #1e3c72;
+    }
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s ease;
+      margin-left: 10px;
+    }
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+    .form-actions {
+      display: flex;
+      justify-content: flex-start;
+      gap: 10px;
+      margin-top: 30px;
+    }
+    .settings-section {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e6eef6;
+    }
+    .settings-section:last-child {
+      border-bottom: none;
+    }
+    .settings-section h3 {
+      color: #234a6a;
+      margin-bottom: 20px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- ✅ Barre latérale identique à la page d'ordonnances -->
+    <aside class="sidebar">
+      <div class="logo">ORDO<span>PASS</span></div>
+      <nav class="menu">
+        <a href="pharmacien_dashboard.html"><i class="fa-solid fa-prescription"></i> <span>Ordonnances</span></a>
+        <a href="pharmacien_medecins.html"><i class="fa-solid fa-user-md"></i> <span>Médecins</span></a>
+        <a href="pharmacien_stock.html">
+          <i class="fa-solid fa-boxes-stacked"></i> <span>Gestion Stock</span>
+        </a>
+        <a href="pharmacien_facturation.html">
+          <i class="fa-solid fa-file-invoice-dollar"></i> <span>Facturation</span>
+        </a>
+        <a href="pharmacien_messagerie.html">
+          <i class="fa-solid fa-comment-medical"></i> <span>Messagerie</span>
+        </a>
+        <a href="pharmacien_parametres.html" class="active">
+          <i class="fa-solid fa-gear"></i> <span>Paramètres</span>
+        </a>
+        <a href="#" id="logout">
+          <i class="fa-solid fa-right-from-bracket"></i> <span>Déconnexion</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- ✅ Contenu principal -->
+    <main class="main">
+      <div class="topbar">
+        <div class="title">Paramètres du compte</div>
+        <div class="user-box">
+          <img class="avatar" src="https://i.pravatar.cc/80?img=14" alt="avatar" />
+          <div>
+            <div id="userName">Pharmacie Centrale</div>
+            <small style="color:#6b8392">Connecté</small>
+          </div>
+        </div>
+      </div>
+
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <div>
+            <div style="font-weight:700;color:#234a6a">Gestion du profil</div>
+            <div style="color:#6b7f8e;font-size:14px">Modifiez les informations de votre pharmacie</div>
+          </div>
+        </div>
+
+        <div class="settings-form">
+          <div class="settings-section">
+            <h3>Informations de la pharmacie</h3>
+            <div class="form-group">
+              <label>Nom de la pharmacie</label>
+              <input type="text" id="pharmacyName" value="Pharmacie Centrale Liberté 6">
+            </div>
+            <div class="form-group">
+              <label>Identifiant pharmacien</label>
+              <input type="text" id="pharmacistId" value="PHARM-SEN-0123" readonly>
+            </div>
+            <div class="form-group">
+              <label>Responsable</label>
+              <input type="text" id="managerName" value="M. Abdoulaye Seck">
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>Coordonnées</h3>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="email" value="contact@pharmacie-liberte6.sn">
+            </div>
+            <div class="form-group">
+              <label>Téléphone</label>
+              <input type="text" id="phone" value="+221 77 456 78 90">
+            </div>
+            <div class="form-group">
+              <label>Adresse</label>
+              <input type="text" id="address" value="Liberté 6, Dakar">
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>Sécurité</h3>
+            <div class="form-group">
+              <label>Mot de passe actuel</label>
+              <input type="password" id="currentPassword" placeholder="Entrez votre mot de passe actuel">
+            </div>
+            <div class="form-group">
+              <label>Nouveau mot de passe</label>
+              <input type="password" id="newPassword" placeholder="Entrez le nouveau mot de passe">
+            </div>
+            <div class="form-group">
+              <label>Confirmer le nouveau mot de passe</label>
+              <input type="password" id="confirmPassword" placeholder="Confirmez le nouveau mot de passe">
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-primary" id="saveSettings">
+              <i class="fa-solid fa-save"></i> Enregistrer les modifications
+            </button>
+            <button type="button" class="btn-secondary" id="resetSettings">
+              <i class="fa-solid fa-undo"></i> Réinitialiser
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ✅ Vérifie si l'utilisateur est connecté
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) {
+      window.location.href = 'index.html';
+    }
+
+    // Éléments du formulaire
+    const pharmacyName = document.getElementById('pharmacyName');
+    const pharmacistId = document.getElementById('pharmacistId');
+    const managerName = document.getElementById('managerName');
+    const email = document.getElementById('email');
+    const phone = document.getElementById('phone');
+    const address = document.getElementById('address');
+    const currentPassword = document.getElementById('currentPassword');
+    const newPassword = document.getElementById('newPassword');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const saveSettings = document.getElementById('saveSettings');
+    const resetSettings = document.getElementById('resetSettings');
+
+    // Charger les paramètres sauvegardés
+    function loadSettings() {
+      const savedSettings = JSON.parse(localStorage.getItem('pharmacySettings'));
+      if (savedSettings) {
+        pharmacyName.value = savedSettings.pharmacyName || 'Pharmacie Centrale Liberté 6';
+        managerName.value = savedSettings.managerName || 'M. Abdoulaye Seck';
+        email.value = savedSettings.email || 'contact@pharmacie-liberte6.sn';
+        phone.value = savedSettings.phone || '+221 77 456 78 90';
+        address.value = savedSettings.address || 'Liberté 6, Dakar';
+      }
+    }
+
+    // Sauvegarder les paramètres
+    function saveSettingsToLocalStorage() {
+      const settings = {
+        pharmacyName: pharmacyName.value,
+        managerName: managerName.value,
+        email: email.value,
+        phone: phone.value,
+        address: address.value,
+        lastUpdated: new Date().toISOString()
+      };
+      localStorage.setItem('pharmacySettings', JSON.stringify(settings));
+    }
+
+    // Valider le formulaire
+    function validateForm() {
+      // Validation de base
+      if (!pharmacyName.value.trim()) {
+        alert('Le nom de la pharmacie est obligatoire');
+        return false;
+      }
+      if (!email.value.trim()) {
+        alert('L\'email est obligatoire');
+        return false;
+      }
+      if (!phone.value.trim()) {
+        alert('Le téléphone est obligatoire');
+        return false;
+      }
+
+      // Validation du mot de passe si rempli
+      if (newPassword.value || confirmPassword.value) {
+        if (!currentPassword.value) {
+          alert('Veuillez entrer votre mot de passe actuel pour modifier le mot de passe');
+          return false;
+        }
+        if (newPassword.value !== confirmPassword.value) {
+          alert('Les nouveaux mots de passe ne correspondent pas');
+          return false;
+        }
+        if (newPassword.value.length < 6) {
+          alert('Le nouveau mot de passe doit contenir au moins 6 caractères');
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    // Événements
+    saveSettings.addEventListener('click', function() {
+      if (validateForm()) {
+        saveSettingsToLocalStorage();
+        alert('Paramètres sauvegardés avec succès !');
+        
+        // Réinitialiser les champs de mot de passe
+        currentPassword.value = '';
+        newPassword.value = '';
+        confirmPassword.value = '';
+      }
+    });
+
+    resetSettings.addEventListener('click', function() {
+      if (confirm('Êtes-vous sûr de vouloir réinitialiser tous les champs ?')) {
+        pharmacyName.value = 'Pharmacie Centrale Liberté 6';
+        managerName.value = 'M. Abdoulaye Seck';
+        email.value = 'contact@pharmacie-liberte6.sn';
+        phone.value = '+221 77 456 78 90';
+        address.value = 'Liberté 6, Dakar';
+        currentPassword.value = '';
+        newPassword.value = '';
+        confirmPassword.value = '';
+      }
+    });
+
+    // Déconnexion
+    document.getElementById("logout").addEventListener("click", (e) => {
+      e.preventDefault();
+      if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+        localStorage.removeItem("user");
+        sessionStorage.removeItem("user");
+        window.location.href = "index.html";
+      }
+    });
+
+    // Charger les paramètres au démarrage
+    document.addEventListener('DOMContentLoaded', function() {
+      loadSettings();
+    });
+  </script>
+</body>
+</html>

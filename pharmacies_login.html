@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Connexion Pharmacie - OrdoPass</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .login-container {
+      max-width: 400px;
+      margin: 100px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    
+    .btn-primary {
+      width: 100%;
+      padding: 15px;
+      background: #2a5298;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    .register-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2 style="text-align: center; color: #2a5298; margin-bottom: 30px;">
+      <i class="fa-solid fa-prescription-bottle-medical"></i> Connexion Pharmacie
+    </h2>
+    
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="username">Nom d'utilisateur</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      
+      <button type="submit" class="btn-primary">
+        <i class="fa-solid fa-right-to-bracket"></i> Se connecter
+      </button>
+    </form>
+    
+    <div class="register-link">
+      <p>Pas de compte ? <a href="pharmacie_register.html">S'inscrire</a></p>
+    </div>
+    
+    <div id="messageContainer" style="margin-top: 20px;"></div>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData);
+      data.role = 'pharmacien';
+      
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          // Stocker les informations utilisateur
+          localStorage.setItem('currentUser', JSON.stringify(result.user));
+          localStorage.setItem('pharmacieInfo', JSON.stringify(result.pharmacie));
+          
+          showMessage('✅ Connexion réussie ! Redirection...', 'success');
+          setTimeout(() => {
+            window.location.href = 'pharmacien_dashboard.html';
+          }, 1000);
+        } else {
+          showMessage('❌ ' + result.error, 'error');
+        }
+      } catch (error) {
+        showMessage('❌ Erreur de connexion au serveur', 'error');
+      }
+    });
+    
+    function showMessage(message, type) {
+      const container = document.getElementById('messageContainer');
+      container.innerHTML = `
+        <div style="padding: 12px; border-radius: 6px; 
+          background: ${type === 'error' ? '#f8d7da' : '#d4edda'};
+          color: ${type === 'error' ? '#721c24' : '#155724'};
+          border: 1px solid ${type === 'error' ? '#f5c6cb' : '#c3e6cb'};">
+          ${message}
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

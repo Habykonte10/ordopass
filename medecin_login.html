@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Connexion Médecin — OrdoPass</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: #f8f9fa;
+      color: #333;
+    }
+    
+    .split-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    .side-image {
+      flex: 1;
+      background: linear-gradient(rgba(30, 60, 114, 0.85), rgba(42, 82, 152, 0.9)), 
+                  url('medecin-bg.jpg') center/cover no-repeat;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    
+    .side-content {
+      position: relative;
+      z-index: 2;
+      padding: 40px;
+      text-align: center;
+      max-width: 600px;
+    }
+    
+    .side-content h2 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .side-content p {
+      font-size: 1.2em;
+      line-height: 1.6;
+      opacity: 0.95;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    
+    .form-side {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      background: #f8f9fa;
+    }
+    
+    .form-card {
+      width: 100%;
+      max-width: 400px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+    }
+    
+    .form-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .logo {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #2a5298, #1e3c72);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .logo i {
+      color: white;
+      font-size: 1.5em;
+    }
+    
+    .form-title {
+      margin: 10px 0 0;
+      color: #1e3c72;
+      font-size: 28px;
+      font-weight: 700;
+    }
+    
+    .form-subtitle {
+      color: #6c757d;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #495057;
+      font-size: 14px;
+    }
+    
+    .input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    
+    .input:focus {
+      outline: none;
+      border-color: #2a5298;
+      box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+    }
+    
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #2a5298, #1e3c72);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(42, 82, 152, 0.3);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    
+    .account-type {
+      margin: 20px 0;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #dee2e6;
+    }
+    
+    .account-type h4 {
+      margin-bottom: 10px;
+      color: #495057;
+    }
+    
+    .radio-group {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .radio-option {
+      flex: 1;
+    }
+    
+    .radio-option input {
+      margin-right: 5px;
+    }
+    
+    .message-box {
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-weight: 500;
+      display: none;
+    }
+    
+    .message-box.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+    
+    .message-box.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+    
+    .login-link {
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #e9ecef;
+    }
+    
+    .login-link p {
+      margin: 0 0 10px 0;
+      color: #6c757d;
+      font-size: 14px;
+    }
+    
+    .login-link a {
+      color: #2a5298;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 14px;
+    }
+    
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+    
+    .contact-info {
+      margin-top: 15px;
+      padding: 12px;
+      background: #f0f8ff;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 13px;
+      color: #1e3c72;
+      border: 1px solid #d1e7ff;
+    }
+    
+    .contact-info a {
+      color: #0ea5a0;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    
+    @media (max-width: 768px) {
+      .split-layout {
+        flex-direction: column;
+      }
+      
+      .side-image {
+        min-height: 200px;
+        padding: 20px;
+      }
+      
+      .side-content h2 {
+        font-size: 1.8em;
+      }
+      
+      .side-content p {
+        font-size: 1em;
+      }
+      
+      .form-side {
+        padding: 20px;
+      }
+      
+      .form-card {
+        padding: 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="split-layout">
+    <!-- Côté gauche avec image -->
+    <div class="side-image">
+      <div class="side-content">
+        <div class="logo-container">
+          <div class="logo">
+            <i class="fas fa-stethoscope"></i>
+          </div>
+          <h1 class="form-title">OrdoPass</h1>
+        </div>
+        <h2>Bienvenue Docteur</h2>
+        <p>Accédez à vos consultations et gérez vos ordonnances depuis n'importe quelle machine.</p>
+      </div>
+    </div>
+
+    <!-- Côté droit - Formulaire -->
+    <div class="form-side">
+      <div class="form-card">
+        <div class="form-header">
+          <h2 class="form-title">Connexion Médecin</h2>
+          <p class="form-subtitle">Accédez à votre compte</p>
+        </div>
+
+        <!-- Note importante -->
+        <div class="contact-info">
+          <strong>Nouveau sur OrdoPass ?</strong><br>
+          Contactez-nous au <a href="tel:+221789299204">+221 78 929 92 04</a> pour créer un compte.
+        </div>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="username">Nom d'utilisateur</label>
+            <input id="username" class="input" type="text" placeholder="Votre nom d'utilisateur" required>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <input id="password" class="input" type="password" placeholder="Votre mot de passe" required>
+          </div>
+
+          <input id="role" type="hidden" value="medecin">
+
+          <button class="btn-primary" type="submit" id="submitBtn">
+            <i class="fas fa-sign-in-alt"></i> Se connecter
+          </button>
+
+          <div class="login-link">
+            <p>Première connexion ?</p>
+            <div class="contact-info" style="margin-top: 0;">
+              Contactez-nous au <a href="tel:+221789299204">+221 78 929 92 04</a>
+            </div>
+          </div>
+
+          <div id="messageBox" class="message-box"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const loginForm = document.getElementById('loginForm');
+      const messageBox = document.getElementById('messageBox');
+      const submitBtn = document.getElementById('submitBtn');
+      
+      loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        const role = document.getElementById('role').value;
+        
+        if (!username || !password) {
+          showMessage('❌ Veuillez remplir tous les champs', 'error');
+          return;
+        }
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connexion...';
+        
+        try {
+          const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password, role })
+          });
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erreur de connexion');
+          }
+          
+          const data = await response.json();
+          
+          // Stocker l'utilisateur connecté
+          localStorage.setItem('currentUser', JSON.stringify(data.user));
+          localStorage.setItem('ordoPass_currentUser', JSON.stringify(data.user));
+          
+          showMessage('✅ Connexion réussie ! Redirection...', 'success');
+          
+          setTimeout(() => {
+            window.location.href = 'medecin_dashboard.html';
+          }, 1000);
+          
+        } catch (error) {
+          showMessage('❌ ' + error.message, 'error');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Se connecter';
+        }
+      });
+      
+      function showMessage(text, type) {
+        messageBox.textContent = text;
+        messageBox.className = 'message-box ' + type;
+        
+        setTimeout(() => {
+          if (type === 'info' || type === 'success') {
+            messageBox.className = 'message-box';
+            messageBox.textContent = '';
+          }
+        }, 5000);
+      }
+    });
+  </script>
+</body>
+</html>

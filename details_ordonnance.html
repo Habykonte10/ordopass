@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Détails Ordonnance - OrdoPass</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body { 
+      background: #f5f7fa; 
+      color: #333; 
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .prescription-details {
+      max-width: 1100px; 
+      margin: 0 auto; 
+      background: white;
+      border-radius: 12px; 
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #2a5298, #3498db);
+      color: white; 
+      padding: 30px; 
+      text-align: center;
+      position: relative;
+    }
+    .header h1 { 
+      margin-bottom: 10px; 
+      font-size: 2em; 
+    }
+    .header .status-badge {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .status-envoye { background: #ff9800; }
+    .status-en_cours { background: #2196f3; }
+    .status-pret { background: #4caf50; }
+    .status-delivree { background: #9c27b0; }
+    .content { padding: 30px; }
+    .section {
+      margin-bottom: 30px; 
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eee;
+    }
+    .section:last-child {
+      border-bottom: none;
+    }
+    .section h3 {
+      color: #2a5298; 
+      margin-bottom: 15px; 
+      font-size: 1.3em;
+      display: flex; 
+      align-items: center; 
+      gap: 10px;
+    }
+    .info-grid {
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+      gap: 15px;
+    }
+    .info-item { 
+      padding: 10px 0;
+    }
+    .info-item strong { 
+      color: #555; 
+      margin-bottom: 5px; 
+      display: block; 
+      font-size: 0.9em;
+    }
+    .info-item span {
+      font-size: 1.1em;
+      color: #333;
+      font-weight: 500;
+    }
+    .medicament-item {
+      background: #f8f9fa; 
+      padding: 20px; 
+      border-radius: 8px;
+      margin-bottom: 15px; 
+      border-left: 4px solid #3498db;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .medicament-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .medicament-header h4 {
+      color: #2a5298;
+      font-size: 1.2em;
+      margin: 0;
+    }
+    .medicament-number {
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .medicament-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    .medicament-remarque {
+      margin-top: 10px;
+      padding: 10px;
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    .instructions {
+      background: #e8f4fd; 
+      padding: 20px; 
+      border-radius: 8px;
+      font-size: 1em;
+      line-height: 1.6;
+    }
+    
+    /* Style pour la section facture */
+    .facture-section {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 10px;
+      padding: 25px;
+      margin-top: 20px;
+      border: 2px solid #dee2e6;
+    }
+    
+    .facture-header {
+      background: #2a5298;
+      color: white;
+      padding: 20px;
+      border-radius: 8px 8px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .facture-content {
+      background: white;
+      padding: 25px;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .facture-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+    
+    .facture-info {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 6px;
+      border-left: 4px solid #28a745;
+    }
+    
+    .table-container {
+      overflow-x: auto;
+      margin: 25px 0;
+    }
+    
+    .facture-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .facture-table th {
+      background: #2a5298;
+      color: white;
+      padding: 12px 15px;
+      text-align: left;
+      font-weight: 600;
+    }
+    
+    .facture-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .facture-table tr:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .total-row {
+      background: #f8f9fa !important;
+      font-weight: bold;
+      font-size: 1.1em;
+    }
+    
+    .total-row td {
+      padding: 15px;
+      border-top: 2px solid #2a5298;
+    }
+    
+    .facture-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+    
+    .linked-info {
+      background: #d4edda;
+      color: #155724;
+      padding: 15px;
+      border-radius: 6px;
+      border-left: 4px solid #28a745;
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .code-badge {
+      background: #2a5298;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-family: monospace;
+      font-weight: bold;
+      font-size: 1.1em;
+      letter-spacing: 1px;
+    }
+    
+    .actions {
+      display: flex; 
+      gap: 10px; 
+      justify-content: center; 
+      margin-top: 30px;
+      padding: 20px;
+      border-top: 1px solid #eee;
+      flex-wrap: wrap;
+    }
+    
+    .btn { 
+      padding: 12px 25px; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      border: none;
+      font-weight: 600;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .btn-primary { 
+      background: #2a5298; 
+      color: white; 
+    }
+    
+    .btn-primary:hover {
+      background: #1a4288;
+    }
+    
+    .btn-warning { 
+      background: #ff9800; 
+      color: white; 
+    }
+    
+    .btn-warning:hover {
+      background: #e68900;
+    }
+    
+    .btn-success { 
+      background: #28a745; 
+      color: white; 
+    }
+    
+    .btn-success:hover {
+      background: #218838;
+    }
+    
+    .btn-danger { 
+      background: #dc3545; 
+      color: white; 
+    }
+    
+    .btn-danger:hover {
+      background: #c82333;
+    }
+    
+    .btn-info { 
+      background: #17a2b8; 
+      color: white; 
+    }
+    
+    .btn-info:hover {
+      background: #138496;
+    }
+    
+    .btn-outline { 
+      background: white;
+      border: 2px solid #2a5298; 
+      color: #2a5298; 
+    }
+    
+    .btn-outline:hover {
+      background: #2a5298;
+      color: white;
+    }
+    
+    .empty-state {
+      text-align: center; 
+      padding: 40px 20px; 
+      color: #666;
+      background: #f9f9f9;
+      border-radius: 8px;
+    }
+    
+    .empty-state i {
+      font-size: 48px;
+      color: #ccc;
+      margin-bottom: 15px;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 50px;
+      color: #666;
+    }
+    
+    .error-message {
+      text-align: center;
+      padding: 40px;
+      background: #f8d7da;
+      border-radius: 8px;
+      color: #721c24;
+      border-left: 4px solid #f5c6cb;
+    }
+    
+    .footer {
+      background: #f8f9fa;
+      padding: 20px;
+      border-top: 1px solid #eee;
+    }
+    
+    @media print {
+      .actions, .facture-actions, .btn {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <!-- L'application sera chargée dynamiquement -->
+    <div class="loading" id="loadingState">
+      <i class="fas fa-spinner fa-spin fa-3x"></i>
+      <p style="margin-top: 20px; font-size: 1.1em;">Chargement des détails de l'ordonnance...</p>
+    </div>
+  </div>
+
+<script>
+let currentPrescription = null;
+let currentFacture = null;
+
+// Fonction principale de chargement
+async function loadPrescription() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+  
+  console.log("🔍 ID récupéré depuis l'URL:", id);
+  
+  if (!id) {
+    showError("❌ Aucun ID d'ordonnance spécifié dans l'URL.<br><br>Veuillez retourner à la liste des ordonnances et cliquer sur 'Détails'.");
+    return;
+  }
+
+  // Récupérer l'utilisateur connecté
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser) {
+    showError("🔒 Vous devez être connecté pour voir les détails de l'ordonnance.<br><br>Veuillez vous reconnecter.");
+    return;
+  }
+
+  console.log(`👤 Utilisateur connecté: ${currentUser.nom} (${currentUser.role})`);
+  console.log(`🔍 Recherche de l'ordonnance ID: ${id}`);
+
+  // 1. D'abord, utiliser la route de débogage
+  try {
+    console.log("🔍 Tentative 1: Route de débogage...");
+    const debugResponse = await fetch(`/api/debug/ordonnance/${id}`);
+    if (debugResponse.ok) {
+      const debugData = await debugResponse.json();
+      console.log("🔍 Réponse débogage:", debugData);
+      
+      if (debugData.found) {
+        console.log("✅ Ordonnance trouvée via débogage");
+        currentPrescription = debugData.ordonnance;
+        await loadFacture(id);
+        displayPrescription(currentPrescription);
+        return;
+      }
+    }
+  } catch (debugError) {
+    console.log("⚠️ Route débogage non disponible:", debugError);
+  }
+
+  // 2. Ensuite, essayer la route pharmacien
+  try {
+    console.log("🔍 Tentative 2: Route pharmacien...");
+    const response = await fetch(`/api/pharmacien/ordonnances/${id}`);
+    
+    console.log("📊 Statut réponse:", response.status);
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log("✅ Données reçues (route pharmacien):", data);
+      currentPrescription = data;
+      await loadFacture(id);
+      displayPrescription(currentPrescription);
+      return;
+    } else {
+      console.log("❌ Route pharmacien a échoué:", response.status);
+    }
+  } catch (apiError) {
+    console.error("❌ Erreur route pharmacien:", apiError);
+  }
+
+  // 3. Essayer la route générale
+  try {
+    console.log("🔍 Tentative 3: Route générale...");
+    const response = await fetch(`/api/ordonnances/${id}`);
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log("✅ Données reçues (route générale):", data);
+      currentPrescription = data;
+      await loadFacture(id);
+      displayPrescription(currentPrescription);
+      return;
+    } else {
+      console.log("❌ Route générale a échoué:", response.status);
+    }
+  } catch (apiError2) {
+    console.error("❌ Erreur route générale:", apiError2);
+  }
+
+  // 4. Fallback: localStorage
+  console.log("🔍 Tentative 4: localStorage...");
+  const list = JSON.parse(localStorage.getItem("ordonnances")) || [];
+  console.log("📁 Nombre d'ordonnances dans localStorage:", list.length);
+  
+  // Chercher par ID, _id ou code
+  currentPrescription = list.find(o => {
+    const found = o.id == id || o._id == id || o.code === id;
+    if (found) console.log("✅ Trouvé dans localStorage:", o);
+    return found;
+  });
+  
+  if (currentPrescription) {
+    console.log("✅ Ordonnance trouvée dans localStorage");
+    await loadFacture(id);
+    displayPrescription(currentPrescription);
+  } else {
+    showError(`
+      <h3>Ordonnance non trouvée</h3>
+      <p>L'ordonnance avec l'ID <strong>${escapeHtml(id)}</strong> n'a pas pu être trouvée.</p>
+      
+      <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 30px; text-align: left; font-family: monospace; font-size: 14px; border-left: 5px solid #ff9800;">
+        <h4>Informations de débogage :</h4>
+        <p><strong>ID recherché :</strong> ${escapeHtml(id)}</p>
+        <p><strong>Utilisateur :</strong> ${escapeHtml(currentUser.nom)}</p>
+        <p><strong>Rôle :</strong> ${escapeHtml(currentUser.role)}</p>
+        <p><strong>URL complète :</strong> ${escapeHtml(window.location.href)}</p>
+      </div>
+      
+      <div style="margin-top: 30px;">
+        <p><strong>Solutions possibles :</strong></p>
+        <ul style="text-align: left; max-width: 600px; margin: 20px auto;">
+          <li>Vérifiez que l'ordonnance existe bien dans la base de données</li>
+          <li>Assurez-vous que l'ordonnance est destinée à votre pharmacie</li>
+          <li>Rafraîchissez la page des ordonnances reçues</li>
+          <li>Contactez l'administrateur si le problème persiste</li>
+        </ul>
+      </div>
+    `);
+  }
+}
+
+// Charger la facture associée à l'ordonnance
+async function loadFacture(ordonnanceId) {
+  try {
+    // Essayer d'abord l'API
+    const response = await fetch(`/api/factures/ordonnance/${ordonnanceId}`);
+    if (response.ok) {
+      currentFacture = await response.json();
+      console.log("✅ Facture chargée depuis API:", currentFacture);
+      return;
+    }
+  } catch (error) {
+    console.log("⚠️ Erreur chargement facture API:", error);
+  }
+
+  // Fallback: localStorage
+  const factures = JSON.parse(localStorage.getItem("factures")) || [];
+  currentFacture = factures.find(f => 
+    f.idOrdonnance === ordonnanceId || 
+    f.ordonnanceId === ordonnanceId || 
+    f.codeOrdonnance === (currentPrescription?.code || ordonnanceId)
+  );
+  
+  if (currentFacture) {
+    console.log("✅ Facture trouvée dans localStorage:", currentFacture);
+  } else {
+    console.log("ℹ️ Aucune facture existante pour cette ordonnance");
+  }
+}
+
+// Afficher l'ordonnance avec la facture
+function displayPrescription(p) {
+  if (!p) return;
+
+  // Déterminer la classe CSS pour le statut
+  const statusClass = `status-${p.statut || 'envoye'}`;
+  const statusText = getStatusText(p.statut);
+  
+  // Construire le HTML de l'ordonnance
+  const html = `
+    <div class="prescription-details">
+      <div class="header">
+        <h1><i class="fas fa-prescription"></i> ORDONNANCE MÉDICALE</h1>
+        <p style="font-size: 1.2em; margin-top: 10px;">N° ${p.code || p.id || "—"}</p>
+        <div class="status-badge ${statusClass}">${statusText}</div>
+      </div>
+
+      <div class="content">
+        <!-- Informations pharmacie -->
+        <div class="section">
+          <h3><i class="fas fa-house-medical"></i> Informations Pharmacie</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <strong>Pharmacie :</strong>
+              <span>${escapeHtml(p.pharmacieNom || "Non spécifié")}</span>
+            </div>
+            <div class="info-item">
+              <strong>Date de réception :</strong>
+              <span>${formatDate(p.dateEnvoi || p.createdAt)}</span>
+            </div>
+            <div class="info-item">
+              <strong>Statut :</strong>
+              <span style="color: ${getStatusColor(p.statut)}; font-weight: bold;">${statusText}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Informations patient -->
+        <div class="section">
+          <h3><i class="fas fa-user"></i> Informations Patient</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <strong>Nom :</strong>
+              <span>${escapeHtml(p.patientNom || "Non spécifié")}</span>
+            </div>
+            <div class="info-item">
+              <strong>Âge :</strong>
+              <span>${escapeHtml(p.patientAge || "Non spécifié")}</span>
+            </div>
+            <div class="info-item">
+              <strong>Poids :</strong>
+              <span>${escapeHtml(p.patientPoids || "Non spécifié")}</span>
+            </div>
+            <div class="info-item">
+              <strong>Genre :</strong>
+              <span>${p.patientGenre === 'F' ? 'Femme' : (p.patientGenre === 'M' ? 'Homme' : escapeHtml(p.patientGenre) || "Non spécifié")}</span>
+            </div>
+            <div class="info-item">
+              <strong>Téléphone :</strong>
+              <span>${escapeHtml(p.patientTelephone || "Non spécifié")}</span>
+            </div>
+            <div class="info-item">
+              <strong>Adresse :</strong>
+              <span>${escapeHtml(p.patientAdresse || "Non spécifié")}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Médicaments -->
+        <div class="section">
+          <h3><i class="fas fa-pills"></i> Médicaments Prescrits</h3>
+          <div id="medicamentsContainer">
+            ${displayMedicamentsHTML(p.medicaments || p.medicamentsList || [])}
+          </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="section">
+          <h3><i class="fas fa-info-circle"></i> Instructions et Recommandations</h3>
+          <div class="instructions">
+            ${escapeHtml(p.instructions || p.recommandations || p.pointsImportants || "Aucune instruction particulière")}
+          </div>
+        </div>
+
+        <!-- Informations médecin -->
+        <div class="section">
+          <h3><i class="fas fa-stethoscope"></i> Informations Médecin</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <strong>Nom médecin :</strong>
+              <span>${escapeHtml(p.medecinNom || "Non spécifié")}</span>
+            </div>
+            <div class="info-item">
+              <strong>Spécialité :</strong>
+              <span>${escapeHtml(p.medecinSpecialite || "Non spécifié")}</span>
+            </div>
+            <div class="info-item">
+              <strong>Date de prescription :</strong>
+              <span>${formatDate(p.dateOrd)}</span>
+            </div>
+            <div class="info-item">
+              <strong>Code ordonnance :</strong>
+              <span style="font-family: monospace; background: #f0f0f0; padding: 2px 6px; border-radius: 4px;">
+                ${escapeHtml(p.code || "—")}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Facture -->
+        <div class="facture-section">
+          <div class="facture-header">
+            <h3 style="margin: 0; color: white;"><i class="fas fa-file-invoice-dollar"></i> FACTURE PHARMACEUTIQUE</h3>
+            <span class="code-badge">ORD-${p.code || p.id || "—"}</span>
+          </div>
+          
+          <div class="facture-content">
+            ${displayFactureHTML(currentFacture, p)}
+            
+            <!-- Information de liaison facture-ordonnance -->
+            ${currentFacture ? `
+              <div class="linked-info">
+                <i class="fas fa-link fa-lg"></i>
+                <div>
+                  <strong>Facture liée à l'ordonnance :</strong><br>
+                  <span>La facture N° ${escapeHtml(currentFacture.numeroFacture || currentFacture.id)} est officiellement liée à l'ordonnance N° ${escapeHtml(p.code || p.id || "—")}</span>
+                </div>
+              </div>
+            ` : ''}
+            
+            <div class="facture-actions">
+              ${currentFacture ? `
+                <button class="btn btn-success" onclick="printFacture()">
+                  <i class="fas fa-print"></i> Imprimer la facture
+                </button>
+                <button class="btn btn-info" onclick="downloadFacture()">
+                  <i class="fas fa-download"></i> Télécharger PDF
+                </button>
+                <button class="btn btn-warning" onclick="editFacture()">
+                  <i class="fas fa-edit"></i> Modifier la facture
+                </button>
+              ` : `
+                <button class="btn btn-success" onclick="createFacture()">
+                  <i class="fas fa-plus-circle"></i> Créer une facture
+                </button>
+                <button class="btn btn-outline" onclick="generateAutoFacture()">
+                  <i class="fas fa-magic"></i> Générer automatiquement
+                </button>
+              `}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="actions">
+          <button class="btn btn-outline" onclick="history.back()">
+            <i class="fas fa-arrow-left"></i> Retour à la liste
+          </button>
+          ${getActionButtonsHTML(p.statut, p._id || p.id)}
+          ${currentFacture ? `
+            <button class="btn btn-info" onclick="viewFullFacture()">
+              <i class="fas fa-file-invoice"></i> Voir facture complète
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Remplacer le contenu de la page
+  document.getElementById('app').innerHTML = html;
+  
+  // Masquer l'état de chargement
+  document.getElementById('loadingState').style.display = 'none';
+}
+
+// Générer le HTML pour la facture
+function displayFactureHTML(facture, ordonnance) {
+  if (!facture) {
+    return `
+      <div class="empty-state">
+        <i class="fas fa-file-invoice fa-3x"></i>
+        <h4>Aucune facture générée</h4>
+        <p style="margin-top: 10px; color: #666;">
+          Aucune facture n'a été créée pour cette ordonnance.<br>
+          Cliquez sur "Créer une facture" pour démarrer la facturation.
+        </p>
+      </div>
+    `;
+  }
+
+  // Calculer les totaux
+  const medicaments = facture.medicaments || facture.items || [];
+  const sousTotal = medicaments.reduce((sum, item) => sum + (item.prix * item.quantite), 0);
+  const tva = facture.tva || sousTotal * 0.18; // 18% TVA pour la Côte d'Ivoire
+  const total = facture.total || (sousTotal + tva);
+
+  return `
+    <div class="facture-grid">
+      <div class="facture-info">
+        <strong><i class="fas fa-hashtag"></i> Numéro de facture :</strong><br>
+        <span style="font-size: 1.2em; font-weight: bold;">${escapeHtml(facture.numeroFacture || facture.id || "FACT-" + new Date().getTime())}</span>
+      </div>
+      <div class="facture-info">
+        <strong><i class="fas fa-calendar"></i> Date de facturation :</strong><br>
+        <span>${formatDate(facture.dateFacturation || new Date())}</span>
+      </div>
+      <div class="facture-info">
+        <strong><i class="fas fa-user-md"></i> Pharmacien :</strong><br>
+        <span>${escapeHtml(facture.pharmacienNom || "Pharmacien responsable")}</span>
+      </div>
+      <div class="facture-info">
+        <strong><i class="fas fa-file-medical"></i> Ordonnance liée :</strong><br>
+        <span style="font-family: monospace;">${escapeHtml(ordonnance.code || ordonnance.id || "—")}</span>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="facture-table">
+        <thead>
+          <tr>
+            <th>Médicament</th>
+            <th>Dosage</th>
+            <th>Quantité</th>
+            <th>Prix unitaire</th>
+            <th>Sous-total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${medicaments.map((item, index) => `
+            <tr>
+              <td>${escapeHtml(item.nom || item.medicament || "Médicament")}</td>
+              <td>${escapeHtml(item.dosage || "—")}</td>
+              <td>${escapeHtml(item.quantite || 1)}</td>
+              <td>${formatPrix(item.prix || 0)}</td>
+              <td>${formatPrix((item.prix || 0) * (item.quantite || 1))}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td colspan="3"></td>
+            <td><strong>Sous-total :</strong></td>
+            <td><strong>${formatPrix(sousTotal)}</strong></td>
+          </tr>
+          <tr class="total-row">
+            <td colspan="3"></td>
+            <td><strong>TVA (18%) :</strong></td>
+            <td><strong>${formatPrix(tva)}</strong></td>
+          </tr>
+          <tr class="total-row">
+            <td colspan="3"></td>
+            <td><strong>TOTAL :</strong></td>
+            <td><strong style="font-size: 1.2em; color: #2a5298;">${formatPrix(total)}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div style="margin-top: 25px; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+      <strong>Méthode de paiement :</strong> ${escapeHtml(facture.methodePaiement || "Non spécifiée")}<br>
+      <strong>Date limite de paiement :</strong> ${formatDate(facture.dateLimitePaiement || "")}<br>
+      <strong>Remarques :</strong> ${escapeHtml(facture.remarques || "Aucune remarque")}
+    </div>
+  `;
+}
+
+// Générer le HTML pour les médicaments
+function displayMedicamentsHTML(medicaments) {
+  if (!medicaments || medicaments.length === 0) {
+    return `
+      <div class="empty-state">
+        <i class="fas fa-prescription-bottle"></i>
+        <p style="margin-top: 10px;">Aucun médicament prescrit</p>
+      </div>
+    `;
+  }
+
+  let html = '';
+  medicaments.forEach((med, index) => {
+    html += `
+      <div class="medicament-item">
+        <div class="medicament-header">
+          <h4>${escapeHtml(med.medicament || med.nom || "Médicament sans nom")}</h4>
+          <span class="medicament-number">Médicament #${index + 1}</span>
+        </div>
+        <div class="medicament-details">
+          <div><strong>Dosage :</strong> ${escapeHtml(med.dosage || "Non spécifié")}</div>
+          <div><strong>Posologie :</strong> ${escapeHtml(med.posologie || "Non spécifié")}</div>
+          <div><strong>Durée :</strong> ${escapeHtml(med.duree || "Non spécifié")}</div>
+          <div><strong>Quantité :</strong> ${escapeHtml(med.quantite || "Non spécifié")}</div>
+        </div>
+        ${med.remarques ? `
+          <div class="medicament-remarque">
+            <strong>Remarques :</strong> ${escapeHtml(med.remarques)}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  });
+  
+  return html;
+}
+
+// Générer les boutons d'action en fonction du statut
+function getActionButtonsHTML(statut, ordonnanceId) {
+  if (!ordonnanceId) return '';
+  
+  switch(statut) {
+    case 'envoyee':
+      return `
+        <button class="btn btn-success" onclick="updateOrdonnanceStatus('en_cours')">
+          <i class="fas fa-play"></i> Commencer le traitement
+        </button>
+      `;
+    case 'en_cours':
+      return `
+        <button class="btn btn-success" onclick="updateOrdonnanceStatus('pret')">
+          <i class="fas fa-check"></i> Marquer comme prête
+        </button>
+      `;
+    case 'pret':
+      return `
+        <button class="btn btn-success" onclick="updateOrdonnanceStatus('delivree')">
+          <i class="fas fa-check-double"></i> Confirmer la délivrance
+        </button>
+      `;
+    default:
+      return '';
+  }
+}
+
+// Créer une nouvelle facture
+async function createFacture() {
+  if (!currentPrescription) {
+    alert("❌ Impossible de créer une facture sans ordonnance");
+    return;
+  }
+
+  // Demander confirmation
+  if (!confirm(`Créer une facture pour l'ordonnance N° ${currentPrescription.code || currentPrescription.id} ?`)) {
+    return;
+  }
+
+  // Générer un numéro de facture unique
+  const numeroFacture = 'FACT-' + new Date().getFullYear() + '-' + 
+    String(new Date().getMonth() + 1).padStart(2, '0') + '-' + 
+    String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+
+  // Créer la facture à partir des médicaments de l'ordonnance
+  const medicamentsFacture = (currentPrescription.medicaments || currentPrescription.medicamentsList || []).map(med => {
+    // Générer un prix aléatoire entre 500 et 50000 FCF pour l'exemple
+    const prix = parseFloat((Math.random() * 49500 + 500).toFixed(0));
+    return {
+      nom: med.medicament || med.nom,
+      dosage: med.dosage,
+      quantite: parseInt(med.quantite) || 1,
+      prix: prix
+    };
+  });
+
+  const sousTotal = medicamentsFacture.reduce((sum, item) => sum + (item.prix * item.quantite), 0);
+  const tva = sousTotal * 0.18; // 18% TVA pour la Côte d'Ivoire
+  const total = sousTotal + tva;
+
+  const nouvelleFacture = {
+    id: 'facture_' + new Date().getTime(),
+    numeroFacture: numeroFacture,
+    idOrdonnance: currentPrescription._id || currentPrescription.id,
+    codeOrdonnance: currentPrescription.code,
+    dateFacturation: new Date().toISOString(),
+    dateLimitePaiement: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 jours
+    pharmacienNom: JSON.parse(localStorage.getItem('currentUser'))?.nom || "Pharmacien",
+    medicaments: medicamentsFacture,
+    sousTotal: sousTotal,
+    tva: tva,
+    total: total,
+    methodePaiement: "À définir",
+    statut: "en_attente",
+    remarques: "Facture générée automatiquement"
+  };
+
+  try {
+    // Essayer d'abord l'API
+    const response = await fetch('/api/factures', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(nouvelleFacture)
+    });
+
+    if (response.ok) {
+      currentFacture = await response.json();
+      alert(`✅ Facture créée avec succès !\nNuméro: ${numeroFacture}\nTotal: ${formatPrix(total)}`);
+    } else {
+      // Fallback: localStorage
+      const factures = JSON.parse(localStorage.getItem("factures")) || [];
+      factures.push(nouvelleFacture);
+      localStorage.setItem("factures", JSON.stringify(factures));
+      currentFacture = nouvelleFacture;
+      alert(`✅ Facture créée avec succès (local) !\nNuméro: ${numeroFacture}\nTotal: ${formatPrix(total)}`);
+    }
+
+    // Recharger l'affichage
+    displayPrescription(currentPrescription);
+    
+  } catch (error) {
+    console.error("❌ Erreur création facture:", error);
+    alert("❌ Erreur lors de la création de la facture");
+  }
+}
+
+// Générer une facture automatiquement
+function generateAutoFacture() {
+  if (!currentPrescription) return;
+  
+  // Récupérer les informations de l'utilisateur
+  const user = JSON.parse(localStorage.getItem('currentUser'));
+  
+  const numeroFacture = 'AUTO-' + new Date().getFullYear() + '-' + 
+    String(new Date().getMonth() + 1).padStart(2, '0') + '-' + 
+    String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+  
+  const prixMoyens = {
+    'Paracétamol': 2500,
+    'Ibuprofène': 3200,
+    'Amoxicilline': 8750,
+    'Vitamine C': 12300,
+    'Aspirine': 4150,
+    'Doliprane': 2800,
+    'Augmentin': 12500,
+    'Nivaquine': 7500,
+    'Flagyl': 6500,
+    'Brufen': 4500
+  };
+  
+  const medicamentsFacture = (currentPrescription.medicaments || currentPrescription.medicamentsList || []).map(med => {
+    const nomMed = med.medicament || med.nom || "";
+    let prix = 10000; // Prix par défaut 10.000 FCF
+    
+    // Chercher un prix connu
+    for (const [key, value] of Object.entries(prixMoyens)) {
+      if (nomMed.toLowerCase().includes(key.toLowerCase())) {
+        prix = value;
+        break;
+      }
+    }
+    
+    return {
+      nom: nomMed,
+      dosage: med.dosage,
+      quantite: parseInt(med.quantite) || 1,
+      prix: prix
+    };
+  });
+
+  const sousTotal = medicamentsFacture.reduce((sum, item) => sum + (item.prix * item.quantite), 0);
+  const tva = sousTotal * 0.18; // 18% TVA
+  const total = sousTotal + tva;
+
+  currentFacture = {
+    id: 'facture_auto_' + new Date().getTime(),
+    numeroFacture: numeroFacture,
+    idOrdonnance: currentPrescription._id || currentPrescription.id,
+    codeOrdonnance: currentPrescription.code,
+    dateFacturation: new Date().toISOString(),
+    dateLimitePaiement: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    pharmacienNom: user?.nom || "Pharmacien Auto",
+    medicaments: medicamentsFacture,
+    sousTotal: sousTotal,
+    tva: tva,
+    total: total,
+    methodePaiement: "Carte bancaire",
+    statut: "payee",
+    remarques: "Facture générée automatiquement avec prix moyens du marché"
+  };
+
+  // Sauvegarder dans localStorage
+  const factures = JSON.parse(localStorage.getItem("factures")) || [];
+  factures.push(currentFacture);
+  localStorage.setItem("factures", JSON.stringify(factures));
+
+  alert(`✅ Facture auto-générée !\nNuméro: ${numeroFacture}\nTotal: ${formatPrix(total)}`);
+  displayPrescription(currentPrescription);
+}
+
+// Imprimer la facture
+function printFacture() {
+  if (!currentFacture) return;
+  
+  // Créer une nouvelle fenêtre pour l'impression
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+      <meta charset="UTF-8">
+      <title>Facture ${currentFacture.numeroFacture}</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+        .header { text-align: center; margin-bottom: 40px; border-bottom: 3px solid #2a5298; padding-bottom: 20px; }
+        .header h1 { color: #2a5298; margin-bottom: 10px; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 30px 0; }
+        .info-box { background: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 4px solid #2a5298; }
+        table { width: 100%; border-collapse: collapse; margin: 30px 0; }
+        th { background: #2a5298; color: white; padding: 12px; text-align: left; }
+        td { padding: 10px 12px; border-bottom: 1px solid #ddd; }
+        .total-row { font-weight: bold; background: #f8f9fa; }
+        .footer { margin-top: 50px; padding-top: 20px; border-top: 2px solid #ddd; text-align: center; color: #666; }
+        .signature { margin-top: 80px; display: flex; justify-content: space-between; }
+        .stamp { border: 2px solid red; padding: 10px 20px; transform: rotate(-15deg); color: red; font-weight: bold; }
+        @media print { body { margin: 20px; } }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>FACTURE PHARMACEUTIQUE</h1>
+        <h2>${currentFacture.numeroFacture}</h2>
+        <p>Date: ${formatDate(currentFacture.dateFacturation)}</p>
+      </div>
+      
+      <div class="info-grid">
+        <div class="info-box">
+          <h3>PHARMACIE</h3>
+          <p><strong>Nom:</strong> ${currentPrescription.pharmacieNom || "Pharmacie Principale"}</p>
+          <p><strong>Pharmacien:</strong> ${currentFacture.pharmacienNom}</p>
+        </div>
+        <div class="info-box">
+          <h3>PATIENT</h3>
+          <p><strong>Nom:</strong> ${currentPrescription.patientNom}</p>
+          <p><strong>Téléphone:</strong> ${currentPrescription.patientTelephone}</p>
+          <p><strong>Ordonnance:</strong> ${currentPrescription.code || currentPrescription.id}</p>
+        </div>
+      </div>
+      
+      <h3>DÉTAIL DES MÉDICAMENTS</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Médicament</th>
+            <th>Dosage</th>
+            <th>Quantité</th>
+            <th>Prix unitaire</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(currentFacture.medicaments || []).map(item => `
+            <tr>
+              <td>${escapeHtml(item.nom)}</td>
+              <td>${escapeHtml(item.dosage || '—')}</td>
+              <td>${item.quantite}</td>
+              <td>${formatPrix(item.prix)}</td>
+              <td>${formatPrix(item.prix * item.quantite)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td colspan="4" style="text-align: right;">Sous-total:</td>
+            <td>${formatPrix(currentFacture.sousTotal)}</td>
+          </tr>
+          <tr class="total-row">
+            <td colspan="4" style="text-align: right;">TVA (18%):</td>
+            <td>${formatPrix(currentFacture.tva)}</td>
+          </tr>
+          <tr class="total-row">
+            <td colspan="4" style="text-align: right;"><strong>TOTAL:</strong></td>
+            <td><strong>${formatPrix(currentFacture.total)}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+      
+      <div class="signature">
+        <div>
+          <p>Signature du pharmacien:</p>
+          <p>_________________________</p>
+        </div>
+        <div class="stamp">
+          PAYÉ<br>
+          ${formatDate(currentFacture.dateFacturation)}
+        </div>
+      </div>
+      
+      <div class="footer">
+        <p>Merci de votre confiance !</p>
+        <p><small>Facture liée à l'ordonnance N° ${currentPrescription.code || currentPrescription.id}</small></p>
+      </div>
+    </body>
+    </html>
+  `);
+  
+  printWindow.document.close();
+  printWindow.focus();
+  
+  // Attendre que le contenu soit chargé avant d'imprimer
+  setTimeout(() => {
+    printWindow.print();
+  }, 500);
+}
+
+// Télécharger la facture en PDF (simulé)
+function downloadFacture() {
+  if (!currentFacture) return;
+  
+  alert("📄 Fonction de téléchargement PDF en cours de développement...\nPour l'instant, utilisez l'impression pour sauvegarder la facture.");
+  printFacture();
+}
+
+// Modifier la facture
+function editFacture() {
+  if (!currentFacture) return;
+  
+  const nouveauTotal = prompt("Modifier le montant total de la facture (en FCF):", currentFacture.total);
+  if (nouveauTotal !== null) {
+    const montant = parseFloat(nouveauTotal);
+    if (!isNaN(montant) && montant > 0) {
+      currentFacture.total = montant;
+      currentFacture.tva = montant * 0.18;
+      currentFacture.sousTotal = montant - currentFacture.tva;
+      
+      // Mettre à jour dans localStorage
+      const factures = JSON.parse(localStorage.getItem("factures")) || [];
+      const index = factures.findIndex(f => f.id === currentFacture.id);
+      if (index !== -1) {
+        factures[index] = currentFacture;
+        localStorage.setItem("factures", JSON.stringify(factures));
+      }
+      
+      displayPrescription(currentPrescription);
+      alert("✅ Facture mise à jour !");
+    } else {
+      alert("❌ Montant invalide !");
+    }
+  }
+}
+
+// Voir la facture complète
+function viewFullFacture() {
+  if (!currentFacture) return;
+  
+  // Ouvrir dans un nouvel onglet
+  const factureWindow = window.open('', '_blank');
+  factureWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+      <meta charset="UTF-8">
+      <title>Facture ${currentFacture.numeroFacture}</title>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+      <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 40px; background: #f5f7fa; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .header { text-align: center; padding-bottom: 30px; border-bottom: 3px solid #2a5298; margin-bottom: 40px; }
+        .header h1 { color: #2a5298; margin: 0; }
+        .badge { background: #2a5298; color: white; padding: 5px 15px; border-radius: 20px; display: inline-block; margin-top: 10px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 40px 0; }
+        .box { background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #28a745; }
+        .linked { background: #d4edda; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745; }
+        table { width: 100%; border-collapse: collapse; margin: 30px 0; }
+        th { background: #2a5298; color: white; padding: 15px; text-align: left; }
+        td { padding: 12px 15px; border-bottom: 1px solid #eee; }
+        .total { font-weight: bold; background: #f8f9fa; }
+        .actions { margin-top: 40px; text-align: center; }
+        .btn { padding: 12px 25px; background: #2a5298; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin: 0 10px; }
+        .btn:hover { background: #1a4288; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1><i class="fas fa-file-invoice-dollar"></i> FACTURE COMPLÈTE</h1>
+          <div class="badge">${currentFacture.numeroFacture}</div>
+          <p>Date d'émission: ${formatDate(currentFacture.dateFacturation)}</p>
+        </div>
+        
+        <div class="linked">
+          <i class="fas fa-link"></i> <strong>LIÉE À L'ORDONNANCE :</strong> ${currentPrescription.code || currentPrescription.id}
+        </div>
+        
+        <div class="grid">
+          <div class="box">
+            <h3><i class="fas fa-user"></i> INFORMATIONS PATIENT</h3>
+            <p><strong>Nom:</strong> ${currentPrescription.patientNom}</p>
+            <p><strong>Téléphone:</strong> ${currentPrescription.patientTelephone}</p>
+            <p><strong>Adresse:</strong> ${currentPrescription.patientAdresse || "Non spécifié"}</p>
+          </div>
+          <div class="box">
+            <h3><i class="fas fa-user-md"></i> INFORMATIONS MÉDECIN</h3>
+            <p><strong>Nom:</strong> ${currentPrescription.medecinNom}</p>
+            <p><strong>Spécialité:</strong> ${currentPrescription.medecinSpecialite || "Non spécifié"}</p>
+            <p><strong>Date prescription:</strong> ${formatDate(currentPrescription.dateOrd)}</p>
+          </div>
+        </div>
+        
+        <h3><i class="fas fa-pills"></i> DÉTAIL DE LA FACTURE</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Médicament</th>
+              <th>Dosage</th>
+              <th>Quantité</th>
+              <th>Prix unitaire</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(currentFacture.medicaments || []).map(item => `
+              <tr>
+                <td>${escapeHtml(item.nom)}</td>
+                <td>${escapeHtml(item.dosage || '—')}</td>
+                <td>${item.quantite}</td>
+                <td>${formatPrix(item.prix)}</td>
+                <td>${formatPrix(item.prix * item.quantite)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+          <tfoot>
+            <tr class="total">
+              <td colspan="4" style="text-align: right;">Sous-total:</td>
+              <td>${formatPrix(currentFacture.sousTotal)}</td>
+            </tr>
+            <tr class="total">
+              <td colspan="4" style="text-align: right;">TVA (18%):</td>
+              <td>${formatPrix(currentFacture.tva)}</td>
+            </tr>
+            <tr class="total">
+              <td colspan="4" style="text-align: right;"><strong>MONTANT TOTAL:</strong></td>
+              <td><strong style="color: #2a5298; font-size: 1.2em;">${formatPrix(currentFacture.total)}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+        
+        <div class="box">
+          <h3><i class="fas fa-info-circle"></i> INFORMATIONS SUPPLÉMENTAIRES</h3>
+          <p><strong>Méthode de paiement:</strong> ${currentFacture.methodePaiement || "Non spécifié"}</p>
+          <p><strong>Date limite de paiement:</strong> ${formatDate(currentFacture.dateLimitePaiement)}</p>
+          <p><strong>Statut:</strong> ${currentFacture.statut || "en_attente"}</p>
+          <p><strong>Remarques:</strong> ${currentFacture.remarques || "Aucune remarque"}</p>
+        </div>
+        
+        <div class="actions">
+          <button class="btn" onclick="window.print()"><i class="fas fa-print"></i> Imprimer</button>
+          <button class="btn" onclick="window.close()"><i class="fas fa-times"></i> Fermer</button>
+        </div>
+      </div>
+    </body>
+    </html>
+  `);
+  factureWindow.document.close();
+}
+
+// Mettre à jour le statut de l'ordonnance
+async function updateOrdonnanceStatus(newStatus) {
+  if (!currentPrescription || (!currentPrescription._id && !currentPrescription.id)) {
+    alert("❌ Impossible de mettre à jour le statut: ID manquant");
+    return;
+  }
+  
+  const ordonnanceId = currentPrescription._id || currentPrescription.id;
+  const statusText = getStatusText(newStatus);
+  
+  if (!confirm(`Êtes-vous sûr de vouloir changer le statut de cette ordonnance à "${statusText}" ?`)) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/api/ordonnances/${ordonnanceId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ statut: newStatus })
+    });
+    
+    if (response.ok) {
+      alert(`✅ Statut mis à jour avec succès ! L'ordonnance est maintenant "${statusText}".`);
+      
+      // Si le statut est "delivrée", suggérer de créer une facture
+      if (newStatus === 'delivree' && !currentFacture) {
+        setTimeout(() => {
+          if (confirm("📋 L'ordonnance a été délivrée. Souhaitez-vous créer une facture maintenant ?")) {
+            createFacture();
+          }
+        }, 500);
+      }
+      
+      // Recharger la page pour voir les changements
+      setTimeout(() => {
+        location.reload();
+      }, 1500);
+      
+    } else {
+      const error = await response.json();
+      throw new Error(error.error || 'Erreur lors de la mise à jour');
+    }
+  } catch (error) {
+    console.error("❌ Erreur mise à jour statut:", error);
+    alert(`❌ ${error.message}`);
+  }
+}
+
+// Fonctions utilitaires
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function formatDate(date) {
+  if (!date) return "Non spécifié";
+  try {
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return date.toString();
+    
+    return d.toLocaleDateString("fr-FR", {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (e) {
+    return date.toString();
+  }
+}
+
+function formatPrix(prix) {
+  return parseFloat(prix).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " FCF";
+}
+
+function getStatusText(statut) {
+  const statusMap = {
+    'active': 'Active',
+    'envoyee': 'À traiter',
+    'en_cours': 'En cours',
+    'pret': 'Prête',
+    'delivree': 'Délivrée',
+    'recuperee': 'Récupérée',
+    'annulee': 'Annulée',
+    'expiree': 'Expirée'
+  };
+  return statusMap[statut] || (statut ? statut.charAt(0).toUpperCase() + statut.slice(1) : 'Inconnu');
+}
+
+function getStatusColor(statut) {
+  const colorMap = {
+    'envoyee': '#ff9800',
+    'en_cours': '#2196f3',
+    'pret': '#4caf50',
+    'delivree': '#9c27b0',
+    'annulee': '#dc3545'
+  };
+  return colorMap[statut] || '#666';
+}
+
+// Afficher une erreur
+function showError(message) {
+  document.getElementById('app').innerHTML = `
+    <div class="error-message">
+      <i class="fas fa-exclamation-triangle fa-3x" style="margin-bottom: 20px;"></i>
+      <div style="max-width: 600px; margin: 0 auto;">
+        ${message}
+      </div>
+      <div style="margin-top: 40px;">
+        <button class="btn btn-outline" onclick="window.history.back()" style="margin-right: 15px;">
+          <i class="fas fa-arrow-left"></i> Retour
+        </button>
+        <button class="btn btn-primary" onclick="location.reload()">
+          <i class="fas fa-sync-alt"></i> Réessayer
+        </button>
+      </div>
+    </div>
+  `;
+  document.getElementById('loadingState').style.display = 'none';
+}
+
+// Initialisation
+window.onload = function() {
+  console.log("🚀 Page de détails d'ordonnance chargée");
+  console.log("🔗 URL complète:", window.location.href);
+  
+  // Vérifier la connexion
+  const user = JSON.parse(localStorage.getItem("currentUser"));
+  if (!user || user.role !== "pharmacien") {
+    showError(`
+      <h3>Accès non autorisé</h3>
+      <p>Cette page est réservée aux pharmaciens connectés.</p>
+      <p>Veuillez vous connecter avec un compte pharmacien.</p>
+    `);
+    return;
+  }
+  
+  loadPrescription();
+};
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messagerie - Médecin | OrdoPass</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .messagerie-container {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 20px;
+      height: calc(100vh - 150px);
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    /* Liste des conversations */
+    .conversations-list {
+      border-right: 1px solid #e1e5e9;
+      background: #f8f9fa;
+      overflow-y: auto;
+    }
+
+    .conversations-header {
+      padding: 20px;
+      border-bottom: 1px solid #e1e5e9;
+      background: white;
+    }
+
+    .search-conversations {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 0.9em;
+    }
+
+    .conversation-item {
+      display: flex;
+      align-items: center;
+      padding: 15px 20px;
+      border-bottom: 1px solid #e1e5e9;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      background: white;
+    }
+
+    .conversation-item:hover {
+      background: #f1f3f4;
+    }
+
+    .conversation-item.active {
+      background: #e3f2fd;
+      border-right: 3px solid #1976d2;
+    }
+
+    .conversation-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 15px;
+      background: #3498db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    .conversation-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .conversation-name {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .conversation-preview {
+      color: #7f8c8d;
+      font-size: 0.85em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .conversation-meta {
+      text-align: right;
+      font-size: 0.8em;
+      color: #95a5a6;
+    }
+
+    .conversation-time {
+      margin-bottom: 4px;
+    }
+
+    .unread-badge {
+      background: #e74c3c;
+      color: white;
+      border-radius: 10px;
+      padding: 2px 8px;
+      font-size: 0.75em;
+      font-weight: 600;
+    }
+
+    /* Zone de chat */
+    .chat-area {
+      display: flex;
+      flex-direction: column;
+      background: white;
+    }
+
+    .chat-header {
+      padding: 20px;
+      border-bottom: 1px solid #e1e5e9;
+      background: white;
+    }
+
+    .chat-header-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .chat-header-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #3498db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    .chat-recipient-name {
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 1.1em;
+    }
+
+    .chat-recipient-status {
+      color: #27ae60;
+      font-size: 0.9em;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: #f8f9fa;
+    }
+
+    .message {
+      max-width: 70%;
+      margin-bottom: 15px;
+      padding: 12px 16px;
+      border-radius: 18px;
+      position: relative;
+      animation: messageAppear 0.3s ease;
+    }
+
+    @keyframes messageAppear {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message.sent {
+      background: #3498db;
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message.received {
+      background: white;
+      color: #2c3e50;
+      border: 1px solid #e1e5e9;
+      border-bottom-left-radius: 4px;
+    }
+
+    .message-content {
+      margin-bottom: 5px;
+      line-height: 1.4;
+    }
+
+    .message-time {
+      font-size: 0.75em;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    .message.received .message-time {
+      text-align: left;
+    }
+
+    .chat-input-area {
+      padding: 20px;
+      border-top: 1px solid #e1e5e9;
+      background: white;
+    }
+
+    .message-input-container {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    .message-input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid #e1e5e9;
+      border-radius: 25px;
+      resize: none;
+      font-family: inherit;
+      font-size: 1em;
+      max-height: 120px;
+      min-height: 50px;
+      outline: none;
+    }
+
+    .message-input:focus {
+      border-color: #3498db;
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+
+    .send-button {
+      padding: 12px 20px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .send-button:hover {
+      background: #2980b9;
+    }
+
+    .send-button:disabled {
+      background: #bdc3c7;
+      cursor: not-allowed;
+    }
+
+    .attachment-button {
+      padding: 12px;
+      background: transparent;
+      border: none;
+      color: #7f8c8d;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: background 0.3s ease;
+    }
+
+    .attachment-button:hover {
+      background: #f1f3f4;
+    }
+
+    /* Nouvelle conversation */
+    .new-conversation-btn {
+      width: 100%;
+      padding: 15px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-bottom: 15px;
+      transition: background 0.3s ease;
+    }
+
+    .new-conversation-btn:hover {
+      background: #2980b9;
+    }
+
+    .no-conversation {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #7f8c8d;
+      text-align: center;
+    }
+
+    .no-conversation i {
+      font-size: 3em;
+      margin-bottom: 15px;
+      color: #bdc3c7;
+    }
+
+    /* Modal nouvelle conversation */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.5em;
+      cursor: pointer;
+      color: #7f8c8d;
+    }
+
+    .contact-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 15px;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .contact-item:hover {
+      background: #f8f9fa;
+    }
+
+    .contact-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #3498db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      margin-right: 15px;
+    }
+
+    .contact-info {
+      flex: 1;
+    }
+
+    .contact-name {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .contact-type {
+      color: #7f8c8d;
+      font-size: 0.85em;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .messagerie-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .conversations-list {
+        display: none;
+      }
+      
+      .conversations-list.mobile-visible {
+        display: block;
+      }
+      
+      .chat-area.mobile-hidden {
+        display: none;
+      }
+    }
+
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      color: #7f8c8d;
+      font-style: italic;
+      margin-bottom: 15px;
+    }
+
+    .typing-dots {
+      display: flex;
+      margin-left: 8px;
+    }
+
+    .typing-dot {
+      width: 6px;
+      height: 6px;
+      background: #7f8c8d;
+      border-radius: 50%;
+      margin: 0 2px;
+      animation: typing 1.4s infinite;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+      0%, 60%, 100% {
+        transform: translateY(0);
+      }
+      30% {
+        transform: translateY(-5px);
+      }
+    }
+
+    /* CORRECTION : S'assurer que la zone de texte est accessible */
+    .message-input:focus {
+      border-color: #3498db !important;
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2) !important;
+    }
+
+    /* Style pour quand une conversation est sélectionnée */
+    .chat-active {
+      display: flex !important;
+      flex-direction: column;
+    }
+  </style>
+</head>
+<body class="dashboard-page">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <i class="fa-solid fa-stethoscope"></i> ORDO<span>PASS</span>
+    </div>
+    <nav>
+      <a class="nav-link" href="medecin_dashboard.html"><i class="fa-solid fa-file-medical"></i> Consultations</a>
+      <a href="patients.html"><i class="fa-solid fa-users"></i> Patients</a>
+      <a href="teleconsultations.html"><i class="fa-solid fa-video"></i> Téléconsultation</a>
+      <a href="pharmacies.html"><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies</a>
+      <a href="medecin_messagerie.html" class="active"><i class="fa-solid fa-comment-medical"></i> Messagerie</a>
+      <a href="parametres.html"><i class="fa-solid fa-gear"></i> Paramètres</a>
+      <a href="medecin_facturation.html"><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</a>
+      <a href="medecin_rendezvous.html"><i class="fa-solid fa-calendar-check"></i> Rendez-vous</a>
+      <a href="medecin_ordonnance.html"><i class="fa-solid fa-prescription"></i> Ordonnances sécurisées</a>
+         <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-area">
+    <header class="topbar">
+      <h1><i class="fa-solid fa-comment-medical"></i> Messagerie</h1>
+      <div class="user-info">
+        <span id="usernameDisplay">Dr. Diallo</span>
+        <i class="fa-solid fa-user-md"></i>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="messagerie-container">
+        <!-- Liste des conversations -->
+        <div class="conversations-list" id="conversationsList">
+          <div class="conversations-header">
+            <button class="new-conversation-btn" onclick="openNewConversationModal()">
+              <i class="fa-solid fa-plus"></i> Nouvelle conversation
+            </button>
+            <input type="text" class="search-conversations" id="searchConversations" placeholder="🔍 Rechercher une conversation...">
+          </div>
+          <div id="conversationsContainer">
+            <!-- Les conversations seront chargées ici dynamiquement -->
+          </div>
+        </div>
+
+        <!-- Zone de chat -->
+        <div class="chat-area" id="chatArea">
+          <div class="no-conversation" id="noConversation">
+            <i class="fa-solid fa-comments"></i>
+            <h3>Aucune conversation sélectionnée</h3>
+            <p>Sélectionnez une conversation ou démarrez-en une nouvelle</p>
+          </div>
+
+          <div class="chat-active" id="chatActive" style="display: none;">
+            <div class="chat-header">
+              <div class="chat-header-info">
+                <div class="chat-header-avatar" id="currentChatAvatar">P</div>
+                <div>
+                  <div class="chat-recipient-name" id="currentChatName">Pharmacie Centrale</div>
+                  <div class="chat-recipient-status" id="currentChatStatus">En ligne</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+              <!-- Les messages seront chargés ici dynamiquement -->
+            </div>
+
+            <div class="chat-input-area">
+              <div class="message-input-container">
+                <button class="attachment-button" type="button">
+                  <i class="fa-solid fa-paperclip"></i>
+                </button>
+                <textarea 
+                  class="message-input" 
+                  id="messageInput" 
+                  placeholder="Tapez votre message..." 
+                  rows="1"
+                  style="height: 50px;"
+                ></textarea>
+                <button class="send-button" id="sendButton" type="button" onclick="sendMessage()">
+                  <i class="fa-solid fa-paper-plane"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal nouvelle conversation -->
+  <div class="modal" id="newConversationModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Nouvelle conversation</h2>
+        <button class="close-modal" onclick="closeNewConversationModal()">&times;</button>
+      </div>
+      
+      <input type="text" id="searchContacts" placeholder="🔍 Rechercher un contact..." style="width: 100%; padding: 12px; border: 1px solid #e1e5e9; border-radius: 8px; margin-bottom: 15px;">
+      
+      <div class="contact-list" id="contactList">
+        <!-- Liste des contacts -->
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    // Données de démonstration
+    const contacts = [
+      { id: 1, name: "Pharmacie Centrale Liberté 6", type: "Pharmacie", avatar: "PC", unread: 2, online: true },
+      { id: 2, name: "Pharmacie des Mamelles", type: "Pharmacie", avatar: "PM", unread: 0, online: false },
+      { id: 3, name: "Dr. Marie Ba", type: "Médecin", avatar: "MB", unread: 1, online: true },
+      { id: 4, name: "Awa Diop", type: "Patient", avatar: "AD", unread: 0, online: false },
+      { id: 5, name: "Pharmacie Fann Résidence", type: "Pharmacie", avatar: "PF", unread: 0, online: true },
+      { id: 6, name: "Leslie Alexander", type: "Patient", avatar: "LA", unread: 3, online: false },
+      { id: 7, name: "Dr. Jean Ndiaye", type: "Médecin", avatar: "JN", unread: 0, online: true }
+    ];
+
+    const conversations = {
+      1: [
+        { id: 1, sender: "other", content: "Bonjour Docteur, nous avons bien reçu l'ordonnance pour le patient Awa Diop", timestamp: "10:30", read: true },
+        { id: 2, sender: "me", content: "Parfait, les médicaments sont-ils disponibles ?", timestamp: "10:32", read: true },
+        { id: 3, sender: "other", content: "Oui, tout est disponible. Le patient peut passer à tout moment", timestamp: "10:35", read: true },
+        { id: 4, sender: "other", content: "Nous avons également reçu une nouvelle livraison d'Amoxicilline", timestamp: "11:20", read: false },
+        { id: 5, sender: "other", content: "Voulez-vous que nous vous réservions quelques boîtes ?", timestamp: "11:20", read: false }
+      ],
+      2: [
+        { id: 1, sender: "other", content: "Bonjour Docteur, nous vous informons que nous serons fermés demain pour inventaire", timestamp: "09:15", read: true }
+      ],
+      3: [
+        { id: 1, sender: "other", content: "Salut ! Tu as vu le dernier protocole pour la prise en charge du COVID ?", timestamp: "14:20", read: true },
+        { id: 2, sender: "me", content: "Pas encore, tu peux me l'envoyer ?", timestamp: "14:25", read: true },
+        { id: 3, sender: "other", content: "Je te l'envoie tout de suite", timestamp: "14:26", read: false }
+      ],
+      6: [
+        { id: 1, sender: "other", content: "Bonjour Docteur, j'ai encore des douleurs thoraciques", timestamp: "08:45", read: false },
+        { id: 2, sender: "other", content: "Est-ce que je dois prendre rendez-vous ?", timestamp: "08:46", read: false },
+        { id: 3, sender: "other", content: "Les médicaments ne semblent pas suffisants", timestamp: "09:30", read: false }
+      ]
+    };
+
+    // État de l'application
+    let currentConversationId = null;
+    let currentContact = null;
+    let socket = null;
+    const currentUser = JSON.parse(localStorage.getItem('currentUser')) || { username: 'Dr. Diallo', role: 'medecin' };
+
+    // Éléments DOM
+    const conversationsContainer = document.getElementById('conversationsContainer');
+    const chatMessages = document.getElementById('chatMessages');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const noConversation = document.getElementById('noConversation');
+    const chatActive = document.getElementById('chatActive');
+    const newConversationModal = document.getElementById('newConversationModal');
+    const contactList = document.getElementById('contactList');
+    const searchContacts = document.getElementById('searchContacts');
+    const searchConversations = document.getElementById('searchConversations');
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('usernameDisplay').textContent = currentUser.username;
+      initializeSocket();
+      loadConversations();
+      setupEventListeners();
+      
+      // Sélectionner automatiquement la première conversation pour tester
+      if (contacts.length > 0) {
+        selectConversation(contacts[0].id);
+      }
+    });
+
+    function initializeSocket() {
+      socket = io();
+      
+      socket.on('connect', () => {
+        console.log('✅ Connecté au serveur de messagerie');
+        socket.emit('join', { 
+          name: currentUser.username, 
+          role: currentUser.role 
+        });
+      });
+
+      socket.on('chat:message', (data) => {
+        console.log('📨 Nouveau message reçu:', data);
+        
+        // Vérifier si le message est pour la conversation actuelle
+        if (currentConversationId && data.from === getContactName(currentConversationId)) {
+          addMessageToChat({
+            id: Date.now(),
+            sender: 'other',
+            content: data.text,
+            timestamp: formatTime(new Date(data.timestamp)),
+            read: true
+          }, true);
+          
+          // Jouer un son de notification (optionnel)
+          playNotificationSound();
+        }
+        
+        // Mettre à jour les badges de notification
+        updateConversationPreview();
+      });
+
+      socket.on('user_status', (data) => {
+        console.log(`🟢 Statut ${data.user}: ${data.status}`);
+        updateUserStatus(data.user, data.status);
+      });
+
+      socket.on('user_typing', (data) => {
+        showTypingIndicator(data.from, data.typing);
+      });
+
+      socket.on('system', (data) => {
+        console.log('💬 Système:', data.text);
+      });
+
+      socket.on('error', (data) => {
+        console.error('❌ Erreur:', data.message);
+        showError(data.message);
+      });
+    }
+
+    function setupEventListeners() {
+      // Auto-resize du textarea
+      messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+      });
+
+      // Envoi avec Enter (sans Shift)
+      messageInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+
+      // Indicateur de frappe
+      messageInput.addEventListener('input', function() {
+        if (socket && currentConversationId) {
+          socket.emit('typing', {
+            to: getContactName(currentConversationId),
+            typing: this.value.length > 0
+          });
+        }
+      });
+
+      // Recherche de conversations
+      searchConversations.addEventListener('input', filterConversations);
+      
+      // Recherche de contacts
+      searchContacts.addEventListener('input', filterContacts);
+
+      // Déconnexion
+      document.getElementById('logout').addEventListener('click', function(e) {
+        e.preventDefault();
+        if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+          localStorage.removeItem('currentUser');
+          window.location.href = 'login.html';
+        }
+      });
+    }
+
+    function getContactName(contactId) {
+      const contact = contacts.find(c => c.id === contactId);
+      return contact ? contact.name : 'Inconnu';
+    }
+
+    function loadConversations() {
+      conversationsContainer.innerHTML = '';
+      
+      contacts.forEach(contact => {
+        const lastMessage = conversations[contact.id] ? conversations[contact.id][conversations[contact.id].length - 1] : null;
+        const lastMessageContent = lastMessage ? lastMessage.content : 'Aucun message';
+        const lastMessageTime = lastMessage ? lastMessage.timestamp : '';
+        
+        const conversationItem = document.createElement('div');
+        conversationItem.className = 'conversation-item';
+        if (currentConversationId === contact.id) {
+          conversationItem.classList.add('active');
+        }
+        conversationItem.onclick = () => selectConversation(contact.id);
+        
+        conversationItem.innerHTML = `
+          <div class="conversation-avatar">${contact.avatar}</div>
+          <div class="conversation-info">
+            <div class="conversation-name">${contact.name}</div>
+            <div class="conversation-preview">${lastMessageContent}</div>
+          </div>
+          <div class="conversation-meta">
+            <div class="conversation-time">${lastMessageTime}</div>
+            ${contact.unread > 0 ? `<div class="unread-badge">${contact.unread}</div>` : ''}
+            ${contact.online ? '<div style="color: #27ae60; font-size: 0.7em;">●</div>' : ''}
+          </div>
+        `;
+        
+        conversationsContainer.appendChild(conversationItem);
+      });
+    }
+
+    function filterConversations() {
+      const searchTerm = searchConversations.value.toLowerCase();
+      const conversationItems = conversationsContainer.getElementsByClassName('conversation-item');
+      
+      Array.from(conversationItems).forEach(item => {
+        const contactName = item.querySelector('.conversation-name').textContent.toLowerCase();
+        if (contactName.includes(searchTerm)) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    function selectConversation(contactId) {
+      currentConversationId = contactId;
+      currentContact = contacts.find(c => c.id === contactId);
+      
+      // Mettre à jour l'interface
+      document.querySelectorAll('.conversation-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      // Afficher la zone de chat
+      noConversation.style.display = 'none';
+      chatActive.style.display = 'flex';
+      
+      // Mettre à jour l'en-tête du chat
+      document.getElementById('currentChatAvatar').textContent = currentContact.avatar;
+      document.getElementById('currentChatName').textContent = currentContact.name;
+      document.getElementById('currentChatStatus').innerHTML = currentContact.online ? 
+        '<span style="color: #27ae60;">● En ligne</span>' : 
+        '<span style="color: #95a5a6;">○ Hors ligne</span>';
+      
+      // Charger les messages
+      loadMessages();
+      
+      // Focus automatique sur la zone de texte
+      setTimeout(() => {
+        messageInput.focus();
+      }, 100);
+      
+      // Marquer comme lu
+      markAsRead(contactId);
+      
+      // Recharger les conversations pour mettre à jour le style actif
+      loadConversations();
+    }
+
+    function loadMessages() {
+      chatMessages.innerHTML = '';
+      
+      if (conversations[currentConversationId]) {
+        conversations[currentConversationId].forEach(message => {
+          addMessageToChat(message, false);
+        });
+      }
+      
+      // Scroll vers le bas
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function addMessageToChat(message, animate = true) {
+      const messageElement = document.createElement('div');
+      messageElement.className = `message ${message.sender === 'me' ? 'sent' : 'received'}`;
+      
+      if (animate) {
+        messageElement.style.animation = 'messageAppear 0.3s ease';
+      }
+      
+      messageElement.innerHTML = `
+        <div class="message-content">${message.content}</div>
+        <div class="message-time">${message.timestamp}</div>
+      `;
+      
+      chatMessages.appendChild(messageElement);
+      
+      // Scroll vers le bas
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function sendMessage() {
+      const content = messageInput.value.trim();
+      
+      if (!content || !currentConversationId) return;
+      
+      // Envoyer via Socket.IO
+      if (socket) {
+        socket.emit('chat:message', {
+          text: content,
+          to: getContactName(currentConversationId)
+        });
+      }
+      
+      // Créer le nouveau message local
+      const newMessage = {
+        id: Date.now(),
+        sender: 'me',
+        content: content,
+        timestamp: getCurrentTime(),
+        read: true
+      };
+      
+      // Ajouter à la conversation locale
+      if (!conversations[currentConversationId]) {
+        conversations[currentConversationId] = [];
+      }
+      conversations[currentConversationId].push(newMessage);
+      
+      // Ajouter à l'interface
+      addMessageToChat(newMessage);
+      
+      // Réinitialiser l'input
+      messageInput.value = '';
+      messageInput.style.height = '50px';
+      
+      // Arrêter l'indicateur de frappe
+      if (socket) {
+        socket.emit('typing', {
+          to: getContactName(currentConversationId),
+          typing: false
+        });
+      }
+      
+      // Remettre le focus après envoi
+      messageInput.focus();
+      
+      // Mettre à jour la liste des conversations
+      updateConversationPreview();
+    }
+
+    function getCurrentTime() {
+      return formatTime(new Date());
+    }
+
+    function formatTime(date) {
+      return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    }
+
+    function updateConversationPreview() {
+      loadConversations();
+    }
+
+    function markAsRead(contactId) {
+      const contact = contacts.find(c => c.id === contactId);
+      if (contact) {
+        contact.unread = 0;
+      }
+      loadConversations();
+    }
+
+    function openNewConversationModal() {
+      newConversationModal.style.display = 'flex';
+      loadContacts();
+    }
+
+    function closeNewConversationModal() {
+      newConversationModal.style.display = 'none';
+    }
+
+    function loadContacts() {
+      contactList.innerHTML = '';
+      
+      contacts.forEach(contact => {
+        const contactItem = document.createElement('div');
+        contactItem.className = 'contact-item';
+        contactItem.onclick = () => startNewConversation(contact);
+        
+        contactItem.innerHTML = `
+          <div class="contact-avatar">${contact.avatar}</div>
+          <div class="contact-info">
+            <div class="contact-name">${contact.name}</div>
+            <div class="contact-type">${contact.type}</div>
+          </div>
+          ${contact.online ? '<div style="color: #27ae60; font-size: 0.8em;">●</div>' : ''}
+        `;
+        
+        contactList.appendChild(contactItem);
+      });
+    }
+
+    function filterContacts() {
+      const searchTerm = searchContacts.value.toLowerCase();
+      const contactItems = contactList.getElementsByClassName('contact-item');
+      
+      Array.from(contactItems).forEach(item => {
+        const contactName = item.querySelector('.contact-name').textContent.toLowerCase();
+        if (contactName.includes(searchTerm)) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    function startNewConversation(contact) {
+      closeNewConversationModal();
+      selectConversation(contact.id);
+    }
+
+    function updateUserStatus(username, status) {
+      const contact = contacts.find(c => c.name === username);
+      if (contact) {
+        contact.online = status === 'online';
+        
+        // Mettre à jour l'affichage si c'est le contact actuel
+        if (currentContact && currentContact.name === username) {
+          document.getElementById('currentChatStatus').innerHTML = contact.online ? 
+            '<span style="color: #27ae60;">● En ligne</span>' : 
+            '<span style="color: #95a5a6;">○ Hors ligne</span>';
+        }
+        
+        loadConversations();
+      }
+    }
+
+    function showTypingIndicator(username, typing) {
+      let typingIndicator = document.getElementById('typing-indicator');
+      
+      if (typing) {
+        if (!typingIndicator && currentContact && currentContact.name === username) {
+          typingIndicator = document.createElement('div');
+          typingIndicator.id = 'typing-indicator';
+          typingIndicator.className = 'typing-indicator';
+          typingIndicator.innerHTML = `
+            ${username} écrit
+            <div class="typing-dots">
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+            </div>
+          `;
+          chatMessages.appendChild(typingIndicator);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+      } else {
+        if (typingIndicator) {
+          typingIndicator.remove();
+        }
+      }
+    }
+
+    function playNotificationSound() {
+      // Créer un son de notification simple
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = 800;
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.5);
+      } catch (error) {
+        console.log('Audio context non supporté');
+      }
+    }
+
+    function showError(message) {
+      // Afficher une notification d'erreur
+      const errorDiv = document.createElement('div');
+      errorDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #e74c3c;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 1001;
+        max-width: 300px;
+      `;
+      errorDiv.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>${message}</span>
+        </div>
+      `;
+      
+      document.body.appendChild(errorDiv);
+      
+      setTimeout(() => {
+        errorDiv.remove();
+      }, 5000);
+    }
+
+    // Fermer le modal en cliquant à l'extérieur
+    window.onclick = function(event) {
+      if (event.target === newConversationModal) {
+        closeNewConversationModal();
+      }
+    }
+
+    // Fonction pour tester rapidement
+    function testMessaging() {
+      console.log("🚀 Messagerie médecin fonctionnelle - Communication en temps réel activée !");
+      console.log("📞 Connecté en tant que:", currentUser.username);
+    }
+
+    // Tester au chargement
+    testMessaging();
+  </script>
+</body>
+</html>

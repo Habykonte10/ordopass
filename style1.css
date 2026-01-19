@@ -1,0 +1,454 @@
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: #f5f8fa;
+  color: #333;
+}
+
+.sidebar {
+  width: 240px;
+  height: 100vh;
+  background: #024d91;
+  color: #fff;
+  position: fixed;
+  top: 0; left: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar .logo {
+  font-size: 22px;
+  font-weight: bold;
+  padding: 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.sidebar nav a {
+  padding: 15px 20px;
+  color: #fff;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar nav a.active,
+.sidebar nav a:hover {
+  background: #0366c2;
+}
+
+.main-area {
+  margin-left: 240px;
+  padding: 20px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.card {
+  background: #fff;
+  padding: 20px;
+  margin-top: 20px;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.tabs {
+  margin: 15px 0;
+}
+
+.tabs .tab {
+  padding: 8px 15px;
+  margin-right: 8px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  background: #e4e9f1;
+}
+
+.tabs .tab.active {
+  background: #024d91;
+  color: white;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+table th, table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.status {
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.status.pending { background: #ffebcc; color: #b37400; }
+.status.progress { background: #e0f0ff; color: #005bb5; }
+.status.done { background: #d6f5d6; color: #2e7d32; }
+
+.btn-outline {
+  padding: 6px 12px;
+  border: 1px solid #024d91;
+  border-radius: 5px;
+  color: #024d91;
+  text-decoration: none;
+}
+
+.btn-outline:hover {
+  background: #024d91;
+  color: #fff;
+}
+/* ======= STYLE ORDONNANCE ======= */
+.ordonnance-preview {
+  margin-top: 30px;
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  border: 1px solid #ddd;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center; /* tout centré */
+}
+
+.ordonnance-preview h2 {
+  margin-bottom: 20px;
+  color: #2a5298;
+  border-bottom: 2px solid #2a5298;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+.ordonnance-preview p {
+  margin: 8px 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.ordonnance-preview .patient-info {
+  margin-top: 15px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.ordonnance-preview .med-list {
+  margin-top: 20px;
+  text-align: left;
+  display: inline-block;
+}
+/* Style général des paragraphes */
+p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #333;
+  margin: 8px 0;
+  font-family: "Arial", sans-serif;
+}
+
+/* Pour les paragraphes dans l’ordonnance (classe .ordonnance-preview si tu l’utilises) */
+.ordonnance-preview p {
+  font-size: 16px;
+  margin: 6px 0;
+  color: #222;
+}
+
+/* Mise en valeur des étiquettes (comme Âge, Sexe, Adresse, etc.) */
+.ordonnance-preview p b {
+  color: #2a5298;
+  font-weight: bold;
+}
+
+/* Style spécial pour le bloc prescription */
+.ordonnance-preview .med-list p {
+  margin-top: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #1f6f8b;
+}
+/* public/css/styles.css - styles partagés pour dashboard et details */
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background:#f3f6f9;color:#333;
+  -webkit-font-smoothing:antialiased;
+}
+.container{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{
+  width:260px;background:linear-gradient(180deg,#0f3a6a 0%, #173e73 100%);
+  color:#fff;padding:28px 20px;display:flex;flex-direction:column;
+  position:fixed;left:0;top:0;bottom:0
+}
+.logo{font-size:24px;font-weight:700;margin-bottom:28px}
+.logo span{color:#ffd66a}
+.menu a{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;
+  color:#e9f0fb;text-decoration:none;margin-bottom:8px;font-weight:600;
+}
+.menu a.active{background:rgba(255,255,255,0.06);border-left:4px solid #ffd66a}
+.menu a:hover{background:rgba(255,255,255,0.04)}
+.menu a.logout{margin-top:auto;background:#ff6b6b;color:#fff;text-align:center}
+
+/* MAIN */
+.main{
+  margin-left:260px;padding:28px;flex:1;
+}
+.topbar{
+  display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;
+}
+.topbar .title{font-size:20px;color:#12375a;font-weight:700}
+.user-box{display:flex;align-items:center;gap:12px}
+.avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #fff}
+
+/* Card */
+.card{
+  background:#fff;border-radius:10px;padding:20px;box-shadow:0 6px 18px rgba(16,24,40,0.06);
+  margin-bottom:20px;
+}
+
+/* Filters tabs like on image */
+.tabs{display:flex;gap:8px;margin-bottom:18px}
+.tab{
+  padding:8px 14px;border-radius:8px;background:#eef6fb;border:1px solid #e6f0f8;
+  cursor:pointer;font-weight:600;color:#234a6a;
+}
+.tab.active{background:#fff;border-color:#d9e9fb;box-shadow:0 4px 10px rgba(4,36,66,0.04)}
+
+/* Table */
+.table-wrap{overflow:auto}
+.table{width:100%;border-collapse:collapse}
+.table thead th{background:#f8fbfe;color:#4b6b88;padding:14px;text-align:left;font-weight:700}
+.table th,.table td{padding:12px;border-bottom:1px solid #eef3f7}
+.table tbody tr:hover{background:#fbfdff}
+
+/* status badges */
+.badge{display:inline-block;padding:6px 12px;border-radius:18px;font-weight:700;font-size:13px}
+.badge.at{background:#fff3f0;color:#c74b3b;border:1px solid #ffd9d6}
+.badge.ec{background:#e9f8ff;color:#0b6b8f;border:1px solid #cfeffb}
+.badge.t{background:#e9f7ee;color:#0b7a39;border:1px solid #cfeed6}
+
+/* action buttons */
+.btn{padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:700}
+.btn.view{background:#fff;border:1px solid #d8e9fb;color:#0b5c8f}
+.btn.view:hover{background:#f0fbff}
+.btn.primary{background:#0b63a0;color:#fff}
+.btn.warn{background:#ffb85c;color:#000}
+.btn.danger{background:#ff6b6b;color:#fff}
+
+/* details page layout for ordonnance */
+.details-grid{display:grid;grid-template-columns:1fr;gap:18px}
+.meta-row{display:flex;gap:20px;align-items:flex-start}
+.meta-col{flex:1;background:#fff;padding:16px;border-radius:8px;border:1px solid #f0f4f7}
+.meta-col h4{color:#234a6a;margin-bottom:8px;font-size:14px}
+.meta-col p{color:#556b7a;font-size:14px}
+
+/* medicaments table in details */
+.medic-table{width:100%;border-collapse:collapse}
+.medic-table th, .medic-table td{padding:12px;border-bottom:1px solid #eef3f7;text-align:left}
+.medic-table thead th{background:#fafcff;color:#4a6b8a}
+
+/* footer actions */
+.details-actions{display:flex;gap:12px;margin-top:14px;justify-content:flex-end}
+@media(max-width:900px){
+  .sidebar{width:72px;padding:18px}
+  .logo{font-size:18px}
+  .main{margin-left:72px;padding:18px}
+  .meta-row{flex-direction:column}
+}
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: #f5f8fb;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+/* ✅ Barre latérale */
+.sidebar {
+  width: 230px;
+  background: #1b3a57;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: 700;
+  padding: 20px;
+  text-align: center;
+}
+
+.logo span {
+  color: #5dc1e8;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+}
+
+.menu a {
+  color: #c9d6e1;
+  text-decoration: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.menu a:hover,
+.menu a.active {
+  background: #2d4e6d;
+  color: white;
+}
+
+.logout {
+  color: #ffcccc;
+}
+
+/* ✅ Partie principale */
+.main {
+  flex: 1;
+  padding: 20px 30px;
+  overflow-y: auto;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1b3a57;
+}
+
+.user-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+}
+
+/* ✅ Carte principale */
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* ✅ Boutons */
+.btn {
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-weight: 500;
+}
+
+.btn.primary {
+  background: #2d8ae0;
+  color: white;
+}
+
+.btn.voir {
+  background: #1b3a57;
+  color: white;
+}
+
+/* ✅ Tabs */
+.tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 8px 16px;
+  border-radius: 6px;
+  background: #f0f6fa;
+  cursor: pointer;
+  font-weight: 500;
+  color: #1b3a57;
+}
+
+.tab.active {
+  background: #2d8ae0;
+  color: white;
+}
+
+/* ✅ Tableau */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  background: #f5f8fb;
+  text-align: left;
+  padding: 10px;
+  color: #234a6a;
+}
+
+.table td {
+  padding: 10px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+/* ✅ Statuts */
+.status {
+  padding: 4px 10px;
+  border-radius: 6px;
+  color: white;
+  font-size: 13px;
+}
+
+.status.active {
+  background: #e67e22;
+}
+
+.status.en_cours {
+  background: #2980b9;
+}
+
+.status.terminee {
+  background: #27ae60;
+}

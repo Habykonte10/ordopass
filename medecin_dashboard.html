@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard Médecin - OrdoPass</title>
+  <link rel="stylesheet" href="style.css" /> 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .avatar { width:40px; height:40px; border-radius:50%; object-fit:cover; }
+    .btn-outline { border:1px solid #2a5298; color:#2a5298; padding:8px 15px; border-radius:5px; cursor:pointer; background:#fff; }
+    .btn-primary { background:#2a5298; color:#fff; padding:8px 15px; border:none; border-radius:5px; cursor:pointer; }
+    .loading { text-align: center; padding: 20px; color: #666; }
+    
+    /* Styles améliorés pour les statuts */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .status.done { 
+      background-color: #e8f5e9; 
+      color: #2e7d32; 
+      border: 1px solid #c8e6c9;
+    }
+    
+    .status.pending { 
+      background-color: #fff3e0; 
+      color: #ef6c00; 
+      border: 1px solid #ffcc80;
+    }
+    
+    .status.in-progress { 
+      background-color: #e3f2fd; 
+      color: #1565c0; 
+      border: 1px solid #90caf9;
+    }
+    
+    /* Styles améliorés pour les boutons d'action */
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: nowrap;
+    }
+    
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 13px;
+    }
+    
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .view-btn { color: #2196f3; border-color: #2196f3; }
+    .view-btn:hover { background-color: #2196f3; color: white; }
+    
+    .edit-btn { color: #ff9800; border-color: #ff9800; }
+    .edit-btn:hover { background-color: #ff9800; color: white; }
+    
+    .delete-btn { color: #f44336; border-color: #f44336; }
+    .delete-btn:hover { background-color: #f44336; color: white; }
+    
+    /* Ajustements de la table */
+    .consultations-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    
+    .consultations-table th {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 2px solid #dee2e6;
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #495057;
+    }
+    
+    .consultations-table td {
+      padding: 12px;
+      vertical-align: middle;
+    }
+    
+    /* Colonnes spécifiques */
+    .col-status {
+      text-align: center;
+      width: 120px;
+    }
+    
+    .col-actions {
+      text-align: center;
+      width: 150px;
+    }
+    
+    .col-image {
+      width: 60px;
+      text-align: center;
+    }
+    
+    /* Styles pour le modal des pharmacies */
+    .pharmacy-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.5em;
+      cursor: pointer;
+      color: #6c757d;
+    }
+    
+    .pharmacy-item {
+      cursor: pointer;
+      padding: 15px;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+    
+    .pharmacy-item:hover {
+      border-color: #3498db;
+    }
+    
+    .pharmacy-item.selected {
+      background: #e6f7ff;
+      border-color: #3498db;
+    }
+    
+    /* Notification system */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 8px;
+      color: white;
+      z-index: 10000;
+      max-width: 400px;
+      animation: slideIn 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .notification-success {
+      background: #28a745;
+    }
+    
+    .notification-error {
+      background: #dc3545;
+    }
+    
+    .notification-info {
+      background: #17a2b8;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .action-buttons {
+        flex-direction: column;
+        gap: 5px;
+      }
+      
+      .action-btn {
+        width: 28px;
+        height: 28px;
+      }
+      
+      .status-badge {
+        font-size: 10px;
+        padding: 4px 8px;
+      }
+      
+      .modal-content {
+        padding: 20px;
+        margin: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body class="dashboard-page">
+
+  <!-- ✅ SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo"><i class="fa-solid fa-notes-medical"></i> ORDOPASS</div>
+    <nav>
+      <a href="medecin_dashboard.html" class="active"><i class="fa-solid fa-file-medical"></i> Consultations</a>
+      <a href="patients.html"><i class="fa-solid fa-users"></i> Patients</a>
+      <a href="teleconsultation.html"><i class="fa-solid fa-video"></i> Téléconsultation</a>
+      <a href="pharmacies.html"><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies</a>
+      <a href="medecin_messagerie.html"><i class="fa-solid fa-comment-medical"></i> Messagerie</a>
+      <a href="parametres.html"><i class="fa-solid fa-gear"></i> Paramètres</a>
+      <a href="medecin_facturation.html"><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</a>
+      <a href="medecin_rendezvous.html"><i class="fa-solid fa-calendar-check"></i> Rendez-vous</a>
+      <a href="medecin_ordonnance.html"><i class="fa-solid fa-prescription"></i> Ordonnances sécurisées</a>
+      <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+    </nav>
+  </aside>
+
+  <!-- ✅ CONTENU PRINCIPAL -->
+  <main class="main-area">
+    <header class="topbar">
+      <h1><i class="fa-solid fa-file-medical"></i> Liste des consultations</h1>
+      <div class="user-info">
+        <img src="https://i.pravatar.cc/40" class="avatar" alt="profil">
+        <span id="usernameDisplay"></span>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:20px;">
+          <h2>Consultations</h2>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <!-- ✅ Bouton Téléconsultation cliquable -->
+            <a href="teleconsultation.html" class="btn-outline"><i class="fa-solid fa-video"></i> Téléconsultation</a>
+
+            <a href="nouvelle_consultation.html" class="btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:5px;">
+              <i class="fa-solid fa-plus"></i> Nouvelle consultation
+            </a>
+          </div>
+        </div>
+
+        <div id="messageContainer"></div>
+
+        <!-- Filtres et statistiques -->
+        <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <label>Filtrer par statut:</label>
+            <select id="statusFilter" onchange="filterConsultations()">
+              <option value="all">Tous</option>
+              <option value="En attente">En attente</option>
+              <option value="En cours">En cours</option>
+              <option value="Terminé">Terminé</option>
+            </select>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <label>Date:</label>
+            <input type="date" id="dateFilter" onchange="filterConsultations()">
+          </div>
+          <button class="btn-outline" onclick="clearFilters()">
+            <i class="fa-solid fa-times"></i> Effacer les filtres
+          </button>
+        </div>
+
+        <!-- Statistiques -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+          <div style="background: #e8f4fd; padding: 15px; border-radius: 8px; text-align: center;">
+            <h3 style="margin: 0; color: #2a5298;" id="totalConsultations">0</h3>
+            <p style="margin: 5px 0 0 0; color: #666;">Total consultations</p>
+          </div>
+          <div style="background: #fff3cd; padding: 15px; border-radius: 8px; text-align: center;">
+            <h3 style="margin: 0; color: #856404;" id="pendingConsultations">0</h3>
+            <p style="margin: 5px 0 0 0; color: #666;">En attente</p>
+          </div>
+          <div style="background: #d4edda; padding: 15px; border-radius: 8px; text-align: center;">
+            <h3 style="margin: 0; color: #155724;" id="completedConsultations">0</h3>
+            <p style="margin: 5px 0 0 0; color: #666;">Terminées</p>
+          </div>
+        </div>
+
+        <table class="consultations-table">
+          <thead>
+            <tr>
+              <th style="width: 120px;">No ticket</th>
+              <th>Nom du patient</th>
+              <th class="col-image">Image</th>
+              <th style="width: 150px;">Date/heure</th>
+              <th>Motif</th>
+              <th class="col-status">Statut</th>
+              <th class="col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="consultationsBody">
+            <tr>
+              <td colspan="7" class="loading">
+                <i class="fa-solid fa-spinner fa-spin"></i> Chargement des consultations...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+          <div id="paginationInfo"></div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-outline" id="prevBtn" onclick="changePage(-1)">
+              <i class="fa-solid fa-chevron-left"></i> Précédent
+            </button>
+            <button class="btn-outline" id="nextBtn" onclick="changePage(1)">
+              Suivant <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal pour sélectionner une pharmacie -->
+  <div class="pharmacy-modal" id="pharmacyModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="pharmacyModalTitle">Envoyer une ordonnance</h2>
+        <button class="close-modal" id="closePharmacyModal">&times;</button>
+      </div>
+      <div id="pharmacyModalContent">
+        <!-- Contenu chargé dynamiquement -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ JAVASCRIPT -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    // Variables globales
+    let allConsultations = [];
+    let filteredConsultations = [];
+    let currentPage = 1;
+    const consultationsPerPage = 10;
+    
+    let doctorSocket = null;
+    let currentUser = null;
+    let selectedOrdonnanceId = null;
+    let currentSelectedPharmacy = null;
+
+    // ============================ MODIFICATION 1: CORRECTION AUTHENTIFICATION ============================
+    // Ancien code qui causait le problème:
+    // const user = JSON.parse(localStorage.getItem("currentUser"));
+    // if (!user || user.role !== "medecin") {
+    //   alert("⚠️ Accès refusé. Veuillez vous connecter.");
+    //   window.location.href = "index.html";
+    // }
+    
+    // Nouveau code corrigé:
+    // Essayer les deux clés de stockage possibles
+    let user = JSON.parse(localStorage.getItem("currentUser"));
+    if (!user) {
+      user = JSON.parse(localStorage.getItem("ordoPass_currentUser"));
+    }
+    
+    if (!user || user.role !== "medecin") {
+      alert("⚠️ Accès refusé. Veuillez vous connecter.");
+      window.location.href = "index.html";
+    }
+    // ================================================================================================
+
+    document.getElementById("usernameDisplay").textContent = user.username;
+
+    // Initialiser la connexion WebSocket
+    function initDoctorSocket() {
+      doctorSocket = io();
+      
+      doctorSocket.on('connect', () => {
+        console.log('🔗 Connecté au serveur Socket.io');
+        
+        // Authentifier le médecin
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+        if (user) {
+          currentUser = user;
+          doctorSocket.emit('user_join', {
+            username: user.username,
+            role: 'medecin',
+            userId: user.id
+          });
+        }
+      });
+
+      // Recevoir la confirmation d'envoi d'ordonnance
+      doctorSocket.on('ordonnance_sent', (data) => {
+        console.log('✅ Confirmation envoi ordonnance:', data);
+        showNotification(`✅ Ordonnance envoyée à ${data.pharmacyName}`, 'success');
+        updateOrdonnanceStatus(data.ordonnanceId, 'envoyee');
+      });
+
+      // Recevoir les erreurs d'envoi
+      doctorSocket.on('ordonnance_error', (data) => {
+        console.error('❌ Erreur envoi ordonnance:', data);
+        showNotification(`❌ Erreur: ${data.message}`, 'error');
+      });
+
+      // Recevoir les mises à jour de statut des ordonnances
+      doctorSocket.on('ordonnance_status_updated', (data) => {
+        console.log('📦 Mise à jour statut ordonnance:', data);
+        showNotification(`📦 Ordonnance ${data.code} : ${data.status}`, 'info');
+        updateOrdonnanceStatus(data.ordonnanceId, data.status);
+      });
+
+      // Recevoir les mises à jour spécifiques
+      doctorSocket.on('your_ordonnance_updated', (data) => {
+        console.log('🏥 Mise à jour ordonnance médecin:', data);
+        showNotification(`🏥 ${data.pharmacyName}: Ordonnance ${data.code} - ${data.newStatus}`, 'info');
+        updateOrdonnanceStatus(data.ordonnanceId, data.newStatus);
+      });
+    }
+
+    // Fonction pour ouvrir la sélection de pharmacie
+    async function openPharmacySelection(ordonnanceId) {
+      selectedOrdonnanceId = ordonnanceId;
+      
+      try {
+        console.log('🔄 Chargement des pharmacies pour ordonnance:', ordonnanceId);
+        
+        // Charger la liste des pharmacies depuis localStorage d'abord
+        let pharmacies = JSON.parse(localStorage.getItem('pharmacies')) || [];
+        
+        // Si pas de pharmacies en localStorage, essayer l'API
+        if (pharmacies.length === 0) {
+          try {
+            const response = await fetch('/api/pharmacies');
+            if (response.ok) {
+              pharmacies = await response.json();
+              localStorage.setItem('pharmacies', JSON.stringify(pharmacies));
+            }
+          } catch (error) {
+            console.log('⚠️ API pharmacies non disponible, utilisation du fallback');
+          }
+        }
+        
+        // Fallback si toujours pas de pharmacies
+        if (pharmacies.length === 0) {
+          pharmacies = [
+            {
+              _id: 'pharmacie_centrale_123',
+              nom: 'Pharmacie Centrale',
+              adresse: '123 Avenue Bourguiba, Dakar',
+              telephone: '+221 33 821 45 67',
+              online: true,
+              horaires: '08:00-20:00'
+            },
+            {
+              _id: 'pharmacie_marche_456',
+              nom: 'Pharmacie du Marché',
+              adresse: '45 Rue du Marché, Dakar',
+              telephone: '+221 33 822 34 56',
+              online: false,
+              horaires: '07:30-21:00'
+            }
+          ];
+          localStorage.setItem('pharmacies', JSON.stringify(pharmacies));
+        }
+
+        document.getElementById('pharmacyModalTitle').textContent = 'Envoyer une ordonnance';
+        document.getElementById('pharmacyModalContent').innerHTML = `
+          <div style="margin-bottom:20px;">
+            <p><strong>Ordonnance:</strong> ${ordonnanceId}</p>
+            <p style="color:#666; font-size:0.9em;">Choisissez une pharmacie pour envoyer l'ordonnance</p>
+          </div>
+          
+          <div style="max-height:400px; overflow-y:auto; margin-bottom:20px;">
+            ${pharmacies.length > 0 ? 
+              pharmacies.map(pharmacy => `
+                <div class="pharmacy-item" onclick="selectPharmacy('${pharmacy._id}', '${pharmacy.nom}', this)" 
+                     data-pharmacy-id="${pharmacy._id}">
+                  <div>
+                    <h4 style="margin:0 0 8px 0;">${pharmacy.nom}</h4>
+                    <p style="margin:0; color:#666; font-size:0.9em;">${pharmacy.adresse}</p>
+                    <p style="margin:5px 0 0 0; font-size:0.8em; color:${pharmacy.online ? '#28a745' : '#dc3545'}">
+                      ${pharmacy.online ? '🟢 En ligne' : '🔴 Hors ligne'}
+                    </p>
+                  </div>
+                  <div style="text-align:right;">
+                    <small style="color:#666;">${pharmacy.horaires || ''}</small>
+                    <br>
+                    <small style="color:#666;">${pharmacy.telephone || ''}</small>
+                  </div>
+                </div>
+              `).join('') :
+              '<p style="text-align:center; color:#666; padding:20px;">Aucune pharmacie disponible</p>'
+            }
+          </div>
+          
+          <div style="display:flex; gap:10px;">
+            <button class="btn-primary" id="confirmSendOrdonnance" disabled style="flex:1;">
+              <i class="fa-solid fa-paper-plane"></i> Envoyer l'ordonnance
+            </button>
+            <button class="btn-outline" onclick="closePharmacyModal()" style="flex:1;">
+              <i class="fa-solid fa-times"></i> Annuler
+            </button>
+          </div>
+        `;
+
+        document.getElementById('pharmacyModal').style.display = 'flex';
+        document.getElementById('confirmSendOrdonnance').addEventListener('click', sendSelectedOrdonnance);
+
+      } catch (error) {
+        console.error('❌ Erreur:', error);
+        showNotification('Erreur lors du chargement des pharmacies', 'error');
+      }
+    }
+
+    function selectPharmacy(pharmacyId, pharmacyName, element) {
+      // Désélectionner tous les éléments
+      document.querySelectorAll('.pharmacy-item').forEach(el => {
+        el.classList.remove('selected');
+      });
+      
+      // Sélectionner l'élément cliqué
+      element.classList.add('selected');
+      
+      currentSelectedPharmacy = pharmacyId;
+      document.getElementById('confirmSendOrdonnance').disabled = false;
+      document.getElementById('confirmSendOrdonnance').innerHTML = 
+        `<i class="fa-solid fa-paper-plane"></i> Envoyer à ${pharmacyName}`;
+    }
+
+    async function sendSelectedOrdonnance() {
+      if (!selectedOrdonnanceId || !currentSelectedPharmacy) {
+        showNotification('Veuillez sélectionner une pharmacie', 'error');
+        return;
+      }
+
+      const success = await sendOrdonnanceToPharmacy(selectedOrdonnanceId, currentSelectedPharmacy);
+      if (success) {
+        closePharmacyModal();
+      }
+    }
+
+    function closePharmacyModal() {
+      document.getElementById('pharmacyModal').style.display = 'none';
+      selectedOrdonnanceId = null;
+      currentSelectedPharmacy = null;
+    }
+
+    // Fonction pour envoyer une ordonnance à une pharmacie - VERSION CORRIGÉE
+    async function sendOrdonnanceToPharmacy(ordonnanceId, pharmacyId) {
+      if (!doctorSocket || !doctorSocket.connected) {
+        showNotification('❌ Non connecté au serveur', 'error');
+        return false;
+      }
+
+      try {
+        console.log('📤 Tentative d\'envoi ordonnance:', ordonnanceId, 'à pharmacie:', pharmacyId);
+        
+        // Récupérer les détails de l'ordonnance depuis localStorage
+        const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
+        const ordonnance = ordonnances.find(ord => ord.id == ordonnanceId || ord._id == ordonnanceId);
+        
+        if (!ordonnance) {
+          showNotification('❌ Ordonnance non trouvée', 'error');
+          return false;
+        }
+
+        // Récupérer les informations de la pharmacie
+        const pharmacies = JSON.parse(localStorage.getItem('pharmacies')) || [];
+        const pharmacie = pharmacies.find(p => p._id === pharmacyId);
+        
+        if (!pharmacie) {
+          showNotification('❌ Pharmacie non trouvée', 'error');
+          return false;
+        }
+
+        // Préparer les données pour l'envoi
+        const ordonnanceData = {
+          ordonnanceId: ordonnanceId,
+          code: ordonnance.code || 'ORD' + Date.now().toString(36).toUpperCase(),
+          patientNom: ordonnance.patientNom,
+          medecinNom: currentUser.username,
+          medicaments: ordonnance.medicaments || ordonnance.medicamentsText,
+          dateOrd: ordonnance.dateOrd,
+          pharmacyId: pharmacyId,
+          pharmacyName: pharmacie.nom,
+          timestamp: new Date().toISOString()
+        };
+
+        console.log('📦 Données ordonnance à envoyer:', ordonnanceData);
+
+        // Mettre à jour le statut dans localStorage
+        ordonnance.statut = 'envoyee';
+        ordonnance.pharmacieId = pharmacyId;
+        ordonnance.pharmacieNom = pharmacie.nom;
+        ordonnance.dateEnvoi = new Date().toISOString();
+        
+        localStorage.setItem('ordonnances', JSON.stringify(ordonnances));
+
+        // Envoyer via Socket.io
+        doctorSocket.emit('send_ordonnance', ordonnanceData);
+
+        // Mettre à jour l'affichage immédiatement
+        updateOrdonnanceStatus(ordonnanceId, 'envoyee');
+        
+        showNotification(`✅ Ordonnance envoyée à ${pharmacie.nom}`, 'success');
+        return true;
+
+      } catch (error) {
+        console.error('❌ Erreur envoi ordonnance:', error);
+        showNotification('❌ Erreur lors de l\'envoi de l\'ordonnance', 'error');
+        return false;
+      }
+    }
+
+    // Système de notification
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.className = `notification notification-${type}`;
+      notification.innerHTML = `
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()" style="background:none; border:none; color:white; margin-left:15px; cursor:pointer;">×</button>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        if (notification.parentElement) {
+          notification.remove();
+        }
+      }, 5000);
+    }
+
+    // Fonctions existantes de gestion des consultations
+    function showMessage(message, type = 'info') {
+      const container = document.getElementById('messageContainer');
+      container.innerHTML = `
+        <div style="padding:15px; border-radius:5px; margin-bottom:15px; 
+          background: ${type === 'error' ? '#f8d7da' : type === 'success' ? '#d4edda' : '#d1ecf1'};
+          color: ${type === 'error' ? '#721c24' : type === 'success' ? '#155724' : '#0c5460'};
+          border: 1px solid ${type === 'error' ? '#f5c6cb' : type === 'success' ? '#c3e6cb' : '#bee5eb'};">
+          ${message}
+        </div>
+      `;
+      setTimeout(() => { container.innerHTML = ''; }, 5000);
+    }
+
+    function loadConsultations() {
+      try {
+        const consultations = JSON.parse(localStorage.getItem('consultations')) || [];
+        const consultationsWithIds = consultations.map((consultation, index) => {
+          if (!consultation.id) {
+            consultation.id = Date.now() + index;
+          }
+          return consultation;
+        });
+        consultationsWithIds.sort((a, b) => {
+          const dateA = new Date(a.createdAt || a.date || 0);
+          const dateB = new Date(b.createdAt || b.date || 0);
+          return dateB - dateA;
+        });
+        allConsultations = consultationsWithIds;
+        filterConsultations();
+        updateStats();
+      } catch (error) {
+        showMessage('❌ Erreur lors du chargement des consultations', 'error');
+      }
+    }
+
+    function filterConsultations() {
+      const statusFilter = document.getElementById('statusFilter').value;
+      const dateFilter = document.getElementById('dateFilter').value;
+
+      filteredConsultations = allConsultations.filter(consultation => {
+        const matchesStatus = statusFilter === 'all' || consultation.statut === statusFilter;
+        const matchesDate = !dateFilter || consultation.date === dateFilter;
+        return matchesStatus && matchesDate;
+      });
+
+      currentPage = 1;
+      renderConsultations();
+    }
+
+    function clearFilters() {
+      document.getElementById('statusFilter').value = 'all';
+      document.getElementById('dateFilter').value = '';
+      filterConsultations();
+    }
+
+    function updateStats() {
+      const total = allConsultations.length;
+      const pending = allConsultations.filter(c => c.statut === 'En attente').length;
+      const completed = allConsultations.filter(c => c.statut === 'Terminé').length;
+
+      document.getElementById('totalConsultations').textContent = total;
+      document.getElementById('pendingConsultations').textContent = pending;
+      document.getElementById('completedConsultations').textContent = completed;
+    }
+
+    function getStatusClass(statut) {
+      switch(statut) {
+        case 'Terminé': return 'done';
+        case 'En attente': return 'pending';
+        case 'En cours': return 'in-progress';
+        default: return 'pending';
+      }
+    }
+
+    function renderConsultations() {
+      const tbody = document.getElementById("consultationsBody");
+      if (filteredConsultations.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 40px; color: #666;">
+              <i class="fa-solid fa-inbox" style="font-size: 48px; margin-bottom: 10px; display: block;"></i>
+              <p>Aucune consultation trouvée</p>
+              <a href="nouvelle_consultation.html" class="btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 5px; margin-top: 10px;">
+                <i class="fa-solid fa-plus"></i> Créer une consultation
+              </a>
+            </td>
+          </tr>
+        `;
+        updatePagination();
+        return;
+      }
+
+      const startIndex = (currentPage - 1) * consultationsPerPage;
+      const endIndex = startIndex + consultationsPerPage;
+      const consultationsToShow = filteredConsultations.slice(startIndex, endIndex);
+
+      tbody.innerHTML = "";
+
+      consultationsToShow.forEach(consultation => {
+        const tr = document.createElement("tr");
+        tr.style.borderBottom = '1px solid #eee';
+        const consultationId = consultation.id;
+        const statusClass = getStatusClass(consultation.statut);
+        
+        tr.innerHTML = `
+          <td><strong style="color: #2a5298;">${consultation.ticket || 'N/A'}</strong></td>
+          <td><strong>${consultation.patientName || `${consultation.nom || ''} ${consultation.prenom || ''}`}</strong></td>
+          <td class="col-image"><img src="${consultation.image || 'https://i.pravatar.cc/40'}" alt="${consultation.nom}" class="avatar"></td>
+          <td>${consultation.date || 'N/A'}<br><small style="color: #666;">${consultation.heure || ''}</small></td>
+          <td>${consultation.motif || 'Non spécifié'}</td>
+          <td class="col-status">
+            <span class="status-badge status ${statusClass}">${consultation.statut || 'En attente'}</span>
+          </td>
+          <td class="col-actions">
+            <div class="action-buttons">
+              <button class="action-btn view-btn viewBtn" data-id="${consultationId}" title="Voir détails">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+              <button class="action-btn edit-btn editBtn" data-id="${consultationId}" title="Modifier">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button class="action-btn delete-btn deleteBtn" data-id="${consultationId}" title="Supprimer">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+              ${consultation.statut === 'Terminé' ? `
+                <button class="action-btn" style="color: #28a745; border-color: #28a745;" title="Envoyer ordonnance" onclick="openPharmacySelection('${consultationId}')">
+                  <i class="fa-solid fa-paper-plane"></i>
+                </button>
+              ` : ''}
+            </div>
+          </td>
+        `;
+        
+        tr.querySelector(".viewBtn").addEventListener("click", function() {
+          const id = this.getAttribute('data-id');
+          window.location.href = `consultation_detail.html?id=${id}`;
+        });
+        
+        tr.querySelector(".deleteBtn").addEventListener("click", function() {
+          const id = this.getAttribute('data-id');
+          deleteConsultation(id);
+        });
+        
+        tr.querySelector(".editBtn").addEventListener("click", function() {
+          const id = this.getAttribute('data-id');
+          window.location.href = `consultation_detail.html?id=${id}&edit=true`;
+        });
+        
+        tbody.appendChild(tr);
+      });
+      
+      updatePagination();
+    }
+
+    function deleteConsultation(consultationId) {
+      if(confirm("Voulez-vous vraiment supprimer cette consultation ?")){
+        allConsultations = allConsultations.filter(c => c.id.toString() !== consultationId.toString());
+        localStorage.setItem('consultations', JSON.stringify(allConsultations));
+        showMessage('✅ Consultation supprimée avec succès', 'success');
+        loadConsultations();
+      }
+    }
+
+    function updatePagination() {
+      const totalPages = Math.ceil(filteredConsultations.length / consultationsPerPage);
+      const startItem = (currentPage - 1) * consultationsPerPage + 1;
+      const endItem = Math.min(currentPage * consultationsPerPage, filteredConsultations.length);
+      document.getElementById('paginationInfo').textContent = 
+        `Affichage de ${startItem} à ${endItem} sur ${filteredConsultations.length} consultations`;
+      document.getElementById('prevBtn').disabled = currentPage === 1;
+      document.getElementById('nextBtn').disabled = currentPage === totalPages || totalPages === 0;
+    }
+
+    function changePage(direction) {
+      const totalPages = Math.ceil(filteredConsultations.length / consultationsPerPage);
+      currentPage += direction;
+      if (currentPage < 1) currentPage = 1;
+      if (currentPage > totalPages) currentPage = totalPages;
+      renderConsultations();
+    }
+
+    // Fonction utilitaire pour mettre à jour le statut d'une ordonnance
+    function updateOrdonnanceStatus(ordonnanceId, newStatus) {
+      console.log(`Mise à jour statut ordonnance ${ordonnanceId}: ${newStatus}`);
+      
+      // Mettre à jour dans localStorage
+      const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
+      const ordonnanceIndex = ordonnances.findIndex(ord => ord.id == ordonnanceId || ord._id == ordonnanceId);
+      
+      if (ordonnanceIndex !== -1) {
+        ordonnances[ordonnanceIndex].statut = newStatus;
+        localStorage.setItem('ordonnances', JSON.stringify(ordonnances));
+      }
+      
+      // Recharger l'affichage si nécessaire
+      loadConsultations();
+    }
+
+    // ============================ MODIFICATION 2: CORRECTION DÉCONNEXION ============================
+    // Gestion des événements
+    document.getElementById("logout").addEventListener("click", function(e) {
+      e.preventDefault();
+      if(confirm("Voulez-vous vraiment vous déconnecter ?")) {
+        // Supprimer les deux clés pour une déconnexion complète
+        localStorage.removeItem("currentUser");
+        localStorage.removeItem("ordoPass_currentUser");
+        window.location.href = "index.html";
+      }
+    });
+    // ================================================================================================
+
+    document.getElementById("closePharmacyModal").addEventListener("click", closePharmacyModal);
+
+    // Fermer le modal en cliquant à l'extérieur
+    document.getElementById('pharmacyModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closePharmacyModal();
+      }
+    });
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', function() {
+      currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      if (currentUser) {
+        initDoctorSocket();
+      }
+      
+      loadConsultations();
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('success') === 'true') {
+        showMessage('✅ Consultation créée avec succès!', 'success');
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    });
+  </script>
+</body>
+</html>

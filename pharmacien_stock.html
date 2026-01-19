@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gestion du stock — OrdoPass</title>
+  <link rel="stylesheet" href="style1.css" />
+  <script src="https://kit.fontawesome.com/a2e0e6ad8c.js" crossorigin="anonymous"></script>
+  <style>
+    /* 🔹 Style du bouton de déconnexion */
+    #logout {
+      display: flex !important;
+      align-items: center;
+      color: white !important;
+      background: #e74c3c;
+      border-radius: 8px;
+      margin-top: 10px;
+      padding: 10px;
+      transition: 0.3s ease;
+    }
+    #logout:hover {
+      background: #c0392b;
+    }
+
+    .stock-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    .stock-table th, .stock-table td {
+      border-bottom: 1px solid #e4edf3;
+      padding: 10px;
+      text-align: left;
+    }
+    .stock-table th {
+      background: #f6f9fc;
+      font-weight: 600;
+      color: #345;
+    }
+    .actions button {
+      margin: 0 4px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .actions button.edit { color: #007bff; }
+    .actions button.delete { color: #e53935; }
+
+    .btn-add {
+      background: #0ea5a0;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-add:hover {
+      background: #0c8a87;
+    }
+    .form-popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      z-index: 10;
+      width: 90%;
+      max-width: 400px;
+    }
+    .form-popup.active { display: block; }
+    .form-popup h3 { margin-top: 0; color: #234a6a; }
+    .form-popup input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+    .form-popup .btns {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .form-popup .btns button {
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-cancel { background: #e4e9ee; }
+    .btn-save { background: #0ea5a0; color: white; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- ✅ Barre latérale identique à la page d'ordonnances -->
+    <aside class="sidebar">
+      <div class="logo">ORDO<span>PASS</span></div>
+      <nav class="menu">
+        <a href="pharmacien_dashboard.html"><i class="fa-solid fa-prescription"></i> <span>Ordonnances</span></a>
+        <a href="pharmacien_medecins.html"><i class="fa-solid fa-user-md"></i> <span>Médecins</span></a>
+        <a href="pharmacien_stock.html" class="active">
+          <i class="fa-solid fa-boxes-stacked"></i> <span>Gestion Stock</span>
+        </a>
+        <a href="pharmacien_facturation.html">
+          <i class="fa-solid fa-file-invoice-dollar"></i> <span>Facturation</span>
+        </a>
+        <a href="pharmacien_messagerie.html">
+          <i class="fa-solid fa-comment-medical"></i> <span>Messagerie</span>
+        </a>
+        <a href="pharmacien_parametres.html">
+          <i class="fa-solid fa-gear"></i> <span>Paramètres</span>
+        </a>
+        <a href="#" id="logout">
+          <i class="fa-solid fa-right-from-bracket"></i> <span>Déconnexion</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- ✅ Contenu principal -->
+    <main class="main">
+      <div class="topbar">
+        <div class="title">Gestion du stock</div>
+        <div class="user-box">
+          <img class="avatar" src="https://i.pravatar.cc/80?img=14" alt="avatar" />
+          <div>
+            <div id="userName">Pharmacie Centrale</div>
+            <small style="color:#6b8392">Connecté</small>
+          </div>
+        </div>
+      </div>
+
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div>
+            <div style="font-weight:700;color:#234a6a">Liste des médicaments</div>
+            <div style="color:#6b7f8e;font-size:14px">Gestion complète du stock de la pharmacie</div>
+          </div>
+          <div>
+            <input id="searchInput" placeholder="Rechercher un médicament..." 
+              style="padding:8px 12px;border-radius:8px;border:1px solid #e6eef6; margin-right: 10px;" />
+            <button class="btn-add" id="addMedBtn"><i class="fa-solid fa-plus"></i> Ajouter</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="stock-table" id="stockTable">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Quantité</th>
+                <th>Prix (CFA)</th>
+                <th>Date d'expiration</th>
+                <th style="width:120px">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="stockBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Popup formulaire -->
+  <div class="form-popup" id="formPopup">
+    <h3 id="popupTitle">Ajouter un médicament</h3>
+    <input type="text" id="medName" placeholder="Nom du médicament" required />
+    <input type="number" id="medQty" placeholder="Quantité" required />
+    <input type="number" id="medPrice" placeholder="Prix (CFA)" required />
+    <input type="date" id="medExpiry" required />
+    <div class="btns">
+      <button class="btn-cancel" id="cancelBtn">Annuler</button>
+      <button class="btn-save" id="saveBtn">Enregistrer</button>
+    </div>
+  </div>
+
+  <script>
+    // --- Données stockées localement ---
+    let stock = JSON.parse(localStorage.getItem("stock")) || [
+      { name: "Paracétamol 500mg", qty: 150, price: 500, expiry: "2025-12-31" },
+      { name: "Amoxicilline 1g", qty: 80, price: 1200, expiry: "2025-10-15" },
+      { name: "Ibuprofène 400mg", qty: 200, price: 800, expiry: "2026-03-20" },
+      { name: "Vitamine C 1000mg", qty: 100, price: 1500, expiry: "2025-11-30" }
+    ];
+    let editIndex = null;
+
+    const stockBody = document.getElementById("stockBody");
+    const formPopup = document.getElementById("formPopup");
+    const addBtn = document.getElementById("addMedBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const searchInput = document.getElementById("searchInput");
+
+    const medName = document.getElementById("medName");
+    const medQty = document.getElementById("medQty");
+    const medPrice = document.getElementById("medPrice");
+    const medExpiry = document.getElementById("medExpiry");
+
+    function renderStock() {
+      stockBody.innerHTML = "";
+      const searchTerm = searchInput.value.toLowerCase();
+      
+      const filteredStock = stock.filter(med => 
+        med.name.toLowerCase().includes(searchTerm)
+      );
+
+      if (filteredStock.length === 0) {
+        stockBody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; color: #6b7f8e; padding: 20px;">
+              Aucun médicament trouvé
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      filteredStock.forEach((med, i) => {
+        // Trouver l'index original dans le tableau complet
+        const originalIndex = stock.findIndex(item => item === med);
+        
+        stockBody.innerHTML += `
+          <tr>
+            <td>${med.name}</td>
+            <td>${med.qty}</td>
+            <td>${med.price.toLocaleString()} FCFA</td>
+            <td>${formatDate(med.expiry)}</td>
+            <td class="actions">
+              <button class="edit" onclick="editMed(${originalIndex})"><i class="fa-solid fa-pen"></i></button>
+              <button class="delete" onclick="deleteMed(${originalIndex})"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>`;
+      });
+      localStorage.setItem("stock", JSON.stringify(stock));
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('fr-FR');
+    }
+
+    function resetForm() {
+      medName.value = "";
+      medQty.value = "";
+      medPrice.value = "";
+      medExpiry.value = "";
+    }
+
+    addBtn.onclick = () => {
+      editIndex = null;
+      document.getElementById("popupTitle").textContent = "Ajouter un médicament";
+      resetForm();
+      formPopup.classList.add("active");
+    };
+
+    cancelBtn.onclick = () => formPopup.classList.remove("active");
+
+    saveBtn.onclick = () => {
+      const med = {
+        name: medName.value.trim(),
+        qty: parseInt(medQty.value),
+        price: parseInt(medPrice.value),
+        expiry: medExpiry.value
+      };
+      
+      if (!med.name || !med.qty || !med.price || !med.expiry) {
+        alert("Veuillez remplir tous les champs !");
+        return;
+      }
+
+      if (med.qty < 0) {
+        alert("La quantité ne peut pas être négative !");
+        return;
+      }
+
+      if (med.price < 0) {
+        alert("Le prix ne peut pas être négatif !");
+        return;
+      }
+
+      if (editIndex !== null) {
+        stock[editIndex] = med;
+      } else {
+        stock.push(med);
+      }
+
+      formPopup.classList.remove("active");
+      renderStock();
+    };
+
+    function editMed(i) {
+      editIndex = i;
+      const med = stock[i];
+      medName.value = med.name;
+      medQty.value = med.qty;
+      medPrice.value = med.price;
+      medExpiry.value = med.expiry;
+      document.getElementById("popupTitle").textContent = "Modifier le médicament";
+      formPopup.classList.add("active");
+    }
+
+    function deleteMed(i) {
+      if (confirm("Êtes-vous sûr de vouloir supprimer ce médicament ?")) {
+        stock.splice(i, 1);
+        renderStock();
+      }
+    }
+
+    // Recherche en temps réel
+    searchInput.addEventListener('input', renderStock);
+
+    // Rendre accessible les fonctions globalement
+    window.editMed = editMed;
+    window.deleteMed = deleteMed;
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', function() {
+      renderStock();
+    });
+
+    // Déconnexion
+    document.getElementById("logout").addEventListener("click", (e) => {
+      e.preventDefault();
+      localStorage.removeItem("user");
+      sessionStorage.removeItem("user");
+      window.location.href = "index.html";
+    });
+  </script>
+</body>
+</html>

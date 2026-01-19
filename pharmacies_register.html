@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Inscription Pharmacien — OrdoPass</title>
+  <link rel="stylesheet" href="style2.css" />
+  <style>
+    .logo-center {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    
+    .form-card {
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 480px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #1e3c72;
+      font-weight: 500;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border 0.3s ease;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #0ea5a0;
+      box-shadow: 0 0 0 3px rgba(14, 165, 160, 0.1);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #0ea5a0, #10b981);
+      color: white;
+      border: none;
+      padding: 14px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #10b981, #34d399);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(14, 165, 160, 0.2);
+    }
+    
+    .message-box {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin: 20px 0;
+      display: none;
+    }
+    
+    .message-box.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+    
+    .message-box.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+    
+    .message-box.warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+      display: block;
+    }
+    
+    .login-link {
+      text-align: center;
+      margin-top: 20px;
+      color: #6b7280;
+    }
+    
+    .login-link a {
+      color: #0ea5a0;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+    
+    .split-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    .side-image {
+      flex: 1;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+    
+    .side-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+    }
+    
+    .side-content {
+      position: absolute;
+      bottom: 40px;
+      left: 40px;
+      right: 40px;
+      color: white;
+    }
+    
+    .pharm-accent {
+      background-image: url('https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');
+    }
+    
+    .check-btn {
+      margin-top: 5px;
+      padding: 5px 10px;
+      background: #f3f4f6;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .check-btn:hover {
+      background: #e5e7eb;
+    }
+    
+    .name-status {
+      margin-top: 5px;
+      font-size: 14px;
+      padding: 5px;
+      border-radius: 4px;
+    }
+    
+    /* Styles pour le captcha */
+    .captcha-container {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      border: 1px solid #e9ecef;
+    }
+    
+    .captcha-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .captcha-code {
+      font-family: 'Courier New', monospace;
+      font-size: 24px;
+      font-weight: bold;
+      letter-spacing: 5px;
+      background: linear-gradient(45deg, #1e3c72, #0ea5a0);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: 1px dashed #0ea5a0;
+      user-select: none;
+    }
+    
+    .refresh-captcha {
+      background: none;
+      border: none;
+      color: #0ea5a0;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .refresh-captcha:hover {
+      text-decoration: underline;
+    }
+    
+    .captcha-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    .captcha-input:focus {
+      outline: none;
+      border-color: #0ea5a0;
+      box-shadow: 0 0 0 3px rgba(14, 165, 160, 0.1);
+    }
+    
+    .captcha-status {
+      margin-top: 8px;
+      font-size: 14px;
+      min-height: 20px;
+    }
+    
+    .captcha-error {
+      color: #dc3545;
+    }
+    
+    .captcha-success {
+      color: #28a745;
+    }
+    
+    /* Style pour les mots censurés */
+    .censored-word {
+      background-color: #ffe6e6;
+      border: 1px solid #ffcccc;
+      padding: 2px 4px;
+      border-radius: 3px;
+      color: #cc0000;
+      font-weight: bold;
+    }
+    
+    .censor-warning {
+      background-color: #fff3cd;
+      border: 1px solid #ffeaa7;
+      color: #856404;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    
+    @media (max-width: 768px) {
+      .split-layout {
+        flex-direction: column;
+      }
+      
+      .side-image {
+        min-height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="split-layout">
+    <!-- 💊 Image à gauche -->
+    <div class="side-image pharm-accent">
+      <div class="side-overlay"></div>
+      <div class="side-content">
+        <h2 style="margin:0 0 12px;font-size:28px">Rejoignez notre réseau</h2>
+        <p style="color:rgba(255,255,255,0.95);max-width:420px">
+          Inscrivez votre pharmacie pour recevoir et traiter des ordonnances numériques sécurisées.
+        </p>
+      </div>
+    </div>
+
+    <!-- 🧾 Formulaire d'inscription -->
+    <div style="display:flex;align-items:center;justify-content:center;padding:40px;overflow-y:auto">
+      <div class="form-card">
+        <!-- 🔹 Logo -->
+        <div class="logo-center">
+          <svg viewBox="0 0 220 40" xmlns="http://www.w3.org/2000/svg">
+            <linearGradient id="g4" x1="0" x2="1">
+              <stop offset="0" stop-color="#2a5298"/>
+              <stop offset="1" stop-color="#1e3c72"/>
+            </linearGradient>
+            <text x="0" y="28" font-family="Inter, Arial" font-size="22" font-weight="700" fill="url(#g4)">
+              Ordo<tspan fill="#0ea5a0">Pass</tspan>
+            </text>
+          </svg>
+          <h2 style="color:#1e3c72;margin-top:10px">Inscription Pharmacien</h2>
+        </div>
+
+        <form id="registerForm" class="flex-col">
+          <!-- Informations de connexion -->
+          <div class="form-group">
+            <label>Nom d'utilisateur *</label>
+            <input id="username" type="text" placeholder="pharmacie123" required>
+            <small style="color:#666">Utilisé pour se connecter (doit être unique)</small>
+          </div>
+
+          <div class="form-group">
+            <label>Mot de passe *</label>
+            <input id="password" type="password" placeholder="Minimum 8 caractères" required>
+          </div>
+
+          <div class="form-group">
+            <label>Confirmer le mot de passe *</label>
+            <input id="confirmPassword" type="password" placeholder="Répétez le mot de passe" required>
+          </div>
+
+          <!-- Informations pharmacie -->
+          <div class="form-group">
+            <label>Nom de la pharmacie *</label>
+            <input id="nom" type="text" placeholder="Pharmacie Centrale" required>
+            <button type="button" id="checkName" class="check-btn">
+              Vérifier la disponibilité
+            </button>
+            <div id="nameStatus" class="name-status"></div>
+          </div>
+
+          <div class="form-group">
+            <label>Adresse complète *</label>
+            <input id="adresse" type="text" placeholder="123 Avenue, Ville, Code postal" required>
+          </div>
+
+          <div class="form-group">
+            <label>Email *</label>
+            <input id="email" type="email" placeholder="contact@pharmacie.com" required>
+          </div>
+
+          <div class="form-group">
+            <label>Téléphone</label>
+            <input id="telephone" type="tel" placeholder="+221 77 123 45 67">
+          </div>
+
+          <div class="form-group">
+            <label>Numéro de licence</label>
+            <input id="licenseNumber" type="text" placeholder="Licence professionnelle">
+          </div>
+
+          <div class="form-group">
+            <label>Années d'expérience</label>
+            <input id="experience" type="number" min="0" placeholder="5">
+          </div>
+
+          <!-- Section CAPTCHA ajoutée -->
+          <div class="captcha-container">
+            <div class="captcha-header">
+              <span style="font-weight:500;color:#1e3c72">Vérification de sécurité</span>
+              <button type="button" id="refreshCaptcha" class="refresh-captcha">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                </svg>
+                Nouveau code
+              </button>
+            </div>
+            
+            <div class="captcha-code" id="captchaDisplay">
+              <!-- Le code CAPTCHA sera généré ici -->
+            </div>
+            
+            <div style="margin-top:15px">
+              <label for="captchaInput" style="display:block;margin-bottom:8px;color:#1e3c72;font-weight:500">
+                Entrez le code ci-dessus *
+              </label>
+              <input type="text" id="captchaInput" class="captcha-input" placeholder="Entrez les caractères" required>
+              <div id="captchaStatus" class="captcha-status"></div>
+            </div>
+          </div>
+
+          <!-- Section de censure (cachée par défaut) -->
+          <div id="censorWarning" class="censor-warning" style="display: none;"></div>
+
+          <button class="btn-primary" type="submit">Créer mon compte</button>
+
+          <div id="messageBox" class="message-box"></div>
+
+          <div class="login-link">
+            Déjà un compte ? <a href="index.html">Se connecter</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Liste de mots interdits (censure)
+    const forbiddenWords = [
+      'drogue', 'stupéfiant', 'cocaïne', 'héroïne', 'cannabis', 'haschich',
+      'mdma', 'ecstasy', 'lsd', 'crack', 'meth', 'amphétamine', 'opium',
+      'viagra', 'cialis', 'levitra', 'kamagra', // médicaments sans ordonnance
+      'arme', 'armes', 'pistolet', 'fusil', 'couteau',
+      'raciste', 'racisme', 'nazi', 'fasciste',
+      'haine', 'violence', 'meurtre', 'suicide',
+      'porn', 'xxx', 'sexe', 'adulte', 'porno',
+      'escroquerie', 'arnaque', 'fraude', 'contrefaçon',
+      'terrorisme', 'terroriste', 'djihad', 'extrémiste',
+      'insulte', 'injure', 'vulgaire', 'obscène'
+    ];
+
+    // Fonctions de censure
+    function containsForbiddenWords(text) {
+      const lowerText = text.toLowerCase();
+      const foundWords = [];
+      
+      forbiddenWords.forEach(word => {
+        // Recherche de mots entiers ou partiels
+        const regex = new RegExp(`\\b${word}\\b`, 'i');
+        if (regex.test(text)) {
+          foundWords.push(word);
+        }
+      });
+      
+      return foundWords;
+    }
+
+    function censorText(text) {
+      let censoredText = text;
+      forbiddenWords.forEach(word => {
+        const regex = new RegExp(`\\b${word}\\b`, 'gi');
+        censoredText = censoredText.replace(regex, '<span class="censored-word">[CENSURÉ]</span>');
+      });
+      return censoredText;
+    }
+
+    function validateTextForCensorship(text, fieldName) {
+      const forbiddenFound = containsForbiddenWords(text);
+      
+      if (forbiddenFound.length > 0) {
+        const warningDiv = document.getElementById('censorWarning');
+        const censoredText = censorText(text);
+        
+        warningDiv.innerHTML = `
+          <strong>⚠️ Contenu inapproprié détecté</strong><br>
+          Le ${fieldName} contient des mots interdits :<br>
+          <strong>${forbiddenFound.join(', ')}</strong><br>
+          Veuillez modifier votre ${fieldName} pour qu'il soit professionnel et approprié.
+        `;
+        warningDiv.style.display = 'block';
+        
+        return {
+          isValid: false,
+          forbiddenWords: forbiddenFound,
+          censoredText: censoredText
+        };
+      }
+      
+      return { isValid: true };
+    }
+
+    // Fonction pour générer un code CAPTCHA aléatoire
+    function generateCaptcha() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Exclure les caractères ambigus
+      let captcha = '';
+      for (let i = 0; i < 6; i++) {
+        captcha += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return captcha;
+    }
+
+    // Variables pour le CAPTCHA
+    let currentCaptcha = generateCaptcha();
+    let captchaAttempts = 0;
+    const maxCaptchaAttempts = 3;
+
+    // Initialiser le CAPTCHA
+    function initCaptcha() {
+      const captchaDisplay = document.getElementById('captchaDisplay');
+      captchaDisplay.textContent = currentCaptcha;
+      
+      // Ajouter un effet de distorsion visuel
+      captchaDisplay.style.transform = `rotate(${Math.random() * 6 - 3}deg)`;
+      
+      // Réinitialiser le statut
+      const captchaStatus = document.getElementById('captchaStatus');
+      captchaStatus.textContent = '';
+      captchaStatus.className = 'captcha-status';
+      
+      // Réinitialiser l'input
+      document.getElementById('captchaInput').value = '';
+    }
+
+    // Vérifier le CAPTCHA
+    function validateCaptcha() {
+      const userInput = document.getElementById('captchaInput').value.trim().toUpperCase();
+      const captchaStatus = document.getElementById('captchaStatus');
+      
+      if (!userInput) {
+        captchaStatus.textContent = 'Veuillez entrer le code de vérification';
+        captchaStatus.className = 'captcha-status captcha-error';
+        return false;
+      }
+      
+      if (userInput === currentCaptcha) {
+        captchaStatus.textContent = '✓ Code correct';
+        captchaStatus.className = 'captcha-status captcha-success';
+        return true;
+      } else {
+        captchaAttempts++;
+        captchaStatus.textContent = `✗ Code incorrect. Tentative ${captchaAttempts}/${maxCaptchaAttempts}`;
+        captchaStatus.className = 'captcha-status captcha-error';
+        
+        // Générer un nouveau CAPTCHA après une erreur
+        if (captchaAttempts < maxCaptchaAttempts) {
+          currentCaptcha = generateCaptcha();
+          initCaptcha();
+        } else {
+          document.getElementById('captchaInput').disabled = true;
+          captchaStatus.textContent = '✗ Trop de tentatives. Veuillez rafraîchir la page.';
+        }
+        return false;
+      }
+    }
+
+    // Événement pour rafraîchir le CAPTCHA
+    document.getElementById('refreshCaptcha').addEventListener('click', function() {
+      currentCaptcha = generateCaptcha();
+      initCaptcha();
+      captchaAttempts = 0;
+    });
+
+    // Initialiser le CAPTCHA au chargement
+    document.addEventListener('DOMContentLoaded', initCaptcha);
+
+    // Vérifier la disponibilité du nom de pharmacie AVEC CENSURE
+    document.getElementById('checkName').addEventListener('click', async () => {
+      const nom = document.getElementById('nom').value.trim();
+      const statusDiv = document.getElementById('nameStatus');
+      const warningDiv = document.getElementById('censorWarning');
+      
+      if (!nom) {
+        statusDiv.innerHTML = '<span style="color:#dc3545">Veuillez entrer un nom</span>';
+        return;
+      }
+      
+      // Vérification de la censure d'abord
+      const censorshipCheck = validateTextForCensorship(nom, 'nom de pharmacie');
+      if (!censorshipCheck.isValid) {
+        statusDiv.innerHTML = `<span style="color:#dc3545">❌ Nom inapproprié détecté</span>`;
+        return;
+      } else {
+        warningDiv.style.display = 'none';
+      }
+      
+      try {
+        const response = await fetch(`/api/check-pharmacy-name/${encodeURIComponent(nom)}`);
+        const data = await response.json();
+        
+        if (data.available) {
+          statusDiv.innerHTML = '<span style="color:#28a745">✓ Nom disponible</span>';
+        } else {
+          statusDiv.innerHTML = `
+            <span style="color:#dc3545">
+              ⚠️ Une pharmacie avec ce nom existe déjà.<br>
+              <small>Suggestion: <strong>${data.suggestion}</strong></small>
+            </span>
+          `;
+        }
+      } catch (error) {
+        console.error('Erreur vérification:', error);
+        statusDiv.innerHTML = '<span style="color:#dc3545">Erreur de vérification</span>';
+      }
+    });
+
+    // Validation en temps réel pour la censure
+    document.getElementById('nom').addEventListener('input', function() {
+      const nom = this.value.trim();
+      if (nom.length > 3) { // Seulement vérifier si assez de caractères
+        const censorshipCheck = validateTextForCensorship(nom, 'nom de pharmacie');
+        if (!censorshipCheck.isValid) {
+          this.style.borderColor = '#dc3545';
+          this.style.boxShadow = '0 0 0 3px rgba(220, 53, 69, 0.1)';
+        } else {
+          this.style.borderColor = '#ddd';
+          this.style.boxShadow = 'none';
+          document.getElementById('censorWarning').style.display = 'none';
+        }
+      }
+    });
+
+    // Validation en temps réel pour l'adresse
+    document.getElementById('adresse').addEventListener('input', function() {
+      const adresse = this.value.trim();
+      if (adresse.length > 10) {
+        const censorshipCheck = validateTextForCensorship(adresse, 'adresse');
+        if (!censorshipCheck.isValid) {
+          this.style.borderColor = '#dc3545';
+          this.style.boxShadow = '0 0 0 3px rgba(220, 53, 69, 0.1)';
+        } else {
+          this.style.borderColor = '#ddd';
+          this.style.boxShadow = 'none';
+        }
+      }
+    });
+
+    // Validation en temps réel pour le nom d'utilisateur
+    document.getElementById('username').addEventListener('input', function() {
+      const username = this.value.trim();
+      if (username.length > 3) {
+        const censorshipCheck = validateTextForCensorship(username, 'nom d\'utilisateur');
+        if (!censorshipCheck.isValid) {
+          this.style.borderColor = '#dc3545';
+          this.style.boxShadow = '0 0 0 3px rgba(220, 53, 69, 0.1)';
+        } else {
+          this.style.borderColor = '#ddd';
+          this.style.boxShadow = 'none';
+        }
+      }
+    });
+
+    // Gestion de l'inscription AVEC VÉRIFICATION DE CENSURE
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const messageBox = document.getElementById('messageBox');
+      messageBox.textContent = '';
+      messageBox.className = 'message-box';
+      
+      // Validation du CAPTCHA d'abord
+      if (!validateCaptcha()) {
+        if (captchaAttempts >= maxCaptchaAttempts) {
+          messageBox.textContent = '❌ Trop de tentatives de CAPTCHA. Veuillez rafraîchir la page.';
+          messageBox.classList.add('error');
+        } else {
+          messageBox.textContent = '❌ Veuillez vérifier le code de sécurité';
+          messageBox.classList.add('error');
+        }
+        return;
+      }
+      
+      // Validation des données
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const nom = document.getElementById('nom').value.trim();
+      const adresse = document.getElementById('adresse').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const telephone = document.getElementById('telephone').value.trim();
+      const licenseNumber = document.getElementById('licenseNumber').value.trim();
+      const experience = document.getElementById('experience').value;
+      
+      // Validation de censure pour tous les champs textuels
+      const fieldsToCheck = [
+        { value: nom, name: 'nom de pharmacie', field: 'nom' },
+        { value: adresse, name: 'adresse', field: 'adresse' },
+        { value: username, name: 'nom d\'utilisateur', field: 'username' },
+        { value: licenseNumber, name: 'numéro de licence', field: 'licenseNumber' }
+      ];
+      
+      let hasCensorshipIssue = false;
+      let censorshipDetails = [];
+      
+      fieldsToCheck.forEach(field => {
+        if (field.value.trim()) {
+          const censorshipCheck = validateTextForCensorship(field.value, field.name);
+          if (!censorshipCheck.isValid) {
+            hasCensorshipIssue = true;
+            censorshipDetails.push(`${field.name}: ${censorshipCheck.forbiddenWords.join(', ')}`);
+            
+            // Mettre en surbrillance le champ problématique
+            document.getElementById(field.field).style.borderColor = '#dc3545';
+            document.getElementById(field.field).style.boxShadow = '0 0 0 3px rgba(220, 53, 69, 0.1)';
+          }
+        }
+      });
+      
+      if (hasCensorshipIssue) {
+        messageBox.innerHTML = `
+          ❌ Contenu inapproprié détecté<br>
+          <small>Les champs suivants contiennent des mots interdits :<br>
+          ${censorshipDetails.join('<br>')}</small>
+        `;
+        messageBox.classList.add('error');
+        return;
+      }
+      
+      // Validation basique
+      if (password !== confirmPassword) {
+        messageBox.textContent = '❌ Les mots de passe ne correspondent pas';
+        messageBox.classList.add('error');
+        return;
+      }
+      
+      if (password.length < 8) {
+        messageBox.textContent = '❌ Le mot de passe doit avoir au moins 8 caractères';
+        messageBox.classList.add('error');
+        return;
+      }
+      
+      if (!nom) {
+        messageBox.textContent = '❌ Le nom de la pharmacie est obligatoire';
+        messageBox.classList.add('error');
+        return;
+      }
+      
+      // Désactiver le bouton pendant l'envoi
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Création en cours...';
+      
+      try {
+        // Ajouter un flag de censure validée côté client
+        const registerData = {
+          username,
+          password,
+          email,
+          telephone,
+          nom,
+          adresse,
+          licenseNumber,
+          experience: experience || 0,
+          censorshipValidated: true // Indique que la censure a été vérifiée côté client
+        };
+        
+        const response = await fetch('/api/register-pharmacien', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(registerData)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          if (data.warning) {
+            messageBox.textContent = `⚠️ ${data.warning}`;
+            messageBox.classList.add('warning');
+          }
+          
+          messageBox.innerHTML += '<br>✅ Compte créé avec succès ! Redirection...';
+          if (!data.warning) {
+            messageBox.classList.add('success');
+          }
+          
+          // Stocker les informations utilisateur
+          localStorage.setItem('currentUser', JSON.stringify(data.user));
+          if (data.pharmacie && data.pharmacie.id) {
+            localStorage.setItem('pharmacieId', data.pharmacie.id);
+          }
+          
+          // Redirection vers le dashboard après 2 secondes
+          setTimeout(() => {
+            window.location.href = 'pharmacien_dashboard.html';
+          }, 2000);
+          
+        } else {
+          messageBox.textContent = `❌ ${data.error || 'Erreur lors de la création du compte'}`;
+          if (data.details) {
+            messageBox.textContent += `: ${Array.isArray(data.details) ? data.details.join(', ') : data.details}`;
+          }
+          messageBox.classList.add('error');
+        }
+        
+      } catch (error) {
+        console.error('Erreur inscription:', error);
+        messageBox.textContent = '❌ Erreur de connexion au serveur';
+        messageBox.classList.add('error');
+      } finally {
+        // Réactiver le bouton
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    });
+    
+    // Validation en temps réel des mots de passe
+    document.getElementById('password').addEventListener('input', function() {
+      const confirm = document.getElementById('confirmPassword');
+      if (this.value !== confirm.value) {
+        confirm.style.borderColor = '#dc3545';
+      } else {
+        confirm.style.borderColor = '#28a745';
+      }
+    });
+    
+    document.getElementById('confirmPassword').addEventListener('input', function() {
+      const password = document.getElementById('password');
+      if (this.value !== password.value) {
+        this.style.borderColor = '#dc3545';
+      } else {
+        this.style.borderColor = '#28a745';
+      }
+    });
+  </script>
+</body>
+</html>

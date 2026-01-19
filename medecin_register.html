@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription Médecin - OrdoPass</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .register-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+            min-height: 600px;
+        }
+        
+        .left-side {
+            flex: 1;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        
+        .logo i {
+            color: #00d4ff;
+        }
+        
+        .logo span {
+            color: #00d4ff;
+        }
+        
+        .left-side h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        
+        .left-side p {
+            opacity: 0.9;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .benefits {
+            list-style: none;
+        }
+        
+        .benefits li {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .benefits i {
+            color: #00d4ff;
+        }
+        
+        .right-side {
+            flex: 1.2;
+            padding: 40px;
+            overflow-y: auto;
+            max-height: 600px;
+        }
+        
+        .right-side h2 {
+            color: #1e3c72;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .required::after {
+            content: " *";
+            color: red;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            display: block;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .checkbox-group input {
+            width: auto;
+            margin-top: 3px;
+        }
+        
+        .checkbox-group label {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .checkbox-group a {
+            color: #2a5298;
+            text-decoration: none;
+        }
+        
+        .checkbox-group a:hover {
+            text-decoration: underline;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 60, 114, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+        
+        .login-link a {
+            color: #2a5298;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .server-status {
+            background: #e8f4fd;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+            border: 1px solid #b3d9ff;
+        }
+        
+        .server-status i {
+            color: #2a5298;
+            margin-right: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .register-container {
+                flex-direction: column;
+            }
+            
+            .left-side {
+                padding: 30px;
+            }
+            
+            .right-side {
+                padding: 30px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="left-side">
+            <div class="logo">
+                <i class="fas fa-notes-medical"></i>
+                Ordo<span>Pass</span>
+            </div>
+            <h1>Rejoignez la révolution médicale</h1>
+            <p>Créez votre compte médecin pour accéder à la plateforme de transmission sécurisée d'ordonnances.</p>
+            <ul class="benefits">
+                <li><i class="fas fa-check-circle"></i> Transmission instantanée aux pharmacies</li>
+                <li><i class="fas fa-check-circle"></i> Interface intuitive et ergonomique</li>
+                <li><i class="fas fa-check-circle"></i> Sauvegarde automatique des données</li>
+                <li><i class="fas fa-check-circle"></i> Support technique dédié</li>
+                <li><i class="fas fa-check-circle"></i> Conforme RGPD</li>
+            </ul>
+            <div style="margin-top: 30px;">
+                <p><i class="fas fa-phone"></i> Support: +221 78 929 92 04</p>
+                <p><i class="fas fa-envelope"></i> Email: support@ordopass.com</p>
+            </div>
+        </div>
+        
+        <div class="right-side">
+            <h2>Inscription Médecin</h2>
+            
+            <div id="serverStatus" class="server-status">
+                <i class="fas fa-server"></i>
+                <span id="modeText">Mode local activé</span>
+            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="nom" class="required">Nom</label>
+                    <input type="text" id="nom" name="nom" placeholder="Votre nom" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="prenom" class="required">Prénom</label>
+                    <input type="text" id="prenom" name="prenom" placeholder="Votre prénom" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email" class="required">Email professionnel</label>
+                    <input type="email" id="email" name="email" placeholder="votre.email@exemple.com" required>
+                    <span class="help-text">Utilisez votre email professionnel</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dateNaissance" class="required">Date de naissance</label>
+                    <input type="date" id="dateNaissance" name="dateNaissance" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="specialite" class="required">Spécialité médicale</label>
+                    <select id="specialite" name="specialite" required>
+                        <option value="">Sélectionnez une spécialité</option>
+                        <option value="Généraliste">Médecin Généraliste</option>
+                        <option value="Cardiologue">Cardiologue</option>
+                        <option value="Dermatologue">Dermatologue</option>
+                        <option value="Pédiatre">Pédiatre</option>
+                        <option value="Gynécologue">Gynécologue</option>
+                        <option value="Ophtalmologue">Ophtalmologue</option>
+                        <option value="ORL">ORL</option>
+                        <option value="Autre">Autre spécialité</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="numeroInscription" class="required">Numéro d'inscription à l'ordre</label>
+                    <input type="text" id="numeroInscription" name="numeroInscription" placeholder="MED123456" required>
+                    <span class="help-text">Votre numéro d'inscription à l'ordre des médecins</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="etablissement" class="required">Établissement / Cabinet</label>
+                    <input type="text" id="etablissement" name="etablissement" placeholder="Nom de votre établissement" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="username" class="required">Nom d'utilisateur</label>
+                    <input type="text" id="username" name="username" placeholder="Choisissez un nom d'utilisateur" required>
+                    <span class="help-text">Ce sera votre identifiant de connexion</span>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password" class="required">Mot de passe</label>
+                        <input type="password" id="password" name="password" placeholder="Créez un mot de passe" required>
+                        <span class="help-text">Minimum 8 caractères</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword" class="required">Confirmer le mot de passe</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirmez votre mot de passe" required>
+                    </div>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="acceptTerms" required>
+                    <label for="acceptTerms">
+                        J'accepte les <a href="#">conditions d'utilisation</a> et la <a href="#">politique de confidentialité</a> d'OrdoPass
+                    </label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="acceptNewsletter">
+                    <label for="acceptNewsletter">
+                        Je souhaite recevoir les actualités et mises à jour d'OrdoPass
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn" id="submitBtn">
+                    <i class="fas fa-user-plus"></i>
+                    <span id="btnText">Créer mon compte</span>
+                </button>
+                
+                <div class="login-link">
+                    Déjà un compte ? <a href="medecin_login.html">Connectez-vous ici</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="config.js"></script>
+    <script src="api-service.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurer la date de naissance
+            const dateInput = document.getElementById('dateNaissance');
+            const today = new Date();
+            const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+            const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
+            dateInput.max = maxDate.toISOString().split('T')[0];
+            dateInput.min = minDate.toISOString().split('T')[0];
+            
+            // Afficher le mode
+            const modeText = document.getElementById('modeText');
+            if (window.APP_CONFIG.isLocal()) {
+                modeText.textContent = 'Mode local activé (sans serveur)';
+            } else {
+                modeText.textContent = 'Mode en ligne activé';
+            }
+            
+            // Génération automatique du nom d'utilisateur
+            const nomInput = document.getElementById('nom');
+            const prenomInput = document.getElementById('prenom');
+            const usernameInput = document.getElementById('username');
+            
+            function generateUsername() {
+                const nom = nomInput.value.trim().toLowerCase();
+                const prenom = prenomInput.value.trim().toLowerCase();
+                
+                if (nom && prenom && !usernameInput.value) {
+                    const baseUsername = prenom.charAt(0) + '.' + nom;
+                    usernameInput.value = baseUsername
+                        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                        .replace(/[^a-z.]/g, '');
+                }
+            }
+            
+            nomInput.addEventListener('input', generateUsername);
+            prenomInput.addEventListener('input', generateUsername);
+            
+            // Validation du mot de passe
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            
+            function validatePassword() {
+                const password = passwordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+                
+                if (password.length > 0 && password.length < 8) {
+                    passwordInput.style.borderColor = '#dc3545';
+                } else {
+                    passwordInput.style.borderColor = '#28a745';
+                }
+                
+                if (confirmPassword && password !== confirmPassword) {
+                    confirmPasswordInput.style.borderColor = '#dc3545';
+                    return false;
+                } else if (confirmPassword) {
+                    confirmPasswordInput.style.borderColor = '#28a745';
+                }
+                
+                return true;
+            }
+            
+            passwordInput.addEventListener('input', validatePassword);
+            confirmPasswordInput.addEventListener('input', validatePassword);
+            
+            // Gestion du formulaire
+            const registerForm = document.getElementById('registerForm');
+            const messageDiv = document.getElementById('message');
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            
+            registerForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Validation
+                if (!validatePassword()) {
+                    showMessage('Les mots de passe ne correspondent pas', 'error');
+                    return;
+                }
+                
+                if (!document.getElementById('acceptTerms').checked) {
+                    showMessage('Veuillez accepter les conditions d\'utilisation', 'error');
+                    return;
+                }
+                
+                // Collecter les données
+                const formData = {
+                    nom: document.getElementById('nom').value.trim(),
+                    prenom: document.getElementById('prenom').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    username: document.getElementById('username').value.trim(),
+                    password: document.getElementById('password').value,
+                    dateNaissance: document.getElementById('dateNaissance').value,
+                    specialite: document.getElementById('specialite').value,
+                    numeroInscription: document.getElementById('numeroInscription').value.trim(),
+                    etablissement: document.getElementById('etablissement').value.trim()
+                };
+                
+                // Désactiver le bouton
+                submitBtn.disabled = true;
+                btnText.textContent = 'Création en cours...';
+                
+                try {
+                    // Utiliser l'API service
+                    const result = await window.apiService.registerMedecin(formData);
+                    
+                    if (result.success) {
+                        showMessage(result.message, 'success');
+                        
+                        // Sauvegarder l'utilisateur dans localStorage
+                        localStorage.setItem('currentUser', JSON.stringify(result.user));
+                        localStorage.setItem('ordoPass_currentUser', JSON.stringify(result.user));
+                        
+                        // Redirection après 2 secondes
+                        setTimeout(() => {
+                            window.location.href = 'medecin_dashboard.html';
+                        }, 2000);
+                    }
+                } catch (error) {
+                    showMessage(error.message, 'error');
+                    submitBtn.disabled = false;
+                    btnText.textContent = 'Créer mon compte';
+                }
+            });
+            
+            function showMessage(text, type) {
+                messageDiv.textContent = text;
+                messageDiv.className = `message ${type}`;
+                
+                if (type === 'error') {
+                    setTimeout(() => {
+                        messageDiv.className = 'message';
+                        messageDiv.textContent = '';
+                    }, 5000);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

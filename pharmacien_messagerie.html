@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messagerie - Pharmacien | OrdoPass</title>
+  <link rel="stylesheet" href="style1.css" />
+  <script src="https://kit.fontawesome.com/a2d9d5a64b.js" crossorigin="anonymous"></script>
+
+  <style>
+    /* 🔹 Style du bouton de déconnexion */
+    #logout {
+      display: flex !important;
+      align-items: center;
+      color: white !important;
+      background: #e74c3c;
+      border-radius: 8px;
+      margin-top: 10px;
+      padding: 10px;
+      transition: 0.3s ease;
+    }
+    #logout:hover {
+      background: #c0392b;
+    }
+
+    /* Styles spécifiques à la messagerie */
+    .messagerie-container {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 0;
+      height: 600px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .conversations-list {
+      border-right: 1px solid #e1e5e9;
+      background: #f8f9fa;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .conversations-header {
+      padding: 25px;
+      border-bottom: 1px solid #e1e5e9;
+      background: white;
+    }
+
+    .search-conversations {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 0.9em;
+    }
+
+    .conversation-item {
+      display: flex;
+      align-items: center;
+      padding: 18px 20px;
+      border-bottom: 1px solid #e1e5e9;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    .conversation-item:hover {
+      background: #f1f3f4;
+    }
+
+    .conversation-item.active {
+      background: #e8f4fd;
+      border-right: 4px solid #2a5298;
+    }
+
+    .conversation-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin-right: 15px;
+      background: linear-gradient(135deg, #2a5298, #1e3c72);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .conversation-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .conversation-name {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 6px;
+    }
+
+    .conversation-preview {
+      color: #7f8c8d;
+      font-size: 0.85em;
+    }
+
+    .conversation-meta {
+      text-align: right;
+      font-size: 0.8em;
+      color: #95a5a6;
+    }
+
+    .unread-badge {
+      background: #e74c3c;
+      color: white;
+      border-radius: 12px;
+      padding: 4px 8px;
+      font-size: 0.7em;
+    }
+
+    .chat-area {
+      display: flex;
+      flex-direction: column;
+      background: white;
+    }
+
+    .chat-header {
+      padding: 20px 25px;
+      border-bottom: 1px solid #e1e5e9;
+      background: white;
+    }
+
+    .chat-header-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .chat-header-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2a5298, #1e3c72);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    .chat-recipient-name {
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 1.2em;
+    }
+
+    .chat-recipient-status {
+      color: #27ae60;
+      font-size: 0.9em;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 25px;
+      overflow-y: auto;
+      background: #f8f9fa;
+    }
+
+    .message {
+      max-width: 70%;
+      margin-bottom: 20px;
+      padding: 15px 20px;
+      border-radius: 18px;
+    }
+
+    .message.sent {
+      background: linear-gradient(135deg, #2a5298, #1e3c72);
+      color: white;
+      margin-left: auto;
+    }
+
+    .message.received {
+      background: white;
+      color: #2c3e50;
+      border: 1px solid #e1e5e9;
+    }
+
+    .chat-input-area {
+      padding: 20px 25px;
+      border-top: 1px solid #e1e5e9;
+      background: white;
+    }
+
+    .message-input-container {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    .message-input {
+      flex: 1;
+      padding: 15px 20px;
+      border: 1px solid #e1e5e9;
+      border-radius: 25px;
+      resize: none;
+    }
+
+    .send-button {
+      padding: 15px 25px;
+      background: linear-gradient(135deg, #2a5298, #1e3c72);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+    }
+
+    .new-conversation-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #2a5298, #1e3c72);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- ✅ Barre latérale identique -->
+    <aside class="sidebar">
+      <div class="logo">ORDO<span>PASS</span></div>
+      <nav class="menu">
+        <a href="pharmacien_dashboard.html"><i class="fa-solid fa-prescription"></i> <span>Ordonnances</span></a>
+        <a href="pharmacien_medecins.html"><i class="fa-solid fa-user-md"></i> <span>Médecins</span></a>
+        <a href="pharmacien_stock.html">
+          <i class="fa-solid fa-boxes-stacked"></i> <span>Gestion Stock</span>
+        </a>
+        <a href="pharmacien_facturation.html">
+          <i class="fa-solid fa-file-invoice-dollar"></i> <span>Facturation</span>
+        </a>
+        <a href="pharmacien_messagerie.html" class="active">
+          <i class="fa-solid fa-comment-medical"></i> <span>Messagerie</span>
+        </a>
+        <a href="pharmacien_parametres.html">
+          <i class="fa-solid fa-gear"></i> <span>Paramètres</span>
+        </a>
+        <a href="#" id="logout">
+          <i class="fa-solid fa-right-from-bracket"></i> <span>Déconnexion</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- ✅ Contenu principal -->
+    <main class="main">
+      <div class="topbar">
+        <div class="title">Messagerie</div>
+        <div class="user-box">
+          <img class="avatar" src="https://i.pravatar.cc/80?img=12" alt="avatar"/>
+          <div>
+            <div id="userName">Pharmacie Centrale</div>
+            <small style="color:#6b8392">Connecté</small>
+          </div>
+        </div>
+      </div>
+
+      <section class="card">
+        <div class="messagerie-container">
+          <!-- Liste des conversations -->
+          <div class="conversations-list">
+            <div class="conversations-header">
+              <button class="new-conversation-btn">
+                <i class="fa-solid fa-plus"></i> Nouvelle conversation
+              </button>
+              <input type="text" class="search-conversations" placeholder="🔍 Rechercher une conversation...">
+            </div>
+            
+            <!-- Conversations -->
+            <div class="conversation-item active">
+              <div class="conversation-avatar">MD</div>
+              <div class="conversation-info">
+                <div class="conversation-name">Dr. Marie Diallo</div>
+                <div class="conversation-preview">Bonjour, nous avons bien reçu l'ordonnance...</div>
+              </div>
+              <div class="conversation-meta">
+                <div class="conversation-time">10:30</div>
+                <div class="unread-badge">2</div>
+              </div>
+            </div>
+
+            <div class="conversation-item">
+              <div class="conversation-avatar">FB</div>
+              <div class="conversation-info">
+                <div class="conversation-name">Dr. Fatoumata Ba</div>
+                <div class="conversation-preview">Avez-vous reçu l'ordonnance électronique...</div>
+              </div>
+              <div class="conversation-meta">
+                <div class="conversation-time">14:20</div>
+                <div class="unread-badge">1</div>
+              </div>
+            </div>
+
+            <div class="conversation-item">
+              <div class="conversation-avatar">MF</div>
+              <div class="conversation-info">
+                <div class="conversation-name">Mamadou Fall</div>
+                <div class="conversation-preview">Bonjour, mes médicaments sont-ils prêts ?</div>
+              </div>
+              <div class="conversation-meta">
+                <div class="conversation-time">08:45</div>
+                <div class="unread-badge">3</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Zone de chat -->
+          <div class="chat-area">
+            <div class="chat-header">
+              <div class="chat-header-info">
+                <div class="chat-header-avatar">MD</div>
+                <div>
+                  <div class="chat-recipient-name">Dr. Marie Diallo</div>
+                  <div class="chat-recipient-status">En ligne</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="chat-messages">
+              <div class="message received">
+                <div class="message-content">Bonjour, nous avons bien reçu l'ordonnance pour le patient Awa Diop</div>
+                <div class="message-time">10:30</div>
+              </div>
+
+              <div class="message sent">
+                <div class="message-content">Parfait, les médicaments sont-ils disponibles ?</div>
+                <div class="message-time">10:32</div>
+              </div>
+
+              <div class="message received">
+                <div class="message-content">Oui, tout est disponible. Le patient peut passer à tout moment</div>
+                <div class="message-time">10:35</div>
+              </div>
+
+              <div class="message received">
+                <div class="message-content">Nous avons également reçu une nouvelle livraison d'Amoxicilline</div>
+                <div class="message-time">11:20</div>
+              </div>
+            </div>
+
+            <div class="chat-input-area">
+              <div class="message-input-container">
+                <textarea class="message-input" placeholder="Tapez votre message..." rows="1"></textarea>
+                <button class="send-button">
+                  <i class="fa-solid fa-paper-plane"></i> Envoyer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Déconnexion
+    document.getElementById("logout").addEventListener("click", (e) => {
+      e.preventDefault();
+      localStorage.removeItem("user");
+      sessionStorage.removeItem("user");
+      window.location.href = "index.html";
+    });
+
+    // Navigation entre conversations
+    document.querySelectorAll('.conversation-item').forEach(item => {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('.conversation-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
