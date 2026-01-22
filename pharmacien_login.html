@@ -131,58 +131,50 @@
     </div>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const loginForm = document.getElementById("loginForm");
-      const msg = document.getElementById('messageBox');
+   
 
-      if (loginForm) {
-        loginForm.addEventListener("submit", async (e) => {
-          e.preventDefault();
+      <script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById("loginForm");
+  const msg = document.getElementById("messageBox");
 
-          const username = document.getElementById("username").value.trim();
-          const password = document.getElementById("password").value;
-          const role = document.getElementById("role").value;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-          msg.textContent = "";
-          msg.className = "message-box";
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
 
-          try {
-            const res = await fetch("/api/login", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ username, password, role }),
-            });
+    try {
+      const res = await fetch(
+        "https://ordopass.com/api/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username,
+            password,
+            role: "pharmacien"
+          })
+        }
+      );
 
-            const data = await res.json();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
 
-            if (res.ok) {
-              localStorage.setItem("currentUser", JSON.stringify(data.user));
-              msg.textContent = "✅ Connexion réussie — redirection...";
-              msg.classList.add("success");
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("currentUser", JSON.stringify(data.user));
 
-              setTimeout(() => {
-                window.location.href = "pharmacien_dashboard.html";
-              }, 1000);
-            } else {
-              msg.textContent = "❌ " + (data.error || "Erreur de connexion");
-              msg.classList.add("error");
-            }
+      window.location.href = "pharmacien_dashboard.html";
 
-          } catch (err) {
-            console.error("Erreur:", err);
-            msg.textContent = "❌ Erreur de connexion au serveur";
-            msg.classList.add("error");
-          }
-        });
-      }
+    } catch (err) {
+      msg.textContent = "❌ " + err.message;
+      msg.className = "message-box error";
+      msg.style.display = "block";
+    }
+  });
+});
+</script>
 
-      // Afficher les messages
-      const observer = new MutationObserver(() => {
-        if (msg && msg.textContent.trim() !== '') msg.style.display = 'block';
-      });
-      if (msg) observer.observe(msg, { childList: true, subtree: true });
-    });
-  </script>
+
 </body>
 </html>

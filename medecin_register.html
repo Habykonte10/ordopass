@@ -400,143 +400,76 @@
     
     <script src="config.js"></script>
     <script src="api-service.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Configurer la date de naissance
-            const dateInput = document.getElementById('dateNaissance');
-            const today = new Date();
-            const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
-            const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
-            dateInput.max = maxDate.toISOString().split('T')[0];
-            dateInput.min = minDate.toISOString().split('T')[0];
-            
-            // Afficher le mode
-            const modeText = document.getElementById('modeText');
-            if (window.APP_CONFIG.isLocal()) {
-                modeText.textContent = 'Mode local activé (sans serveur)';
-            } else {
-                modeText.textContent = 'Mode en ligne activé';
-            }
-            
-            // Génération automatique du nom d'utilisateur
-            const nomInput = document.getElementById('nom');
-            const prenomInput = document.getElementById('prenom');
-            const usernameInput = document.getElementById('username');
-            
-            function generateUsername() {
-                const nom = nomInput.value.trim().toLowerCase();
-                const prenom = prenomInput.value.trim().toLowerCase();
-                
-                if (nom && prenom && !usernameInput.value) {
-                    const baseUsername = prenom.charAt(0) + '.' + nom;
-                    usernameInput.value = baseUsername
-                        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                        .replace(/[^a-z.]/g, '');
-                }
-            }
-            
-            nomInput.addEventListener('input', generateUsername);
-            prenomInput.addEventListener('input', generateUsername);
-            
-            // Validation du mot de passe
-            const passwordInput = document.getElementById('password');
-            const confirmPasswordInput = document.getElementById('confirmPassword');
-            
-            function validatePassword() {
-                const password = passwordInput.value;
-                const confirmPassword = confirmPasswordInput.value;
-                
-                if (password.length > 0 && password.length < 8) {
-                    passwordInput.style.borderColor = '#dc3545';
-                } else {
-                    passwordInput.style.borderColor = '#28a745';
-                }
-                
-                if (confirmPassword && password !== confirmPassword) {
-                    confirmPasswordInput.style.borderColor = '#dc3545';
-                    return false;
-                } else if (confirmPassword) {
-                    confirmPasswordInput.style.borderColor = '#28a745';
-                }
-                
-                return true;
-            }
-            
-            passwordInput.addEventListener('input', validatePassword);
-            confirmPasswordInput.addEventListener('input', validatePassword);
-            
-            // Gestion du formulaire
-            const registerForm = document.getElementById('registerForm');
-            const messageDiv = document.getElementById('message');
-            const submitBtn = document.getElementById('submitBtn');
-            const btnText = document.getElementById('btnText');
-            
-            registerForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                // Validation
-                if (!validatePassword()) {
-                    showMessage('Les mots de passe ne correspondent pas', 'error');
-                    return;
-                }
-                
-                if (!document.getElementById('acceptTerms').checked) {
-                    showMessage('Veuillez accepter les conditions d\'utilisation', 'error');
-                    return;
-                }
-                
-                // Collecter les données
-                const formData = {
-                    nom: document.getElementById('nom').value.trim(),
-                    prenom: document.getElementById('prenom').value.trim(),
-                    email: document.getElementById('email').value.trim(),
-                    username: document.getElementById('username').value.trim(),
-                    password: document.getElementById('password').value,
-                    dateNaissance: document.getElementById('dateNaissance').value,
-                    specialite: document.getElementById('specialite').value,
-                    numeroInscription: document.getElementById('numeroInscription').value.trim(),
-                    etablissement: document.getElementById('etablissement').value.trim()
-                };
-                
-                // Désactiver le bouton
-                submitBtn.disabled = true;
-                btnText.textContent = 'Création en cours...';
-                
-                try {
-                    // Utiliser l'API service
-                    const result = await window.apiService.registerMedecin(formData);
-                    
-                    if (result.success) {
-                        showMessage(result.message, 'success');
-                        
-                        // Sauvegarder l'utilisateur dans localStorage
-                        localStorage.setItem('currentUser', JSON.stringify(result.user));
-                        localStorage.setItem('ordoPass_currentUser', JSON.stringify(result.user));
-                        
-                        // Redirection après 2 secondes
-                        setTimeout(() => {
-                            window.location.href = 'medecin_dashboard.html';
-                        }, 2000);
-                    }
-                } catch (error) {
-                    showMessage(error.message, 'error');
-                    submitBtn.disabled = false;
-                    btnText.textContent = 'Créer mon compte';
-                }
-            });
-            
-            function showMessage(text, type) {
-                messageDiv.textContent = text;
-                messageDiv.className = `message ${type}`;
-                
-                if (type === 'error') {
-                    setTimeout(() => {
-                        messageDiv.className = 'message';
-                        messageDiv.textContent = '';
-                    }, 5000);
-                }
-            }
-        });
-    </script>
+    
+       
+      
+      <script>
+document.addEventListener('DOMContentLoaded', function() {
+
+  const API_URL = "https://ordopass.onrender.com";
+
+  const registerForm = document.getElementById('registerForm');
+  const messageDiv = document.getElementById('message');
+  const submitBtn = document.getElementById('submitBtn');
+  const btnText = document.getElementById('btnText');
+
+  registerForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirmPassword').value;
+
+    if (password !== confirm) {
+      messageDiv.textContent = "❌ Les mots de passe ne correspondent pas";
+      messageDiv.className = "message error";
+      return;
+    }
+
+    const formData = {
+      nom: nom.value,
+      prenom: prenom.value,
+      email: email.value,
+      username: username.value,
+      password: password,
+      dateNaissance: dateNaissance.value,
+      specialite: specialite.value,
+      numeroInscription: numeroInscription.value,
+      etablissement: etablissement.value
+    };
+
+    submitBtn.disabled = true;
+    btnText.textContent = 'Création en cours...';
+
+    try {
+      const res = await fetch(
+        API_URL + "/api/register-medecin",
+        {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify(formData)
+        }
+      );
+
+      const data = await res.json();
+
+      if(!res.ok) throw new Error(data.error);
+
+      messageDiv.textContent = "✅ Compte créé avec succès";
+      messageDiv.className = "message success";
+
+      setTimeout(()=>{
+        window.location.href="medecin_login.html";
+      },1500);
+
+    } catch(err){
+      messageDiv.textContent="❌ "+err.message;
+      messageDiv.className="message error";
+      submitBtn.disabled=false;
+      btnText.textContent="Créer mon compte";
+    }
+  });
+});
+</script> 
+                   
 </body>
 </html>

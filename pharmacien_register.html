@@ -186,142 +186,77 @@
     </div>
   </div>
 
+  
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const msg = document.getElementById('messageBox');
-      const passwordInput = document.getElementById('password');
-      const strengthBar = document.getElementById('strengthBar');
-      const strengthText = document.getElementById('strengthText');
-      const strengthPercent = document.getElementById('strengthPercent');
-      const submitBtn = document.querySelector('button[type="submit"]');
-      const submitText = document.getElementById('submitText');
-      const submitLoader = document.getElementById('submitLoader');
-      
-      // Observer pour les messages
-      if (msg) {
-        const observer = new MutationObserver(() => {
-          if (msg.textContent.trim() !== '') msg.style.display = 'block';
-        });
-        observer.observe(msg, { childList: true, subtree: true });
-      }
-      
-      // Vérificateur de force du mot de passe
-      function checkPasswordStrength(password) {
-        let score = 0;
-        if (!password) return 0;
-        
-        if (password.length >= 8) score += 25;
-        if (/[A-Z]/.test(password)) score += 25;
-        if (/[0-9]/.test(password)) score += 25;
-        if (/[^A-Za-z0-9]/.test(password)) score += 25;
-        
-        // Mettre à jour l'affichage
-        strengthBar.style.width = `${score}%`;
-        strengthPercent.textContent = `${score}%`;
-        
-        if (score < 50) {
-          strengthBar.style.background = '#ef4444';
-          strengthText.textContent = 'Faible';
-        } else if (score < 75) {
-          strengthBar.style.background = '#f59e0b';
-          strengthText.textContent = 'Moyen';
-        } else {
-          strengthBar.style.background = '#10b981';
-          strengthText.textContent = 'Fort';
+document.addEventListener('DOMContentLoaded', function() {
+
+  const msg = document.getElementById('messageBox');
+  const registerForm = document.getElementById('registerForm');
+  const submitBtn = document.querySelector('button[type="submit"]');
+  const submitText = document.getElementById('submitText');
+  const submitLoader = document.getElementById('submitLoader');
+
+  registerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value;
+    const telephone = document.getElementById('telephone').value;
+    const pharmacyName = document.getElementById('pharmacyName').value;
+    const address = document.getElementById('address').value;
+    const licenseNumber = document.getElementById('licenseNumber').value;
+    const experience = document.getElementById('experience').value;
+    const password = document.getElementById('password').value;
+
+    submitText.style.display = 'none';
+    submitLoader.style.display = 'inline';
+    submitBtn.disabled = true;
+
+    try {
+      const res = await fetch(
+        "https://ordopass.com/api/register-pharmacien",
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: email,
+            password,
+            role: 'pharmacien',
+            email,
+            telephone,
+            nom: pharmacyName,
+            adresse: address,
+            licenseNumber,
+            experience
+          })
         }
-        
-        return score;
-      }
-      
-      // Écouteur spécial pour le mot de passe
-      passwordInput.addEventListener('input', function() {
-        checkPasswordStrength(this.value);
-      });
-      
-      // Gestion de la soumission du formulaire
-      const registerForm = document.getElementById('registerForm');
-      if (registerForm) {
-        registerForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          
-          // Validation des conditions
-          if (!document.getElementById('acceptConditions').checked) {
-            msg.textContent = '❌ Veuillez accepter les conditions d\'utilisation';
-            msg.className = 'message-box error';
-            return;
-          }
-          
-          // Récupération des données
-          const email = document.getElementById('email').value;
-          const telephone = document.getElementById('telephone').value;
-          const pharmacyName = document.getElementById('pharmacyName').value;
-          const address = document.getElementById('address').value;
-          const licenseNumber = document.getElementById('licenseNumber').value;
-          const experience = document.getElementById('experience').value;
-          const password = document.getElementById('password').value;
-          
-          // Validation côté client supplémentaire
-          if (password.length < 8) {
-            msg.textContent = '❌ Le mot de passe doit contenir au moins 8 caractères';
-            msg.className = 'message-box error';
-            return;
-          }
-          
-          // Afficher le loader
-          submitText.style.display = 'none';
-          submitLoader.style.display = 'inline';
-          submitBtn.disabled = true;
-          
-          try {
-            const res = await fetch('/api/register-pharmacien', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                username: email,
-                password: password,
-                role: 'pharmacien',
-                email: email,
-                telephone: telephone,
-                nom: pharmacyName,
-                adresse: address,
-                licenseNumber: licenseNumber,
-                experience: experience
-              })
-            });
+      );
 
-            const data = await res.json();
+      const data = await res.json();
 
-            if (res.ok) {
-              msg.textContent = '✅ Compte créé avec succès sur le serveur ! Redirection...';
-              msg.className = 'message-box success';
-              
-              // Stocker l'utilisateur
-              localStorage.setItem('currentUser', JSON.stringify(data.user));
-              
-              setTimeout(() => {
-                window.location.href = 'pharmacien_dashboard.html';
-              }, 1500);
-            } else {
-              msg.textContent = '❌ ' + (data.error || 'Erreur lors de la création');
-              msg.className = 'message-box error';
-              submitText.style.display = 'inline';
-              submitLoader.style.display = 'none';
-              submitBtn.disabled = false;
-            }
-          } catch (err) {
-            console.error('Erreur:', err);
-            msg.textContent = '❌ Erreur de connexion au serveur. Veuillez réessayer plus tard.';
-            msg.className = 'message-box error';
-            submitText.style.display = 'inline';
-            submitLoader.style.display = 'none';
-            submitBtn.disabled = false;
-          }
-        });
+      if (res.ok) {
+        msg.textContent = '✅ Compte créé avec succès';
+        msg.className = 'message-box success';
+
+        localStorage.setItem('currentUser', JSON.stringify(data.user));
+
+        setTimeout(() => {
+          window.location.href = 'pharmacien_dashboard.html';
+        }, 1500);
+      } else {
+        throw new Error(data.error || 'Erreur création');
       }
 
-      // Focus sur le premier champ
-      document.getElementById('email').focus();
-    });
-  </script>
+    } catch (err) {
+      msg.textContent = '❌ ' + err.message;
+      msg.className = 'message-box error';
+      submitText.style.display = 'inline';
+      submitLoader.style.display = 'none';
+      submitBtn.disabled = false;
+    }
+  });
+});
+</script>
+
+
 </body>
 </html>

@@ -1,73 +1,37 @@
 class ApiService {
-    constructor() {
-        this.API_URL = window.APP_CONFIG.getApiUrl();
-        console.log("API URL:", this.API_URL);
-    }
+  constructor() {
+    this.API_URL = window.APP_CONFIG.API_URL;
+  }
 
-    async checkServerStatus() {
-        try {
-            const res = await fetch(`${this.API_URL}/health`);
-            const text = await res.text();
-            const data = JSON.parse(text);
-            return { online: true, data };
-        } catch {
-            return { online: false };
-        }
-    }
+  async registerMedecin(data) {
+    const res = await fetch(
+      `${this.API_URL}/api/register-medecin`,
+      {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify(data)
+      }
+    );
 
-    async login(username, password, role) {
-        const res = await fetch(`${this.API_URL}/login`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
-            body: JSON.stringify({ username, password, role })
-        });
+    const result = await res.json();
+    if(!res.ok) throw new Error(result.error);
+    return result;
+  }
 
-        const text = await res.text();
-        const data = JSON.parse(text);
+  async login(username, password, role) {
+    const res = await fetch(
+      `${this.API_URL}/api/auth/login`,
+      {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ username, password, role })
+      }
+    );
 
-        if (!res.ok) {
-            throw new Error(data.error || "Erreur connexion");
-        }
-
-        return data;
-    }
-
-    async registerMedecin(payload) {
-        return this.post("register-medecin", payload);
-    }
-
-    async registerPharmacien(payload) {
-        return this.post("register-pharmacien", payload);
-    }
-
-    async getPharmacies() {
-        const res = await fetch(`${this.API_URL}/pharmacies`);
-        const text = await res.text();
-        return JSON.parse(text);
-    }
-
-    async post(endpoint, payload) {
-        const res = await fetch(`${this.API_URL}/${endpoint}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
-            body: JSON.stringify(payload)
-        });
-
-        const text = await res.text();
-        const data = JSON.parse(text);
-
-        if (!res.ok) {
-            throw new Error(data.error || "Erreur serveur");
-        }
-
-        return data;
-    }
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || "Erreur connexion");
+    return data;
+  }
 }
 
 window.apiService = new ApiService();

@@ -1,5 +1,3 @@
 window.APP_CONFIG = {
-    getApiUrl: function () {
-        return "./api";
-    }
+  API_URL: "https://ordopass.onrender.com"
 };

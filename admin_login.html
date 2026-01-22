@@ -1,442 +1,105 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion Admin - OrdoPass</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        .login-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            width: 100%;
-            max-width: 450px;
-        }
-        
-        .login-header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            padding: 40px 30px;
-            text-align: center;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-        
-        .logo .pass {
-            color: #0ea5a0;
-        }
-        
-        .login-header h1 {
-            font-size: 24px;
-            font-weight: 600;
-            margin-top: 15px;
-            opacity: 0.9;
-        }
-        
-        .login-body {
-            padding: 40px 30px;
-        }
-        
-        .alert {
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            font-size: 14px;
-            display: none;
-        }
-        
-        .alert.success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #a7f3d0;
-            display: block;
-        }
-        
-        .alert.error {
-            background: #fee2e2;
-            color: #7f1d1d;
-            border: 1px solid #fecaca;
-            display: block;
-        }
-        
-        .form-group {
-            margin-bottom: 25px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #374151;
-            font-weight: 500;
-            font-size: 14px;
-        }
-        
-        .input-group {
-            position: relative;
-        }
-        
-        .input-group input, .input-group select {
-            width: 100%;
-            padding: 14px 16px;
-            padding-left: 48px;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 15px;
-            transition: all 0.3s;
-            background: white;
-        }
-        
-        .input-group i {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6b7280;
-            font-size: 18px;
-        }
-        
-        .input-group input:focus, .input-group select:focus {
-            outline: none;
-            border-color: #1e3c72;
-            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
-        }
-        
-        .btn-login {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .btn-login:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(30, 60, 114, 0.3);
-        }
-        
-        .btn-login:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        
-        .login-footer {
-            text-align: center;
-            margin-top: 25px;
-            padding-top: 25px;
-            border-top: 1px solid #e5e7eb;
-            color: #6b7280;
-            font-size: 14px;
-        }
-        
-        .login-footer a {
-            color: #1e3c72;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .login-footer a:hover {
-            text-decoration: underline;
-        }
-        
-        .server-status {
-            background: #eff6ff;
-            border: 1px solid #dbeafe;
-            border-radius: 10px;
-            padding: 12px 16px;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
-        }
-        
-        .server-status i {
-            color: #1e3c72;
-            font-size: 16px;
-        }
-        
-        .server-status.online {
-            background: #d1fae5;
-            border-color: #a7f3d0;
-        }
-        
-        .server-status.offline {
-            background: #fef3c7;
-            border-color: #fde68a;
-        }
-        
-        .quick-login {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .quick-btn {
-            flex: 1;
-            min-width: 120px;
-            padding: 8px 12px;
-            background: #f3f4f6;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .quick-btn:hover {
-            background: #e5e7eb;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion Admin - OrdoPass</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+body{
+background:linear-gradient(135deg,#1a237e,#283593);
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+font-family:Segoe UI,sans-serif;
+}
+.box{
+background:#fff;
+width:100%;
+max-width:420px;
+border-radius:16px;
+padding:35px;
+box-shadow:0 15px 40px rgba(0,0,0,.3);
+}
+h2{text-align:center;color:#1e3c72;margin-bottom:25px}
+input,select{
+width:100%;
+padding:14px;
+margin-bottom:15px;
+border-radius:10px;
+border:2px solid #ddd;
+font-size:15px;
+}
+button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:10px;
+background:#1e3c72;
+color:white;
+font-size:16px;
+font-weight:600;
+cursor:pointer;
+}
+button:hover{opacity:.9}
+.alert{
+padding:12px;
+border-radius:8px;
+margin-bottom:15px;
+display:none;
+}
+.alert.error{background:#fee2e2;color:#7f1d1d}
+.alert.success{background:#d1fae5;color:#065f46}
+</style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <div class="logo">
-                <i class="fas fa-notes-medical"></i>
-                <span>Ordo<span class="pass">Pass</span></span>
-            </div>
-            <h1>Connexion Administrateur</h1>
-        </div>
-        
-        <div class="login-body">
-            <div id="serverStatus" class="server-status">
-                <i class="fas fa-server"></i>
-                <span id="statusText">Vérification connexion...</span>
-            </div>
-            
-            <div id="alertMessage" class="alert"></div>
-            
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="username">Nom d'utilisateur</label>
-                    <div class="input-group">
-                        <i class="fas fa-user"></i>
-                        <input type="text" id="username" placeholder="admin, testmedecin, testpharmacien" required>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Mot de passe</label>
-                    <div class="input-group">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" id="password" placeholder="Votre mot de passe" required>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="role">Rôle</label>
-                    <div class="input-group">
-                        <i class="fas fa-user-tag"></i>
-                        <select id="role" required>
-                            <option value="">Sélectionner un rôle</option>
-                            <option value="medecin">Médecin</option>
-                            <option value="pharmacien">Pharmacien</option>
-                            <option value="admin">Administrateur</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <button type="submit" class="btn-login" id="loginBtn">
-                    <i class="fas fa-sign-in-alt"></i>
-                    <span id="btnText">Se connecter</span>
-                    <span id="btnLoader" style="display:none;">
-                        <i class="fas fa-spinner fa-spin"></i> Connexion...
-                    </span>
-                </button>
-                
-                <div class="quick-login">
-                    <button type="button" class="quick-btn" onclick="quickLogin('admin', 'admin123', 'admin')">
-                        <i class="fas fa-user-shield"></i> Admin
-                    </button>
-                    <button type="button" class="quick-btn" onclick="quickLogin('testmedecin', 'test123', 'medecin')">
-                        <i class="fas fa-user-md"></i> Médecin Test
-                    </button>
-                    <button type="button" class="quick-btn" onclick="quickLogin('testpharmacien', 'test123', 'pharmacien')">
-                        <i class="fas fa-prescription-bottle-medical"></i> Pharmacien Test
-                    </button>
-                </div>
-            </form>
-            
-            <div class="login-footer">
-                <p>Support technique : <a href="tel:+221789299204">+221 78 929 92 04</a></p>
-                <p style="margin-top: 10px;">
-                    <a href="index.html"><i class="fas fa-arrow-left"></i> Retour à l'accueil</a>
-                </p>
-            </div>
-        </div>
-    </div>
-    
-    <script src="config.js"></script>
-    <script src="api-service.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const loginForm = document.getElementById('loginForm');
-            const alertMessage = document.getElementById('alertMessage');
-            const loginBtn = document.getElementById('loginBtn');
-            const btnText = document.getElementById('btnText');
-            const btnLoader = document.getElementById('btnLoader');
-            const serverStatus = document.getElementById('serverStatus');
-            const statusText = document.getElementById('statusText');
-            
-            // Vérifier connexion serveur
-            async function checkServerConnection() {
-                try {
-                    const isOnline = await window.apiService.checkServerStatus();
-                    if (isOnline) {
-                        serverStatus.className = 'server-status online';
-                        statusText.innerHTML = '<i class="fas fa-check-circle"></i> Serveur connecté';
-                        return true;
-                    } else {
-                        throw new Error('Hors ligne');
-                    }
-                } catch (error) {
-                    serverStatus.className = 'server-status offline';
-                    statusText.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Mode local';
-                    return false;
-                }
-            }
-            
-            // Afficher message
-            function showAlert(message, type, duration = 5000) {
-                alertMessage.textContent = message;
-                alertMessage.className = `alert ${type}`;
-                
-                if (type === 'error' && duration > 0) {
-                    setTimeout(() => {
-                        alertMessage.className = 'alert';
-                        alertMessage.textContent = '';
-                    }, duration);
-                }
-            }
-            
-            // Connexion rapide
-            window.quickLogin = function(username, password, role) {
-                document.getElementById('username').value = username;
-                document.getElementById('password').value = password;
-                document.getElementById('role').value = role;
-                
-                setTimeout(() => {
-                    loginForm.dispatchEvent(new Event('submit'));
-                }, 300);
-            };
-            
-            // Gestion connexion
-            loginForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const username = document.getElementById('username').value.trim();
-                const password = document.getElementById('password').value;
-                const role = document.getElementById('role').value;
-                
-                if (!username || !password || !role) {
-                    showAlert('Veuillez remplir tous les champs', 'error');
-                    return;
-                }
-                
-                // Afficher loader
-                btnText.style.display = 'none';
-                btnLoader.style.display = 'inline';
-                loginBtn.disabled = true;
-                
-                try {
-                    // Utiliser apiService.login
-                    const result = await window.apiService.login(username, password, role);
-                    
-                    if (result.success) {
-                        showAlert(result.message, 'success', 2000);
-                        
-                        // Sauvegarder utilisateur
-                        localStorage.setItem('currentUser', JSON.stringify(result.user));
-                        localStorage.setItem('ordoPass_currentUser', JSON.stringify(result.user));
-                        localStorage.setItem('lastLogin', new Date().toISOString());
-                        
-                        console.log('✅ Utilisateur connecté:', result.user);
-                        
-                        // Redirection
-                        setTimeout(() => {
-                            if (role === 'medecin') {
-                                window.location.href = 'medecin_dashboard.html';
-                            } else if (role === 'pharmacien') {
-                                window.location.href = 'pharmacien_dashboard.html';
-                            } else if (role === 'admin') {
-                                window.location.href = 'admin_dashboard.html';
-                            }
-                        }, 1500);
-                    } else {
-                        throw new Error(result.error || 'Erreur connexion');
-                    }
-                } catch (error) {
-                    console.error('❌ Erreur connexion:', error);
-                    showAlert(`Erreur: ${error.message}`, 'error');
-                    
-                    // Réactiver bouton
-                    btnText.style.display = 'inline';
-                    btnLoader.style.display = 'none';
-                    loginBtn.disabled = false;
-                }
-            });
-            
-            // Vérifier session existante
-            function checkExistingSession() {
-                const currentUser = localStorage.getItem('currentUser');
-                if (currentUser) {
-                    try {
-                        const user = JSON.parse(currentUser);
-                        showAlert(`Bon retour ${user.nom} !`, 'success');
-                        
-                        document.getElementById('username').value = user.username || user.email;
-                        document.getElementById('role').value = user.role;
-                    } catch (e) {
-                        console.log('Pas de session active');
-                    }
-                }
-            }
-            
-            // Initialisation
-            checkServerConnection();
-            checkExistingSession();
-            
-            // Debug
-            console.log('🖥️ Page connexion chargée');
-            console.log('🔌 API Service:', window.apiService);
-        });
-    </script>
+<div class="box">
+<h2>🔐 Connexion Administrateur</h2>
+<div id="msg" class="alert"></div>
+<form id="loginForm">
+<input type="text" id="username" placeholder="Nom utilisateur" required>
+<input type="password" id="password" placeholder="Mot de passe" required>
+<select id="role" required>
+<option value="">Choisir rôle</option>
+<option value="admin">Admin</option>
+<option value="medecin">Médecin</option>
+<option value="pharmacien">Pharmacien</option>
+</select>
+<button type="submit">Se connecter</button>
+</form>
+</div>
+<script>
+document.getElementById("loginForm").addEventListener("submit", async e => {
+ e.preventDefault();
+ const msg=document.getElementById("msg");
+ const username=document.getElementById("username").value;
+ const password=document.getElementById("password").value;
+ const role=document.getElementById("role").value;
+ try{
+  const res=await fetch(
+   "/api/auth/login",
+   {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({username,password,role})
+   }
+  );
+  const data=await res.json();
+  if(!res.ok) throw new Error(data.error);
+  localStorage.setItem("token",data.token);
+  msg.textContent="✅ Connexion OK";
+  msg.className="alert success";
+  msg.style.display="block";
+  setTimeout(()=>{
+    location.href="admin_dashboard.html";
+  },1200);
+ }catch(err){
+  msg.textContent="❌ "+err.message;
+  msg.className="alert error";
+  msg.style.display="block";
+ }
+});
+</script>
 </body>
 </html>

@@ -350,69 +350,47 @@
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const loginForm = document.getElementById('loginForm');
-      const messageBox = document.getElementById('messageBox');
-      const submitBtn = document.getElementById('submitBtn');
-      
-      loginForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value;
-        const role = document.getElementById('role').value;
-        
-        if (!username || !password) {
-          showMessage('❌ Veuillez remplir tous les champs', 'error');
-          return;
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById("loginForm");
+  const msg = document.getElementById("messageBox");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+
+    try {
+      const res = await fetch(
+        "https://ordopass.com/api/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username,
+            password,
+            role: "medecin"
+          })
         }
+      );
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erreur connexion");
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("currentUser", JSON.stringify(data.user));
+
+      window.location.href = "medecin_dashboard.html";
+
+    } catch (err) {
+      msg.textContent = "❌ " + err.message;
+      msg.className = "message-box error";
+      msg.style.display = "block";
+    }
+  });
+});
+</script>
+
         
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connexion...';
-        
-        try {
-          const response = await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password, role })
-          });
-          
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Erreur de connexion');
-          }
-          
-          const data = await response.json();
-          
-          // Stocker l'utilisateur connecté
-          localStorage.setItem('currentUser', JSON.stringify(data.user));
-          localStorage.setItem('ordoPass_currentUser', JSON.stringify(data.user));
-          
-          showMessage('✅ Connexion réussie ! Redirection...', 'success');
-          
-          setTimeout(() => {
-            window.location.href = 'medecin_dashboard.html';
-          }, 1000);
-          
-        } catch (error) {
-          showMessage('❌ ' + error.message, 'error');
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Se connecter';
-        }
-      });
-      
-      function showMessage(text, type) {
-        messageBox.textContent = text;
-        messageBox.className = 'message-box ' + type;
-        
-        setTimeout(() => {
-          if (type === 'info' || type === 'success') {
-            messageBox.className = 'message-box';
-            messageBox.textContent = '';
-          }
-        }, 5000);
-      }
-    });
-  </script>
 </body>
 </html>
