@@ -7,7 +7,7 @@ const mongoose = require("mongoose");
 const app = express();
 app.enable("trust proxy");
 
-// HTTPS
+// HTTPS (Render)
 app.use((req, res, next) => {
   if (
     process.env.NODE_ENV === "production" &&
@@ -28,17 +28,32 @@ app.use(
 
 app.use(express.json());
 
-// ROUTES API
+/* ======================
+   ROUTES API
+   ====================== */
+
+// test global
 app.get("/api/test", (req, res) => {
   res.json({ status: "API OK" });
 });
 
+// test auth
+app.get("/api/auth/test", (req, res) => {
+  res.json({ status: "AUTH API OK" });
+});
+
+// routes auth (REGISTER / LOGIN)
 app.use("/api/auth", require("./routes/auth"));
 
-// FRONT
-app.use(express.static(__dirname));
+/* ======================
+   FRONTEND
+   ====================== */
+
+// frontend statique (index.html)
+app.use(express.static(path.join(__dirname, "../")));
+
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(__dirname, "../index.html"));
 });
 
 // DB
