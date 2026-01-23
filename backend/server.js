@@ -7,7 +7,9 @@ const mongoose = require("mongoose");
 const app = express();
 app.enable("trust proxy");
 
-// HTTPS
+/* ======================
+   HTTPS (Render)
+   ====================== */
 app.use((req, res, next) => {
   if (
     process.env.NODE_ENV === "production" &&
@@ -18,7 +20,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// CORS
+/* ======================
+   CORS
+   ====================== */
 app.use(
   cors({
     origin: "https://ordopass.com",
@@ -29,7 +33,7 @@ app.use(
 app.use(express.json());
 
 /* ======================
-   ROUTES API (AVANT *)
+   API ROUTES (AVANT FRONT)
    ====================== */
 
 // test global
@@ -42,27 +46,36 @@ app.get("/api/auth/test", (req, res) => {
   res.json({ status: "AUTH API OK" });
 });
 
-// vraie route auth
+// vraie route auth (le fichier DOIT exister)
 app.use("/api/auth", require("./routes/auth"));
 
 /* ======================
-   STATIC + FRONT
+   FRONTEND (index.html)
    ====================== */
 
-app.use(express.static(__dirname));
+// 👉 remonte d’un niveau : backend → ordopass
+const FRONT_PATH = path.join(__dirname, "..");
 
+// fichiers statiques
+app.use(express.static(FRONT_PATH));
+
+// toutes les autres routes → index.html
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(FRONT_PATH, "index.html"));
 });
 
-// DB
+/* ======================
+   DATABASE
+   ====================== */
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connecté"))
-  .catch((err) => console.log(err));
+  .catch((err) => console.error("❌ MongoDB erreur :", err));
 
-// START
+/* ======================
+   START SERVER
+   ====================== */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log("🚀 Serveur lancé sur " + PORT);
+  console.log("🚀 Serveur lancé sur le port " + PORT);
 });
