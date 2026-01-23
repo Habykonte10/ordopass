@@ -1,37 +1,29 @@
-const express = require("express");
-const auth = require("../middleware/auth");
-const admin = require("../middleware/admin");
-const User = require("../models/User");
+const jwt = require("jsonwebtoken");
 
-const router = express.Router();
+module.exports = (req, res, next) => {
 
-/* LISTE UTILISATEURS */
-router.get("/users", auth, admin, async (req, res) => {
-  try {
-    const users = await User.find().select("-password");
-    res.json(users);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+  const header = req.headers.authorization;
 
-/* STATISTIQUES */
-router.get("/stats", auth, admin, async (req, res) => {
-  try {
-    const total = await User.countDocuments();
-    const medecins = await User.countDocuments({ role: "medecin" });
-    const pharmaciens = await User.countDocuments({ role: "pharmacien" });
-    const admins = await User.countDocuments({ role: "admin" });
-
-    res.json({
-      total,
-      admins,
-      medecins,
-      pharmaciens
+  if (!header) {
+    return res.status(401).json({
+      error: "Token manquant"
     });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
   }
-});
 
-module.exports = router;
+  const token = header.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+    req.user = decoded;
+    next();
+
+  } catch {
+    res.status(401).json({
+      error: "Token invalide"
+    });
+  }
+};
