@@ -1,8 +1,12 @@
 const express = require("express");
-const router = express.Router();
+const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 
-// REGISTER médecin / pharmacie
+const router = express.Router();
+
+/* =====================
+   REGISTER
+   ===================== */
 router.post("/register", async (req, res) => {
   try {
     const { username, password, role } = req.body;
@@ -11,30 +15,36 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Champs manquants" });
     }
 
-    const exist = await User.findOne({ username });
-    if (exist) {
-      return res.status(400).json({ error: "Utilisateur existe déjà" });
+    if (!["medecin", "pharmacie", "admin"].includes(role)) {
+      return res.status(400).json({ error: "Rôle invalide" });
     }
 
-    const user = new User({ username, password, role });
-    await user.save();
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ error: "Utilisateur déjà existant" });
+    }
 
-    res.json({ message: "Compte créé avec succès", user });
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      username,
+      password: hashedPassword,
+      role,
+    });
+
+    res.status(201).json({
+      message: "Compte créé avec succès",
+      user: {
+        id: user._id,
+        username: user.username,
+        role: user.role,
+      },
+    });
+
   } catch (err) {
+    console.error("REGISTER ERROR:", err);
     res.status(500).json({ error: "Erreur serveur" });
   }
-});
-
-// LOGIN
-router.post("/login", async (req, res) => {
-  const { username, password } = req.body;
-
-  const user = await User.findOne({ username, password });
-  if (!user) {
-    return res.status(401).json({ error: "Identifiants incorrects" });
-  }
-
-  res.json({ message: "Connexion OK", user });
 });
 
 module.exports = router;
