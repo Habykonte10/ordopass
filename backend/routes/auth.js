@@ -2,84 +2,39 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 
-/* ======================
-   TEST
-====================== */
-router.get("/test", (req, res) => {
-  res.json({ status: "AUTH API OK" });
-});
-
-/* ======================
-   INSCRIPTION
-====================== */
+// REGISTER médecin / pharmacie
 router.post("/register", async (req, res) => {
   try {
     const { username, password, role } = req.body;
 
     if (!username || !password || !role) {
-      return res.status(400).json({
-        success: false,
-        message: "Tous les champs sont obligatoires",
-      });
+      return res.status(400).json({ error: "Champs manquants" });
     }
 
-    if (!["medecin", "pharmacien"].includes(role)) {
-      return res.status(400).json({
-        success: false,
-        message: "Rôle invalide",
-      });
+    const exist = await User.findOne({ username });
+    if (exist) {
+      return res.status(400).json({ error: "Utilisateur existe déjà" });
     }
 
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: "Nom d'utilisateur déjà utilisé",
-      });
-    }
+    const user = new User({ username, password, role });
+    await user.save();
 
-    const user = await User.create({ username, password, role });
-
-    res.json({
-      success: true,
-      message: "Compte créé avec succès",
-      user: {
-        username: user.username,
-        role: user.role,
-      },
-    });
+    res.json({ message: "Compte créé avec succès", user });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
-/* ======================
-   CONNEXION
-====================== */
+// LOGIN
 router.post("/login", async (req, res) => {
-  try {
-    const { username, password, role } = req.body;
+  const { username, password } = req.body;
 
-    const user = await User.findOne({ username, role });
-
-    if (!user || user.password !== password) {
-      return res.status(401).json({
-        success: false,
-        message: "Identifiants incorrects",
-      });
-    }
-
-    res.json({
-      success: true,
-      message: "Connexion réussie",
-      user: {
-        username: user.username,
-        role: user.role,
-      },
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+  const user = await User.findOne({ username, password });
+  if (!user) {
+    return res.status(401).json({ error: "Identifiants incorrects" });
   }
+
+  res.json({ message: "Connexion OK", user });
 });
 
 module.exports = router;
