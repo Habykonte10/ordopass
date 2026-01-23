@@ -1,12 +1,8 @@
 const express = require("express");
-const bcrypt = require("bcryptjs");
+const router = express.Router();
 const User = require("../models/User");
 
-const router = express.Router();
-
-/* =====================
-   REGISTER
-   ===================== */
+/* REGISTER */
 router.post("/register", async (req, res) => {
   try {
     const { username, password, role } = req.body;
@@ -15,34 +11,40 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Champs manquants" });
     }
 
-    if (!["medecin", "pharmacie", "admin"].includes(role)) {
-      return res.status(400).json({ error: "Rôle invalide" });
+    const exists = await User.findOne({ username });
+    if (exists) {
+      return res.status(400).json({ error: "Utilisateur existe déjà" });
     }
 
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
-      return res.status(400).json({ error: "Utilisateur déjà existant" });
-    }
+    const user = await User.create({ username, password, role });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await User.create({
-      username,
-      password: hashedPassword,
-      role,
-    });
-
-    res.status(201).json({
+    res.json({
       message: "Compte créé avec succès",
       user: {
-        id: user._id,
         username: user.username,
-        role: user.role,
-      },
+        role: user.role
+      }
     });
-
   } catch (err) {
-    console.error("REGISTER ERROR:", err);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+});
+
+/* LOGIN */
+router.post("/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    const user = await User.findOne({ username, password });
+    if (!user) {
+      return res.status(401).json({ error: "Identifiants incorrects" });
+    }
+
+    res.json({
+      message: "Connexion réussie",
+      role: user.role
+    });
+  } catch (err) {
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
