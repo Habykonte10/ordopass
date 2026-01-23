@@ -19,50 +19,32 @@ app.use((req, res, next) => {
 });
 
 // CORS
-app.use(
-  cors({
-    origin: "https://ordopass.com",
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: "*"
+}));
 
 app.use(express.json());
 
-/* ======================
-   ROUTES API
-   ====================== */
-
-// test global
+/* ========= API ========= */
 app.get("/api/test", (req, res) => {
   res.json({ status: "API OK" });
 });
 
-// test auth
-app.get("/api/auth/test", (req, res) => {
-  res.json({ status: "AUTH API OK" });
-});
-
-// routes auth (REGISTER / LOGIN)
 app.use("/api/auth", require("./routes/auth"));
 
-/* ======================
-   FRONTEND
-   ====================== */
-
-// frontend statique (index.html)
-app.use(express.static(path.join(__dirname, "../")));
+/* ========= FRONT ========= */
+app.use(express.static(path.join(__dirname, "..")));
 
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../index.html"));
+  res.sendFile(path.join(__dirname, "..", "index.html"));
 });
 
-// DB
-mongoose
-  .connect(process.env.MONGO_URI)
+/* ========= DB ========= */
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connecté"))
-  .catch((err) => console.log(err));
+  .catch(err => console.log(err));
 
-// START
+/* ========= START ========= */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("🚀 Serveur lancé sur " + PORT);
