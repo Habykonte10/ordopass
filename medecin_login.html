@@ -349,43 +349,54 @@
     </div>
   </div>
 
-  <script>
-document.addEventListener('DOMContentLoaded', function() {
+  
+     
+      <script>
+document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById("loginForm");
   const msg = document.getElementById("messageBox");
+  const btn = document.getElementById("submitBtn");
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    msg.style.display = "none";
+    btn.disabled = true;
 
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value;
 
     try {
-      const res = await fetch(
-        "https://ordopass.com/api/auth/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username,
-            password,
-            role: "medecin"
-          })
-        }
-      );
+      const res = await fetch("https://ordopass.onrender.com/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          username,
+          password,
+          role: "medecin"   // 🔥 OBLIGATOIRE
+        })
+      });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Erreur connexion");
+      if (!res.ok) throw new Error(data.message || "Erreur de connexion");
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("currentUser", JSON.stringify(data.user));
+      localStorage.setItem("user", JSON.stringify(data));
 
-      window.location.href = "medecin_dashboard.html";
+      // 🔀 REDIRECTION
+      if (data.role === "medecin") {
+        window.location.href = "dashboard-medecin.html";
+      } else if (data.role === "pharmacie") {
+        window.location.href = "dashboard-pharmacie.html";
+      } else {
+        throw new Error("Rôle inconnu");
+      }
 
     } catch (err) {
       msg.textContent = "❌ " + err.message;
       msg.className = "message-box error";
       msg.style.display = "block";
+      btn.disabled = false;
     }
   });
 });
