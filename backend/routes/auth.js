@@ -4,16 +4,16 @@ const User = require("../models/User");
 
 const router = express.Router();
 
-/* ================= LOGIN ================= */
+/* ===== LOGIN ===== */
 router.post("/login", async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, role } = req.body;
 
-    if (!username || !password) {
+    if (!username || !password || !role) {
       return res.status(400).json({ message: "Champs manquants" });
     }
 
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username, role });
     if (!user) {
       return res.status(401).json({ message: "Utilisateur introuvable" });
     }
@@ -24,7 +24,6 @@ router.post("/login", async (req, res) => {
     }
 
     res.json({
-      message: "Connexion réussie",
       username: user.username,
       role: user.role
     });
@@ -36,51 +35,18 @@ router.post("/login", async (req, res) => {
 });
 
 
-/* ================= REGISTER MEDECIN ================= */
-router.post("/register-medecin", async (req, res) => {
-  try {
-    const { username, password } = req.body;
-
-    if (!username || !password) {
-      return res.status(400).json({ message: "Champs manquants" });
-    }
-
-    const exist = await User.findOne({ username });
-    if (exist) {
-      return res.status(400).json({ message: "Utilisateur déjà existant" });
-    }
-
-    const hash = await bcrypt.hash(password, 10);
-
-    const user = new User({
-      username,
-      password: hash,
-      role: "medecin"
-    });
-
-    await user.save();
-
-    res.json({ message: "Compte médecin créé avec succès" });
-
-  } catch (err) {
-    console.error("REGISTER MEDECIN ERROR:", err);
-    res.status(500).json({ message: "Erreur création médecin" });
-  }
-});
-
-
-/* ================= REGISTER PHARMACIE ================= */
+/* ===== REGISTER PHARMACIE ===== */
 router.post("/register-pharmacie", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    if (!username || !password) {
+    if(!username || !password){
       return res.status(400).json({ message: "Champs manquants" });
     }
 
-    const exist = await User.findOne({ username });
-    if (exist) {
-      return res.status(400).json({ message: "Utilisateur déjà existant" });
+    const exist = await User.findOne({ username, role:"pharmacie" });
+    if(exist){
+      return res.status(400).json({ message: "Utilisateur existe déjà" });
     }
 
     const hash = await bcrypt.hash(password, 10);
@@ -93,10 +59,10 @@ router.post("/register-pharmacie", async (req, res) => {
 
     await user.save();
 
-    res.json({ message: "Compte pharmacie créé avec succès" });
+    res.json({ message: "✅ Compte pharmacie créé avec succès" });
 
   } catch (err) {
-    console.error("REGISTER PHARMACIE ERROR:", err);
+    console.error(err);
     res.status(500).json({ message: "Erreur création pharmacie" });
   }
 });
