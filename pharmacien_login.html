@@ -5,45 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Connexion Pharmacien — OrdoPass</title>
   <link rel="stylesheet" href="style2.css" />
+
   <style>
-    .logo-center {
-      text-align: center;
-      position: relative;
-      margin-bottom: 16px;
-    }
-
-    .logo-dropdown {
-      display: none;
-      position: absolute;
-      top: 48px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      padding: 8px 0;
-      min-width: 180px;
-      z-index: 10;
-      text-align: left;
-    }
-
-    .logo-dropdown a {
-      display: block;
-      padding: 8px 16px;
-      color: #1e3c72;
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 15px;
-    }
-
-    .logo-dropdown a:hover {
-      background-color: #f3f4f6;
-    }
-
-    .logo-center:hover .logo-dropdown {
-      display: block;
-    }
-
     .contact-info {
       margin: 15px 0;
       padding: 12px;
@@ -60,53 +23,54 @@
       font-weight: 600;
       text-decoration: none;
     }
+
+    .message-box {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .message-box.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .message-box.success {
+      background: #d4edda;
+      color: #155724;
+    }
   </style>
 </head>
+
 <body>
   <div class="split-layout">
-    <!-- 💊 Image à gauche -->
+
+    <!-- IMAGE -->
     <div class="side-image pharm-accent" style="background-image:url('images/pharmacien-bg.jpg');">
-      <div class="side-overlay" style="background: linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.2));"></div>
+      <div class="side-overlay"></div>
       <div class="side-content">
-        <h2 style="margin:0 0 12px;font-size:28px">Bienvenue Pharmacien</h2>
-        <p style="color:rgba(255,255,255,0.95);max-width:420px">
-          Connectez-vous pour vérifier et délivrer des ordonnances sécurisées.
-        </p>
+        <h2>Bienvenue Pharmacien</h2>
+        <p>Connectez-vous pour vérifier et délivrer des ordonnances sécurisées.</p>
       </div>
     </div>
 
-    <!-- 🧾 Formulaire -->
+    <!-- FORM -->
     <div style="display:flex;align-items:center;justify-content:center;padding:40px;">
       <div class="form-card" style="width:100%;max-width:420px;">
 
-        <!-- 🔹 Logo OrdoPass interactif -->
-        <div class="logo-center">
-          <svg viewBox="0 0 220 40" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer;">
-            <linearGradient id="g4" x1="0" x2="1">
-              <stop offset="0" stop-color="#2a5298"/>
-              <stop offset="1" stop-color="#1e3c72"/>
-            </linearGradient>
-            <text x="0" y="28" font-family="Inter, Arial" font-size="22" font-weight="700" fill="url(#g4)">
-              Ordo<tspan fill="#0ea5a0">Pass</tspan>
-            </text>
-          </svg>
+        <h2 style="text-align:center;">Connexion Pharmacien</h2>
 
-          <!-- 🔽 Menu déroulant du logo -->
-          <div class="logo-dropdown">
-            <a href="index.html">🏠 Page d'accueil</a>
-          </div>
-        </div>
-
-        <!-- Note importante -->
         <div class="contact-info">
           <strong>Nouveau sur OrdoPass ?</strong><br>
-          Contactez-nous au <a href="tel:+221789299204">+221 78 929 92 04</a> pour créer un compte.
+          Contactez-nous au <a href="tel:+221789299204">+221 78 929 92 04</a>
         </div>
 
-        <form id="loginForm" class="flex-col">
+        <form id="loginForm">
+
           <div class="form-group">
-            <label>Adresse e-mail</label>
-            <input id="username" class="input" type="email" placeholder="votre@email.com" required>
+            <label>Nom d'utilisateur</label>
+            <input id="username" class="input" type="text" placeholder="pharmacie_test1" required>
           </div>
 
           <div class="form-group">
@@ -114,67 +78,68 @@
             <input id="password" class="input" type="password" placeholder="Votre mot de passe" required>
           </div>
 
-          <input id="role" type="hidden" value="pharmacien">
+          <input id="role" type="hidden" value="pharmacie">
 
-          <button class="btn-primary pharm-btn" type="submit">Se connecter</button>
+          <button class="btn-primary pharm-btn" id="submitBtn" type="submit">
+            Se connecter
+          </button>
 
-          <div class="contact-info" style="margin-top: 10px;">
-            <p style="margin: 0; color: #6b7280;">
-              Première connexion ?<br>
-              Contactez-nous au <a href="tel:+221789299204">+221 78 929 92 04</a>
-            </p>
-          </div>
+          <div id="messageBox" class="message-box"></div>
 
-          <div id="messageBox" class="message-box" style="display:none"></div>
         </form>
+
       </div>
     </div>
   </div>
 
-   
+<script>
+document.addEventListener("DOMContentLoaded", () => {
 
-      <script>
-document.addEventListener('DOMContentLoaded', function() {
   const form = document.getElementById("loginForm");
   const msg = document.getElementById("messageBox");
+  const btn = document.getElementById("submitBtn");
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    msg.style.display = "none";
+    btn.disabled = true;
 
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value;
 
     try {
-      const res = await fetch(
-        "https://ordopass.com/api/auth/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username,
-            password,
-            role: "pharmacien"
-          })
-        }
-      );
+      const res = await fetch("https://ordopass.onrender.com/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password,
+          role: "pharmacie"
+        })
+      });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("currentUser", JSON.stringify(data.user));
+      if (!res.ok) throw new Error(data.message || "Erreur de connexion");
 
+      // ✅ sauvegarde utilisateur
+      localStorage.setItem("user", JSON.stringify(data));
+
+      // ✅ redirection
       window.location.href = "pharmacien_dashboard.html";
 
     } catch (err) {
       msg.textContent = "❌ " + err.message;
       msg.className = "message-box error";
       msg.style.display = "block";
+      btn.disabled = false;
     }
   });
+
 });
 </script>
-
 
 </body>
 </html>
