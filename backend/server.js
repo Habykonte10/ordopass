@@ -23,11 +23,18 @@ app.get("/api/test", (req, res) => {
 
 app.use("/api/auth", require("./routes/auth"));
 
-/* ===== FRONTEND ===== */
+/* ===== FRONTEND STATIC FILES ===== */
+// sert tous les fichiers HTML (login, dashboard, etc.)
 app.use(express.static(path.join(__dirname, "..")));
 
+/* page principale */
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "index.html"));
+});
+
+/* ✅ catch-all pour toutes les pages HTML */
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", req.path));
 });
 
 /* ===== DB ===== */
