@@ -23,7 +23,7 @@ app.get("/api/test", (req, res) => {
 
 app.use("/api/auth", require("./routes/auth"));
 
-/* ===== FRONTEND (APRÈS API) ===== */
+/* ===== FRONTEND ===== */
 app.use(express.static(path.join(__dirname, "..")));
 
 app.get("/", (req, res) => {
@@ -31,10 +31,10 @@ app.get("/", (req, res) => {
 });
 
 /* ===== DB ===== */
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB connecté"))
-  .catch(err => console.log(err));
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log("✅ MongoDB connecté"))
+  .catch(err => console.error("❌ MongoDB erreur :", err));
 
 /* ===== START ===== */
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Serveur lancé sur " + PORT));
+app.listen(PORT, () => console.log("🚀 Serveur lancé sur " + PORT));
