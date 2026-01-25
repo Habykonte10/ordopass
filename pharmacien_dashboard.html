@@ -19,11 +19,7 @@
       padding: 10px;
       transition: 0.3s ease;
     }
-    #logout:hover {
-      background: #c0392b;
-    }
-
-    .table-wrap { overflow-x: auto; }
+    #logout:hover { background: #c0392b; }
 
     .notification {
       position: fixed;
@@ -33,66 +29,37 @@
       border-radius: 8px;
       color: white;
       z-index: 10000;
-      max-width: 400px;
-      animation: slideIn 0.3s ease;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
     }
+    .notification-success { background:#28a745; }
+    .notification-error { background:#dc3545; }
+    .notification-info { background:#17a2b8; }
 
-    .notification-success { background: #28a745; }
-    .notification-error { background: #dc3545; }
-    .notification-info { background: #17a2b8; }
-
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-
-    .action-buttons {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .action-btn {
-      padding: 6px 12px;
-      border-radius: 6px;
-      border: 1px solid #ddd;
-      background: white;
-      cursor: pointer;
-      font-size: 13px;
-    }
-
-    .process-btn { color: #4CAF50; border-color: #4CAF50; }
-    .delete-btn { color: #f44336; border-color: #f44336; }
-
-    .status {
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .status.envoyee { background: #E8F5E9; color: #4CAF50; }
-    .status.en_cours { background: #FFF3E0; color: #FF9800; }
-    .status.delivree { background: #F3E5F5; color: #9C27B0; }
-    .status.pret { background: #E0F7FA; color: #00BCD4; }
+    .status { padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600; }
+    .status.envoyee { background:#E8F5E9;color:#4CAF50; }
+    .status.en_cours { background:#FFF3E0;color:#FF9800; }
+    .status.delivree { background:#F3E5F5;color:#9C27B0; }
+    .status.pret { background:#E0F7FA;color:#00BCD4; }
   </style>
 </head>
 
 <body>
 <div class="container">
 
+  <!-- ✅ SIDEBAR COMPLET -->
   <aside class="sidebar">
     <div class="logo">ORDO<span>PASS</span></div>
     <nav class="menu">
-      <a href="pharmacien_dashboard.html" class="active">Ordonnances</a>
-      <a href="#" id="logout">Déconnexion</a>
+      <a href="pharmacien_dashboard.html" class="active"><i class="fa-solid fa-prescription"></i> Ordonnances</a>
+      <a href="pharmacien_medecins.html"><i class="fa-solid fa-user-md"></i> Médecins</a>
+      <a href="pharmacien_stock.html"><i class="fa-solid fa-boxes-stacked"></i> Gestion Stock</a>
+      <a href="pharmacien_facturation.html"><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</a>
+      <a href="pharmacien_messagerie.html"><i class="fa-solid fa-comment-medical"></i> Messagerie</a>
+      <a href="pharmacien_parametres.html"><i class="fa-solid fa-gear"></i> Paramètres</a>
+      <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
     </nav>
   </aside>
 
+  <!-- ✅ CONTENU -->
   <main class="main">
     <div class="topbar">
       <div class="title">Ordonnances reçues</div>
@@ -119,9 +86,7 @@
           </tr>
         </thead>
         <tbody id="ordBody">
-          <tr>
-            <td colspan="6">Chargement...</td>
-          </tr>
+          <tr><td colspan="6">Chargement...</td></tr>
         </tbody>
       </table>
     </section>
@@ -129,42 +94,38 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
 
   const API_URL = window.location.protocol + "//" + window.location.host;
 
-  // ✅ CORRECTION ICI
+  // ✅ CORRECTION PRINCIPALE
   const user = JSON.parse(localStorage.getItem("user"));
 
   if (!user || user.role !== "pharmacie") {
     alert("⚠️ Accès refusé");
-    window.location.href = "index.html";
+    location.href = "index.html";
     return;
   }
 
   document.getElementById("userName").textContent = user.username;
   document.getElementById("userStatus").textContent = "Connecté";
 
-  function showNotification(msg, type="info"){
+  function showNotification(msg,type="info"){
     const n=document.createElement("div");
     n.className=`notification notification-${type}`;
-    n.innerHTML=`<span>${msg}</span>
-    <button onclick="this.parentElement.remove()">×</button>`;
+    n.textContent=msg;
     document.body.appendChild(n);
-    setTimeout(()=>n.remove(),5000);
+    setTimeout(()=>n.remove(),4000);
   }
 
   async function loadOrdonnances(){
     try{
-      const res = await fetch(
-        `${API_URL}/api/pharmacien/ordonnances?nom=${encodeURIComponent(user.username)}`
-      );
+      const res = await fetch(`${API_URL}/api/pharmacien/ordonnances?nom=${user.username}`);
       const data = await res.json();
       afficher(data);
-      document.getElementById("ordCount").textContent =
-      data.length + " ordonnance(s)";
+      document.getElementById("ordCount").textContent=data.length+" ordonnance(s)";
     }catch{
-      showNotification("Erreur chargement", "error");
+      showNotification("Erreur chargement","error");
     }
   }
 
@@ -186,31 +147,26 @@ document.addEventListener("DOMContentLoaded", async () => {
         <td>${o.medecinNom}</td>
         <td><span class="status ${o.statut}">${o.statut}</span></td>
         <td>
-          <button class="action-btn process-btn" onclick="updateStatus('${o.id}','en_cours')">Traiter</button>
-          <button class="action-btn delete-btn" onclick="deleteOrd('${o.id}')">Supprimer</button>
+          <button onclick="updateStatus('${o.id}','en_cours')">Traiter</button>
+          <button onclick="deleteOrd('${o.id}')">Supprimer</button>
         </td>
       </tr>`;
     });
   }
 
   window.updateStatus = async(id,statut)=>{
-    const res = await fetch(`${API_URL}/api/ordonnances/${id}/status`,{
+    await fetch(`${API_URL}/api/ordonnances/${id}/status`,{
       method:"PUT",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({statut})
     });
-
-    if(res.ok){
-      showNotification("Statut mis à jour","success");
-      loadOrdonnances();
-    }
+    showNotification("Statut mis à jour","success");
+    loadOrdonnances();
   }
 
   window.deleteOrd = async(id)=>{
     if(!confirm("Supprimer ?")) return;
-
-    await fetch(`${API_URL}/api/ordonnances/${id}`,{ method:"DELETE" });
-
+    await fetch(`${API_URL}/api/ordonnances/${id}`,{method:"DELETE"});
     showNotification("Supprimée","success");
     loadOrdonnances();
   }
