@@ -40,14 +40,19 @@
       background: #d4edda;
       color: #155724;
     }
+
+    .side-image {
+      background-size: cover;
+      background-position: center;
+    }
   </style>
 </head>
 
 <body>
   <div class="split-layout">
 
-    <!-- IMAGE -->
-    <div class="side-image pharm-accent" style="background-image:url('images/pharmacien-bg.jpg');">
+    <!-- IMAGE (depuis la racine ordopass) -->
+    <div class="side-image pharm-accent" style="background-image:url('pharmacienne.jpg');">
       <div class="side-overlay"></div>
       <div class="side-content">
         <h2>Bienvenue Pharmacien</h2>
@@ -55,7 +60,7 @@
       </div>
     </div>
 
-    <!-- FORM -->
+    <!-- FORMULAIRE -->
     <div style="display:flex;align-items:center;justify-content:center;padding:40px;">
       <div class="form-card" style="width:100%;max-width:420px;">
 
@@ -124,10 +129,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!res.ok) throw new Error(data.message || "Erreur de connexion");
 
-      // ✅ sauvegarde utilisateur
+      // Sauvegarde utilisateur
       localStorage.setItem("user", JSON.stringify(data));
 
-      // ✅ redirection
+      // Redirection
       window.location.href = "pharmacien_dashboard.html";
 
     } catch (err) {
