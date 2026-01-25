@@ -1,170 +1,226 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard Pharmacien - OrdoPass</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <link rel="stylesheet" href="style1.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pharmacien - Ordonnances reçues</title>
+  <link rel="stylesheet" href="style1.css" />
   <script src="https://kit.fontawesome.com/a2d9d5a64b.js" crossorigin="anonymous"></script>
+  <script src="/socket.io/socket.io.js"></script>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f4f6f9;
-    }
-
-    .container {
-      display: flex;
-      min-height: 100vh;
-    }
-
-    .sidebar {
-      width: 230px;
-      background: #1e3c72;
-      color: white;
-      padding: 20px;
-    }
-
-    .sidebar .logo {
-      font-size: 22px;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-
-    .sidebar a {
-      display: block;
-      color: white;
-      padding: 10px;
-      text-decoration: none;
-      margin-bottom: 5px;
-      border-radius: 6px;
-    }
-
-    .sidebar a:hover {
-      background: #2a5298;
-    }
-
     #logout {
+      display: flex !important;
+      align-items: center;
+      color: white !important;
       background: #e74c3c;
+      border-radius: 8px;
+      margin-top: 10px;
+      padding: 10px;
+      transition: 0.3s ease;
+    }
+    #logout:hover {
+      background: #c0392b;
     }
 
-    main {
-      flex: 1;
-      padding: 20px;
-    }
+    .table-wrap { overflow-x: auto; }
 
-    .topbar {
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 8px;
+      color: white;
+      z-index: 10000;
+      max-width: 400px;
+      animation: slideIn 0.3s ease;
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+
+    .notification-success { background: #28a745; }
+    .notification-error { background: #dc3545; }
+    .notification-info { background: #17a2b8; }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .action-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
       background: white;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
+      cursor: pointer;
+      font-size: 13px;
     }
 
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
+    .process-btn { color: #4CAF50; border-color: #4CAF50; }
+    .delete-btn { color: #f44336; border-color: #f44336; }
+
+    .status {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      border-bottom: 1px solid #ddd;
-      padding: 10px;
-      text-align: left;
-    }
-
-    th {
-      background: #f1f1f1;
-    }
+    .status.envoyee { background: #E8F5E9; color: #4CAF50; }
+    .status.en_cours { background: #FFF3E0; color: #FF9800; }
+    .status.delivree { background: #F3E5F5; color: #9C27B0; }
+    .status.pret { background: #E0F7FA; color: #00BCD4; }
   </style>
 </head>
 
 <body>
-
 <div class="container">
 
-  <!-- SIDEBAR -->
   <aside class="sidebar">
-    <div class="logo">ORDOPASS</div>
-
-    <a href="pharmacien_dashboard.html"><i class="fa fa-prescription"></i> Ordonnances</a>
-    <a href="#"><i class="fa fa-user-md"></i> Médecins</a>
-    <a href="#"><i class="fa fa-box"></i> Stock</a>
-    <a href="#"><i class="fa fa-file-invoice"></i> Facturation</a>
-    <a href="#"><i class="fa fa-comment"></i> Messagerie</a>
-    <a href="#"><i class="fa fa-gear"></i> Paramètres</a>
-
-    <a href="#" id="logout"><i class="fa fa-right-from-bracket"></i> Déconnexion</a>
+    <div class="logo">ORDO<span>PASS</span></div>
+    <nav class="menu">
+      <a href="pharmacien_dashboard.html" class="active">Ordonnances</a>
+      <a href="#" id="logout">Déconnexion</a>
+    </nav>
   </aside>
 
-  <!-- MAIN -->
-  <main>
-
+  <main class="main">
     <div class="topbar">
-      <h2>Ordonnances reçues</h2>
-      <div>
-        👤 <span id="userName">...</span>
+      <div class="title">Ordonnances reçues</div>
+      <div class="user-box">
+        <div>
+          <div id="userName">Pharmacie</div>
+          <small id="userStatus">Chargement...</small>
+        </div>
       </div>
     </div>
 
     <section class="card">
-      <h3>Liste des ordonnances</h3>
+      <div id="ordCount">Chargement...</div>
 
-      <table>
+      <table class="table">
         <thead>
           <tr>
             <th>Code</th>
+            <th>Date</th>
             <th>Patient</th>
             <th>Médecin</th>
             <th>Statut</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody id="ordBody">
           <tr>
-            <td colspan="4">Aucune ordonnance</td>
+            <td colspan="6">Chargement...</td>
           </tr>
         </tbody>
       </table>
     </section>
-
   </main>
-
 </div>
 
-
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
-  // ✅ Récupérer utilisateur depuis login
+  const API_URL = window.location.protocol + "//" + window.location.host;
+
+  // ✅ CORRECTION ICI
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // ✅ Vérification accès
   if (!user || user.role !== "pharmacie") {
     alert("⚠️ Accès refusé");
     window.location.href = "index.html";
     return;
   }
 
-  // ✅ Afficher username
   document.getElementById("userName").textContent = user.username;
+  document.getElementById("userStatus").textContent = "Connecté";
 
-  // ✅ Logout
-  document.getElementById("logout").addEventListener("click", () => {
-    if (confirm("Se déconnecter ?")) {
-      localStorage.removeItem("user");
-      window.location.href = "index.html";
+  function showNotification(msg, type="info"){
+    const n=document.createElement("div");
+    n.className=`notification notification-${type}`;
+    n.innerHTML=`<span>${msg}</span>
+    <button onclick="this.parentElement.remove()">×</button>`;
+    document.body.appendChild(n);
+    setTimeout(()=>n.remove(),5000);
+  }
+
+  async function loadOrdonnances(){
+    try{
+      const res = await fetch(
+        `${API_URL}/api/pharmacien/ordonnances?nom=${encodeURIComponent(user.username)}`
+      );
+      const data = await res.json();
+      afficher(data);
+      document.getElementById("ordCount").textContent =
+      data.length + " ordonnance(s)";
+    }catch{
+      showNotification("Erreur chargement", "error");
     }
+  }
+
+  function afficher(list){
+    const body=document.getElementById("ordBody");
+    body.innerHTML="";
+
+    if(!list.length){
+      body.innerHTML="<tr><td colspan='6'>Aucune ordonnance</td></tr>";
+      return;
+    }
+
+    list.forEach(o=>{
+      body.innerHTML+=`
+      <tr>
+        <td>${o.code}</td>
+        <td>${o.createdAt}</td>
+        <td>${o.patientNom}</td>
+        <td>${o.medecinNom}</td>
+        <td><span class="status ${o.statut}">${o.statut}</span></td>
+        <td>
+          <button class="action-btn process-btn" onclick="updateStatus('${o.id}','en_cours')">Traiter</button>
+          <button class="action-btn delete-btn" onclick="deleteOrd('${o.id}')">Supprimer</button>
+        </td>
+      </tr>`;
+    });
+  }
+
+  window.updateStatus = async(id,statut)=>{
+    const res = await fetch(`${API_URL}/api/ordonnances/${id}/status`,{
+      method:"PUT",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({statut})
+    });
+
+    if(res.ok){
+      showNotification("Statut mis à jour","success");
+      loadOrdonnances();
+    }
+  }
+
+  window.deleteOrd = async(id)=>{
+    if(!confirm("Supprimer ?")) return;
+
+    await fetch(`${API_URL}/api/ordonnances/${id}`,{ method:"DELETE" });
+
+    showNotification("Supprimée","success");
+    loadOrdonnances();
+  }
+
+  document.getElementById("logout").addEventListener("click",()=>{
+    localStorage.clear();
+    location.href="index.html";
   });
 
+  loadOrdonnances();
 });
 </script>
 
