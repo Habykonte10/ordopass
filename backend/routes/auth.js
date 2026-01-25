@@ -7,13 +7,13 @@ const router = express.Router();
 /* ================= LOGIN ================= */
 router.post("/login", async (req, res) => {
   try {
-    const { username, password, role } = req.body;
+    const { username, password } = req.body;
 
     if (!username || !password) {
       return res.status(400).json({ message: "Champs manquants" });
     }
 
-    const user = await User.findOne({ username, role });
+    const user = await User.findOne({ username });
     if (!user) {
       return res.status(401).json({ message: "Utilisateur introuvable" });
     }
@@ -24,6 +24,7 @@ router.post("/login", async (req, res) => {
     }
 
     res.json({
+      message: "Connexion réussie",
       username: user.username,
       role: user.role
     });
@@ -40,6 +41,15 @@ router.post("/register-medecin", async (req, res) => {
   try {
     const { username, password } = req.body;
 
+    if (!username || !password) {
+      return res.status(400).json({ message: "Champs manquants" });
+    }
+
+    const exist = await User.findOne({ username });
+    if (exist) {
+      return res.status(400).json({ message: "Utilisateur déjà existant" });
+    }
+
     const hash = await bcrypt.hash(password, 10);
 
     const user = new User({
@@ -53,7 +63,7 @@ router.post("/register-medecin", async (req, res) => {
     res.json({ message: "Compte médecin créé avec succès" });
 
   } catch (err) {
-    console.error(err);
+    console.error("REGISTER MEDECIN ERROR:", err);
     res.status(500).json({ message: "Erreur création médecin" });
   }
 });
@@ -63,6 +73,15 @@ router.post("/register-medecin", async (req, res) => {
 router.post("/register-pharmacie", async (req, res) => {
   try {
     const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ message: "Champs manquants" });
+    }
+
+    const exist = await User.findOne({ username });
+    if (exist) {
+      return res.status(400).json({ message: "Utilisateur déjà existant" });
+    }
 
     const hash = await bcrypt.hash(password, 10);
 
@@ -77,7 +96,7 @@ router.post("/register-pharmacie", async (req, res) => {
     res.json({ message: "Compte pharmacie créé avec succès" });
 
   } catch (err) {
-    console.error(err);
+    console.error("REGISTER PHARMACIE ERROR:", err);
     res.status(500).json({ message: "Erreur création pharmacie" });
   }
 });
