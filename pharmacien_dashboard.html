@@ -1,398 +1,98 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Pharmacien - Ordonnances reçues</title>
-  <link rel="stylesheet" href="style1.css" />
+  <meta charset="UTF-8">
+  <title>Pharmacien - Ordonnances</title>
+  <link rel="stylesheet" href="style1.css">
   <script src="https://kit.fontawesome.com/a2d9d5a64b.js" crossorigin="anonymous"></script>
-  <script src="/socket.io/socket.io.js"></script>
-
-  <style>
-    /* 🔹 Style du bouton de déconnexion */
-    #logout {
-      display: flex !important;
-      align-items: center;
-      color: white !important;
-      background: #e74c3c;
-      border-radius: 8px;
-      margin-top: 10px;
-      padding: 10px;
-      transition: 0.3s ease;
-    }
-    #logout:hover {
-      background: #c0392b;
-    }
-
-    /* ✅ Ajustement visuel pour le contenu */
-    .table-wrap {
-      overflow-x: auto;
-    }
-
-    /* Styles pour les notifications */
-    .notification {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 15px 20px;
-      border-radius: 8px;
-      color: white;
-      z-index: 10000;
-      max-width: 400px;
-      animation: slideIn 0.3s ease;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .notification-success {
-      background: #28a745;
-    }
-    
-    .notification-error {
-      background: #dc3545;
-    }
-    
-    .notification-info {
-      background: #17a2b8;
-    }
-    
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-
-    /* Styles pour les boutons d'action */
-    .action-buttons {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: nowrap;
-    }
-    
-    .action-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 6px 12px;
-      border-radius: 6px;
-      border: 1px solid #ddd;
-      background: white;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-size: 13px;
-      text-decoration: none;
-    }
-    
-    .action-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    
-    .view-btn { 
-      color: #2196f3; 
-      border-color: #2196f3; 
-    }
-    .view-btn:hover { 
-      background-color: #2196f3; 
-      color: white; 
-    }
-    
-    .process-btn { 
-      color: #4CAF50; 
-      border-color: #4CAF50; 
-    }
-    .process-btn:hover { 
-      background-color: #4CAF50; 
-      color: white; 
-    }
-    
-    .complete-btn { 
-      color: #9C27B0; 
-      border-color: #9C27B0; 
-    }
-    .complete-btn:hover { 
-      background-color: #9C27B0; 
-      color: white; 
-    }
-    
-    .delete-btn { 
-      color: #f44336; 
-      border-color: #f44336; 
-    }
-    .delete-btn:hover { 
-      background-color: #f44336; 
-      color: white; 
-    }
-
-    /* Ajustement de la largeur de la colonne Actions */
-    .col-actions {
-      width: 250px;
-    }
-    
-    /* Styles pour les statuts */
-    .status {
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-    
-    .status.active {
-      background: #E3F2FD;
-      color: #1976D2;
-    }
-    
-    .status.en_cours {
-      background: #FFF3E0;
-      color: #FF9800;
-    }
-    
-    .status.envoyee {
-      background: #E8F5E9;
-      color: #4CAF50;
-    }
-    
-    .status.delivree {
-      background: #F3E5F5;
-      color: #9C27B0;
-    }
-    
-    .status.pret {
-      background: #E0F7FA;
-      color: #00BCD4;
-    }
-    
-    .status.annulee {
-      background: #f5f5f5;
-      color: #999;
-      text-decoration: line-through;
-    }
-  </style>
 </head>
+
 <body>
-  <div class="container">
-    <!-- ✅ Barre latérale -->
-    <aside class="sidebar">
-      <div class="logo">ORDO<span>PASS</span></div>
-      <nav class="menu">
-        <a href="pharmacien_dashboard.html" class="active"><i class="fa-solid fa-prescription"></i> <span>Ordonnances</span></a>
-        <a href="pharmacien_medecins.html"><i class="fa-solid fa-user-md"></i> <span>Médecins</span></a>
-        <a href="pharmacien_stock.html">
-          <i class="fa-solid fa-boxes-stacked"></i> <span>Gestion Stock</span>
-        </a>
-        <a href="pharmacien_facturation.html">
-          <i class="fa-solid fa-file-invoice-dollar"></i> <span>Facturation</span>
-        </a>
-        <a href="pharmacien_messagerie.html">
-          <i class="fa-solid fa-comment-medical"></i> <span>Messagerie</span>
-        </a>
-        <a href="pharmacien_parametres.html">
-          <i class="fa-solid fa-gear"></i> <span>Paramètres</span>
-        </a>
-        <a href="#" id="logout">
-          <i class="fa-solid fa-right-from-bracket"></i> <span>Déconnexion</span>
-        </a>
-      </nav>
-    </aside>
+<div class="container">
 
-    <!-- ✅ Contenu principal -->
-    <main class="main">
-      <div class="topbar">
-        <div class="title">Ordonnances reçues</div>
-        <div class="user-box">
-          <img class="avatar" src="https://i.pravatar.cc/80?img=12" alt="avatar"/>
-          <div>
-            <div id="userName">Pharmacie</div>
-            <small style="color:#6b8392" id="userStatus">Chargement...</small>
-          </div>
-        </div>
-      </div>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">ORDO<span>PASS</span></div>
+    <nav class="menu">
+      <a href="pharmacien_dashboard.html" class="active">Ordonnances</a>
+      <a href="pharmacien_stock.html">Stock</a>
+      <a href="pharmacien_facturation.html">Facturation</a>
+      <a href="#" id="logout">Déconnexion</a>
+    </nav>
+  </aside>
 
-      <section class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div>
-            <div style="font-weight:700;color:#234a6a">Ordonnances reçues</div>
-            <div style="color:#6b7f8e;font-size:14px" id="ordCount">Chargement...</div>
-          </div>
-          <div style="display:flex;gap:10px;align-items:center">
-            <input id="searchInput" placeholder="Rechercher patient / n° ticket..." 
-              style="padding:8px 12px;border-radius:8px;border:1px solid #e6eef6;width:250px" />
-            <button class="btn primary" id="refreshBtn"><i class="fa-solid fa-rotate"></i> Actualiser</button>
-          </div>
-        </div>
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <h2>Ordonnances reçues</h2>
+      <div id="userName"></div>
+    </div>
 
-        <div class="tabs" id="tabs">
-          <div class="tab active" data-filter="all">Toutes</div>
-          <div class="tab" data-filter="envoyee">À traiter</div>
-          <div class="tab" data-filter="en_cours">En cours</div>
-          <div class="tab" data-filter="pret">Prêtes</div>
-          <div class="tab" data-filter="delivree">Délivrées</div>
-        </div>
+    <table border="1" width="100%">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Patient</th>
+          <th>Médecin</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody id="ordBody">
+        <tr><td colspan="4">Chargement...</td></tr>
+      </tbody>
+    </table>
+  </main>
+</div>
 
-        <div class="table-wrap">
-          <table class="table" id="ordTable">
-            <thead>
-              <tr>
-                <th>Code</th>
-                <th>Date</th>
-                <th>Patient</th>
-                <th>Médecin</th>
-                <th>Statut</th>
-                <th class="col-actions">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="ordBody">
-              <tr>
-                <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
-                  <i class="fa-solid fa-spinner fa-spin"></i> Chargement des ordonnances...
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </main>
-  </div>
-            
-        
-         <script>
+
+<script>
 document.addEventListener("DOMContentLoaded", async () => {
 
   const API_URL = window.location.protocol + "//" + window.location.host;
 
-  // 🔐 Vérification session
-  const user = JSON.parse(localStorage.getItem("currentUser"));
-  if (!user || user.role !== "pharmacien") {
+  // ✅ AUTH CORRIGÉ
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  if (!user || user.role !== "pharmacie") {
     alert("⚠️ Accès refusé");
     window.location.href = "index.html";
     return;
   }
 
-  document.getElementById("userName").textContent = user.nom;
-  document.getElementById("userStatus").textContent = "Connecté";
+  document.getElementById("userName").textContent = "Connecté : " + user.username;
 
-  // 🔔 Notification
-  function showNotification(msg, type="info"){
-    const n=document.createElement("div");
-    n.className=`notification notification-${type}`;
-    n.innerHTML=`<span>${msg}</span>
-    <button onclick="this.parentElement.remove()" 
-    style="background:none;border:none;color:white;font-size:18px;">×</button>`;
-    document.body.appendChild(n);
-    setTimeout(()=>n.remove(),5000);
-  }
+  // 🚪 LOGOUT
+  document.getElementById("logout").addEventListener("click", () => {
+    localStorage.clear();
+    location.href = "index.html";
+  });
 
-  // 📥 Charger ordonnances
-  async function loadOrdonnances(){
-    try{
-      const res = await fetch(
-        `${API_URL}/api/pharmacien/ordonnances?nom=${encodeURIComponent(user.nom)}`
-      );
-      const data = await res.json();
-      afficher(data);
-      document.getElementById("ordCount").textContent =
-      `${data.length} ordonnance(s)`;
-    }catch{
-      showNotification("Erreur chargement", "error");
-    }
-  }
+  // 📥 LOAD ORDONNANCES (exemple localStorage)
+  function loadOrdonnances() {
+    const ords = JSON.parse(localStorage.getItem("ordonnances")) || [];
+    const body = document.getElementById("ordBody");
+    body.innerHTML = "";
 
-  // 📊 Affichage tableau
-  function afficher(list){
-    const body=document.getElementById("ordBody");
-    body.innerHTML="";
-
-    if(!list.length){
-      body.innerHTML=`<tr>
-      <td colspan="6" style="text-align:center">
-      Aucune ordonnance</td></tr>`;
+    if (!ords.length) {
+      body.innerHTML = `<tr><td colspan="4">Aucune ordonnance</td></tr>`;
       return;
     }
 
-    list.forEach(o=>{
-      body.innerHTML+=`
-      <tr>
-        <td><b>${o.code||"N/A"}</b></td>
-        <td>${o.createdAt||""}</td>
-        <td>${o.patientNom||""}</td>
-        <td>${o.medecinNom||""}</td>
-        <td>
-          <span class="status ${o.statut}">
-          ${o.statut}</span>
-        </td>
-        <td>
-          <button class="action-btn process-btn"
-           onclick="updateStatus('${o.id}','en_cours')">
-           Traiter</button>
-
-          <button class="action-btn delete-btn"
-           onclick="deleteOrd('${o.id}')">
-           Supprimer</button>
-        </td>
-      </tr>`;
+    ords.forEach(o => {
+      body.innerHTML += `
+        <tr>
+          <td>${o.code}</td>
+          <td>${o.patientNom}</td>
+          <td>${o.medecinNom}</td>
+          <td>${o.statut}</td>
+        </tr>
+      `;
     });
   }
 
-  // 🔄 MAJ statut
-  window.updateStatus = async(id,statut)=>{
-    const res = await fetch(
-      `${API_URL}/api/ordonnances/${id}/status`,
-      {
-        method:"PUT",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({statut})
-      }
-    );
-
-    if(res.ok){
-      showNotification("Statut mis à jour","success");
-      loadOrdonnances();
-    }
-  }
-
-  // 🗑️ Supprimer
-  window.deleteOrd = async(id)=>{
-    if(!confirm("Supprimer ?")) return;
-
-    await fetch(`${API_URL}/api/ordonnances/${id}`,{
-      method:"DELETE"
-    });
-
-    showNotification("Supprimée","success");
-    loadOrdonnances();
-  }
-
-  // 🔁 Bouton refresh
-  document.getElementById("refreshBtn")
-  .addEventListener("click",loadOrdonnances);
-
-  // 🚪 Déconnexion
-  document.getElementById("logout")
-  .addEventListener("click",()=>{
-    localStorage.clear();
-    location.href="index.html";
-  });
-
-  // 🔍 Recherche
-  document.getElementById("searchInput")
-  .addEventListener("input",(e)=>{
-    const v=e.target.value.toLowerCase();
-    document.querySelectorAll("#ordBody tr")
-    .forEach(r=>{
-      r.style.display=
-      r.textContent.toLowerCase().includes(v)
-      ?"":"none";
-    });
-  });
-
-  // 🚀 Lancement
   loadOrdonnances();
 });
 </script>
 
-        
 </body>
 </html>
