@@ -4,15 +4,16 @@ const User = require("../models/User");
 
 const router = express.Router();
 
+/* ================= LOGIN ================= */
 router.post("/login", async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, role } = req.body;
 
     if (!username || !password) {
       return res.status(400).json({ message: "Champs manquants" });
     }
 
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username, role });
     if (!user) {
       return res.status(401).json({ message: "Utilisateur introuvable" });
     }
@@ -30,6 +31,54 @@ router.post("/login", async (req, res) => {
   } catch (err) {
     console.error("LOGIN ERROR:", err);
     res.status(500).json({ message: "Erreur serveur" });
+  }
+});
+
+
+/* ================= REGISTER MEDECIN ================= */
+router.post("/register-medecin", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    const hash = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      username,
+      password: hash,
+      role: "medecin"
+    });
+
+    await user.save();
+
+    res.json({ message: "Compte médecin créé avec succès" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erreur création médecin" });
+  }
+});
+
+
+/* ================= REGISTER PHARMACIE ================= */
+router.post("/register-pharmacie", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    const hash = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      username,
+      password: hash,
+      role: "pharmacie"
+    });
+
+    await user.save();
+
+    res.json({ message: "Compte pharmacie créé avec succès" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erreur création pharmacie" });
   }
 });
 
