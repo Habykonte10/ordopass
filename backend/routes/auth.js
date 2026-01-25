@@ -4,9 +4,7 @@ const User = require("../models/User");
 
 const router = express.Router();
 
-/* =====================
-   REGISTER (création compte)
-===================== */
+/* REGISTER */
 router.post("/register", async (req, res) => {
   try {
     const { username, password, role } = req.body;
@@ -38,26 +36,16 @@ router.post("/register", async (req, res) => {
   }
 });
 
-/* =====================
-   LOGIN
-===================== */
+/* LOGIN */
 router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    if (!username || !password) {
-      return res.status(400).json({ message: "Champs manquants" });
-    }
-
     const user = await User.findOne({ username });
-    if (!user) {
-      return res.status(401).json({ message: "Utilisateur introuvable" });
-    }
+    if (!user) return res.status(401).json({ message: "Utilisateur introuvable" });
 
     const ok = await bcrypt.compare(password, user.password);
-    if (!ok) {
-      return res.status(401).json({ message: "Mot de passe incorrect" });
-    }
+    if (!ok) return res.status(401).json({ message: "Mot de passe incorrect" });
 
     res.json({
       username: user.username,
