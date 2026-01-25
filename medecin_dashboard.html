@@ -366,49 +366,31 @@
     </div>
   </div>
 
-  <!-- ✅ JAVASCRIPT -->
-  <script src="/socket.io/socket.io.js"></script>
   
-      <script>
-document.addEventListener("DOMContentLoaded", async () => {
+ <script>
+document.addEventListener("DOMContentLoaded", () => {
 
 const API_URL = window.location.protocol + "//" + window.location.host;
 
 // ================= AUTH =================
-let user = JSON.parse(localStorage.getItem("currentUser")) ||
-           JSON.parse(localStorage.getItem("ordoPass_currentUser"));
+let user = JSON.parse(localStorage.getItem("user"));
 
-if (!user || user.role !== "medecin") {
-  alert("⚠️ Accès refusé");
-  location.href="index.html";
+if (!user) {
+  alert("⚠️ Accès refusé : vous devez vous connecter");
+  location.href = "medecin_login.html";
+  return;
+}
+
+if (user.role !== "medecin") {
+  alert("⚠️ Accès refusé : rôle invalide");
+  location.href = "medecin_login.html";
   return;
 }
 
 document.getElementById("usernameDisplay").textContent = user.username;
 
-// ================= SOCKET =================
-let socket = io(API_URL);
-
-socket.on("connect",()=>{
-  socket.emit("user_join",{
-    username:user.username,
-    role:"medecin"
-  });
-});
-
-// ================= NOTIF =================
-function notify(msg,type="info"){
-  const n=document.createElement("div");
-  n.className=`notification notification-${type}`;
-  n.innerHTML=`<span>${msg}</span>
-  <button onclick="this.parentElement.remove()"
-  style="background:none;border:none;color:white;">×</button>`;
-  document.body.appendChild(n);
-  setTimeout(()=>n.remove(),5000);
-}
-
 // ================= CONSULTATIONS =================
-let all=[];
+let all = [];
 
 function loadConsultations(){
   all = JSON.parse(localStorage.getItem("consultations")) || [];
@@ -422,8 +404,11 @@ function render(){
 
   if(!all.length){
     body.innerHTML=`
-    <tr><td colspan="7" style="text-align:center">
-    Aucune consultation</td></tr>`;
+    <tr>
+      <td colspan="7" style="text-align:center">
+      Aucune consultation
+      </td>
+    </tr>`;
     return;
   }
 
@@ -432,32 +417,17 @@ function render(){
     <tr>
       <td><b>${c.ticket||"N/A"}</b></td>
       <td>${c.patientName||""}</td>
-      <td><img src="${c.image||'https://i.pravatar.cc/40'}"
-      class="avatar"></td>
+      <td><img src="${c.image||'https://i.pravatar.cc/40'}" class="avatar"></td>
       <td>${c.date||""}<br>${c.heure||""}</td>
       <td>${c.motif||""}</td>
       <td>
-        <span class="status-badge status 
-        ${getClass(c.statut)}">
-        ${c.statut||"En attente"}</span>
+        <span class="status-badge ${getClass(c.statut)}">
+          ${c.statut||"En attente"}
+        </span>
       </td>
       <td>
-        <div class="action-buttons">
-          <button class="action-btn view-btn"
-           onclick="view('${c.id}')">
-           <i class="fa fa-eye"></i></button>
-
-          <button class="action-btn delete-btn"
-           onclick="del('${c.id}')">
-           <i class="fa fa-trash"></i></button>
-
-          ${c.statut==="Terminé"?`
-          <button class="action-btn"
-          style="color:#28a745"
-          onclick="openPharmacy('${c.id}')">
-          <i class="fa fa-paper-plane"></i>
-          </button>`:""}
-        </div>
+        <button onclick="view('${c.id}')">👁</button>
+        <button onclick="del('${c.id}')">🗑</button>
       </td>
     </tr>`;
   });
@@ -465,85 +435,36 @@ function render(){
 
 // ================= STATUS =================
 function getClass(s){
- if(s==="Terminé")return"done";
- if(s==="En cours")return"in-progress";
- return"pending";
+ if(s==="Terminé") return "done";
+ if(s==="En cours") return "in-progress";
+ return "pending";
 }
 
 // ================= STATS =================
 function stats(){
- document.getElementById("totalConsultations")
- .textContent=all.length;
-
- document.getElementById("pendingConsultations")
- .textContent=all.filter(x=>x.statut==="En attente").length;
-
- document.getElementById("completedConsultations")
- .textContent=all.filter(x=>x.statut==="Terminé").length;
+ document.getElementById("totalConsultations").textContent = all.length;
+ document.getElementById("pendingConsultations").textContent =
+   all.filter(x=>x.statut==="En attente").length;
+ document.getElementById("completedConsultations").textContent =
+   all.filter(x=>x.statut==="Terminé").length;
 }
 
 // ================= ACTIONS =================
-window.view=id=>{
- location.href=`consultation_detail.html?id=${id}`;
+window.view = id => {
+ location.href = `consultation_detail.html?id=${id}`;
 }
 
-window.del=id=>{
- if(!confirm("Supprimer ?"))return;
- all=all.filter(x=>x.id!=id);
- localStorage.setItem("consultations",JSON.stringify(all));
- notify("Consultation supprimée","success");
+window.del = id => {
+ if(!confirm("Supprimer cette consultation ?")) return;
+ all = all.filter(x=>x.id != id);
+ localStorage.setItem("consultations", JSON.stringify(all));
  loadConsultations();
 }
 
-// ================= PHARMACIES =================
-window.openPharmacy=async(id)=>{
-
- const res=await fetch(API_URL+"/api/pharmacies");
- const list=await res.json();
-
- const modal=document.getElementById("pharmacyModal");
- const content=document.getElementById("pharmacyModalContent");
-
- content.innerHTML=list.map(p=>`
- <div class="pharmacy-item"
- onclick="sendOrd('${id}','${p.id}','${p.nom}')">
-   <b>${p.nom}</b><br>
-   ${p.adresse}
- </div>`).join("");
-
- modal.style.display="flex";
-}
-
-window.sendOrd=(id,pid,pname)=>{
-
- let ords=JSON.parse(localStorage.getItem("ordonnances"))||[];
-
- ords.push({
-  id:Date.now(),
-  code:"ORD"+Date.now(),
-  patientNom:"Patient",
-  medecinNom:user.username,
-  pharmacieNom:pname,
-  statut:"envoyee",
-  createdAt:new Date()
- });
-
- localStorage.setItem("ordonnances",JSON.stringify(ords));
-
- notify("Envoyée à "+pname,"success");
- closeModal();
-}
-
-function closeModal(){
- document.getElementById("pharmacyModal")
- .style.display="none";
-}
-
 // ================= LOGOUT =================
-document.getElementById("logout")
-.addEventListener("click",()=>{
+document.getElementById("logout").addEventListener("click", ()=>{
  if(confirm("Déconnexion ?")){
-  localStorage.clear();
+  localStorage.removeItem("user");
   location.href="index.html";
  }
 });
