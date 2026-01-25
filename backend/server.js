@@ -31,7 +31,7 @@ app.get("/", (req, res) => {
 });
 
 /* ===== DB ===== */
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connecté"))
   .catch(err => console.error("❌ MongoDB erreur :", err));
 
