@@ -2,95 +2,169 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Pharmacien - Ordonnances</title>
+  <title>Dashboard Pharmacien - OrdoPass</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <link rel="stylesheet" href="style1.css">
   <script src="https://kit.fontawesome.com/a2d9d5a64b.js" crossorigin="anonymous"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f6f9;
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 230px;
+      background: #1e3c72;
+      color: white;
+      padding: 20px;
+    }
+
+    .sidebar .logo {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .sidebar a {
+      display: block;
+      color: white;
+      padding: 10px;
+      text-decoration: none;
+      margin-bottom: 5px;
+      border-radius: 6px;
+    }
+
+    .sidebar a:hover {
+      background: #2a5298;
+    }
+
+    #logout {
+      background: #e74c3c;
+    }
+
+    main {
+      flex: 1;
+      padding: 20px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border-bottom: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background: #f1f1f1;
+    }
+  </style>
 </head>
 
 <body>
+
 <div class="container">
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <div class="logo">ORDO<span>PASS</span></div>
-    <nav class="menu">
-      <a href="pharmacien_dashboard.html" class="active">Ordonnances</a>
-      <a href="pharmacien_stock.html">Stock</a>
-      <a href="pharmacien_facturation.html">Facturation</a>
-      <a href="#" id="logout">Déconnexion</a>
-    </nav>
+    <div class="logo">ORDOPASS</div>
+
+    <a href="pharmacien_dashboard.html"><i class="fa fa-prescription"></i> Ordonnances</a>
+    <a href="#"><i class="fa fa-user-md"></i> Médecins</a>
+    <a href="#"><i class="fa fa-box"></i> Stock</a>
+    <a href="#"><i class="fa fa-file-invoice"></i> Facturation</a>
+    <a href="#"><i class="fa fa-comment"></i> Messagerie</a>
+    <a href="#"><i class="fa fa-gear"></i> Paramètres</a>
+
+    <a href="#" id="logout"><i class="fa fa-right-from-bracket"></i> Déconnexion</a>
   </aside>
 
   <!-- MAIN -->
-  <main class="main">
+  <main>
+
     <div class="topbar">
       <h2>Ordonnances reçues</h2>
-      <div id="userName"></div>
+      <div>
+        👤 <span id="userName">...</span>
+      </div>
     </div>
 
-    <table border="1" width="100%">
-      <thead>
-        <tr>
-          <th>Code</th>
-          <th>Patient</th>
-          <th>Médecin</th>
-          <th>Statut</th>
-        </tr>
-      </thead>
-      <tbody id="ordBody">
-        <tr><td colspan="4">Chargement...</td></tr>
-      </tbody>
-    </table>
+    <section class="card">
+      <h3>Liste des ordonnances</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Patient</th>
+            <th>Médecin</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody id="ordBody">
+          <tr>
+            <td colspan="4">Aucune ordonnance</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
   </main>
+
 </div>
 
 
 <script>
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
 
-  const API_URL = window.location.protocol + "//" + window.location.host;
-
-  // ✅ AUTH CORRIGÉ
+  // ✅ Récupérer utilisateur depuis login
   const user = JSON.parse(localStorage.getItem("user"));
 
+  // ✅ Vérification accès
   if (!user || user.role !== "pharmacie") {
     alert("⚠️ Accès refusé");
     window.location.href = "index.html";
     return;
   }
 
-  document.getElementById("userName").textContent = "Connecté : " + user.username;
+  // ✅ Afficher username
+  document.getElementById("userName").textContent = user.username;
 
-  // 🚪 LOGOUT
+  // ✅ Logout
   document.getElementById("logout").addEventListener("click", () => {
-    localStorage.clear();
-    location.href = "index.html";
+    if (confirm("Se déconnecter ?")) {
+      localStorage.removeItem("user");
+      window.location.href = "index.html";
+    }
   });
 
-  // 📥 LOAD ORDONNANCES (exemple localStorage)
-  function loadOrdonnances() {
-    const ords = JSON.parse(localStorage.getItem("ordonnances")) || [];
-    const body = document.getElementById("ordBody");
-    body.innerHTML = "";
-
-    if (!ords.length) {
-      body.innerHTML = `<tr><td colspan="4">Aucune ordonnance</td></tr>`;
-      return;
-    }
-
-    ords.forEach(o => {
-      body.innerHTML += `
-        <tr>
-          <td>${o.code}</td>
-          <td>${o.patientNom}</td>
-          <td>${o.medecinNom}</td>
-          <td>${o.statut}</td>
-        </tr>
-      `;
-    });
-  }
-
-  loadOrdonnances();
 });
 </script>
 
