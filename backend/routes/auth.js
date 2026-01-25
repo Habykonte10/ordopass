@@ -1,51 +1,35 @@
 const express = require("express");
-const router = express.Router();
+const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 
-/* REGISTER */
-router.post("/register", async (req, res) => {
-  try {
-    const { username, password, role } = req.body;
+const router = express.Router();
 
-    if (!username || !password || !role) {
-      return res.status(400).json({ error: "Champs manquants" });
-    }
-
-    const exists = await User.findOne({ username });
-    if (exists) {
-      return res.status(400).json({ error: "Utilisateur existe déjà" });
-    }
-
-    const user = await User.create({ username, password, role });
-
-    res.json({
-      message: "Compte créé avec succès",
-      user: {
-        username: user.username,
-        role: user.role
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ error: "Erreur serveur" });
-  }
-});
-
-/* LOGIN */
 router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    const user = await User.findOne({ username, password });
+    if (!username || !password) {
+      return res.status(400).json({ message: "Champs manquants" });
+    }
+
+    const user = await User.findOne({ username });
     if (!user) {
-      return res.status(401).json({ error: "Identifiants incorrects" });
+      return res.status(401).json({ message: "Utilisateur introuvable" });
+    }
+
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok) {
+      return res.status(401).json({ message: "Mot de passe incorrect" });
     }
 
     res.json({
-      message: "Connexion réussie",
+      username: user.username,
       role: user.role
     });
+
   } catch (err) {
-    res.status(500).json({ error: "Erreur serveur" });
+    console.error("LOGIN ERROR:", err);
+    res.status(500).json({ message: "Erreur serveur" });
   }
 });
 
