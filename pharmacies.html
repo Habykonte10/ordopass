@@ -447,7 +447,9 @@
             </div>
           ` : ''}
         </div>
-     <script>
+ <script src="/socket.io/socket.io.js"></script>
+
+<script>
 document.addEventListener("DOMContentLoaded", function(){
 
   const user = JSON.parse(localStorage.getItem("user"));
@@ -471,9 +473,91 @@ document.addEventListener("DOMContentLoaded", function(){
     window.location.href="index.html";
   });
 
-  loadPharmacies();
+  document.getElementById("refreshBtn").addEventListener("click", loadPharmacies);
 
+  loadPharmacies();
 });
+
+
+// =====================
+// 📥 Charger pharmacies
+// =====================
+function loadPharmacies(){
+  let pharmacies = JSON.parse(localStorage.getItem("pharmacies")) || [];
+
+  displayPharmacies(pharmacies);
+  updateStats(pharmacies);
+}
+
+
+// =====================
+// 📊 Stats
+// =====================
+function updateStats(pharmacies){
+  document.getElementById("totalPharmacies").textContent = pharmacies.length;
+  document.getElementById("onlinePharmacies").textContent =
+    pharmacies.filter(p => p.online === true).length;
+  document.getElementById("activePharmacies").textContent = pharmacies.length;
+}
+
+
+// =====================
+// 🏥 Affichage pharmacies
+// =====================
+function displayPharmacies(pharmacies){
+  const container = document.getElementById("pharmaciesList");
+
+  if(pharmacies.length === 0){
+    container.innerHTML = `
+      <div class="empty-state">
+        <i class="fa-solid fa-store-slash"></i>
+        <h3>Aucune pharmacie partenaire</h3>
+        <p>Les pharmacies qui créent un compte apparaîtront ici.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = "";
+
+  pharmacies.forEach(pharmacy=>{
+    container.innerHTML += `
+      <div class="pharmacy-card">
+        <div class="pharmacy-header">
+          <div class="pharmacy-info">
+            <h3>${pharmacy.nom}</h3>
+            <div class="pharmacy-status">
+              <span class="status-dot ${pharmacy.online ? 'online':'offline'}"></span>
+              <span class="${pharmacy.online ? 'status-online':'status-offline'}">
+                ${pharmacy.online ? 'En ligne':'Hors ligne'}
+              </span>
+            </div>
+          </div>
+          <div class="pharmacy-actions">
+            <button class="btn-primary btn-small" onclick="alert('Ordonnance envoyée')">
+              <i class="fa-solid fa-paper-plane"></i> Envoyer ordonnance
+            </button>
+          </div>
+        </div>
+
+        <div class="pharmacy-details">
+          <div class="detail-item">
+            <i class="fa-solid fa-location-dot"></i>
+            ${pharmacy.adresse || 'Non renseignée'}
+          </div>
+          <div class="detail-item">
+            <i class="fa-solid fa-phone"></i>
+            ${pharmacy.telephone || 'Non renseigné'}
+          </div>
+          <div class="detail-item">
+            <i class="fa-solid fa-envelope"></i>
+            ${pharmacy.email || 'Non renseigné'}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
 </script>
 </body> 
 </html>
