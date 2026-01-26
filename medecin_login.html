@@ -377,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
           role: "medecin"   // 🔥 OBLIGATOIRE
         })
       });
-
+ 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Erreur de connexion");
 
@@ -387,7 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (data.role === "medecin") {
         window.location.href = "medecin_dashboard.html";
       } else if (data.role === "pharmacie") {
-        window.location.href = "dashboard-pharmacie.html";
+        window.location.href = "pharmacien_dashboard.html";
       } else {
         throw new Error("Rôle inconnu");
       }
