@@ -36,9 +36,12 @@
     <div id="meet"></div>
   </main>
 
-  <script>
+  
+
+<script>
 document.addEventListener("DOMContentLoaded", function(){
 
+  // 🔐 Vérification utilisateur
   const user = JSON.parse(localStorage.getItem("user"));
 
   if(!user){
@@ -53,14 +56,44 @@ document.addEventListener("DOMContentLoaded", function(){
     return;
   }
 
-  document.getElementById("usernameDisplay").textContent = user.username;
+  // 🚪 Logout
+  const logoutBtn = document.getElementById("logout");
+  if(logoutBtn){
+    logoutBtn.addEventListener("click", function(e){
+      e.preventDefault();
+      localStorage.removeItem("user");
+      window.location.href = "index.html";
+    });
+  }
 
-  document.getElementById("logout").addEventListener("click", ()=>{
-    localStorage.removeItem("user");
-    window.location.href="index.html";
+  // ======================
+  // 🎥 INITIALISATION JITSI
+  // ======================
+
+  const domain = "meet.jit.si";
+
+  // Nom unique de la salle
+  const roomName = "OrdoPassTeleconsultation_" + Date.now();
+
+  const options = {
+    roomName: roomName,
+    width: "100%",
+    height: "100%",
+    parentNode: document.querySelector('#meet'),
+
+    userInfo: {
+      displayName: user.username || "Médecin OrdoPass"
+    }
+  };
+
+  const api = new JitsiMeetExternalAPI(domain, options);
+
+  api.addEventListener('videoConferenceJoined', () => {
+    console.log("✅ Téléconsultation démarrée");
   });
 
 });
+</script>
 </script>
 </body>
 </html>
