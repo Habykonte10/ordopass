@@ -355,209 +355,464 @@
   </main>
 
   <script src="/socket.io/socket.io.js"></script>
-  
-      
-      
+ <script src="/socket.io/socket.io.js"></script>
+<<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pharmacies Partenaires — OrdoPass</title>
+  <link rel="stylesheet" href="style.css" /> 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .pharmacy-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border-left: 4px solid #0ea5a0;
+      transition: all 0.3s ease;
+    }
 
-    // Afficher les pharmacies
-    function displayPharmacies(pharmacies) {
-      const container = document.getElementById('pharmaciesList');
+    .pharmacy-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+
+    .pharmacy-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 15px;
+    }
+
+    .pharmacy-info h3 {
+      margin: 0 0 8px 0;
+      color: #1e3c72;
+    }
+
+    .pharmacy-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-online {
+      color: #28a745;
+      font-weight: 600;
+    }
+
+    .status-offline {
+      color: #dc3545;
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .online {
+      background: #28a745;
+    }
+
+    .offline {
+      background: #dc3545;
+    }
+
+    .pharmacy-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #666;
+    }
+
+    .detail-item i {
+      color: #0ea5a0;
+      width: 16px;
+    }
+
+    .pharmacy-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      border: none;
+    }
+
+    .search-filter {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .filter-select {
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: white;
+      font-size: 14px;
+    }
+
+    .stats-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .stat-number {
+      font-size: 24px;
+      font-weight: bold;
+      color: #1e3c72;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .empty-state i {
+      font-size: 48px;
+      margin-bottom: 15px;
+      color: #ccc;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .map-container {
+      height: 300px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+    }
+
+    .services-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .service-tag {
+      background: #e8f4fd;
+      color: #1e3c72;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      border: 1px solid #d1e7ff;
+    }
+
+    @media (max-width: 768px) {
+      .pharmacy-header {
+        flex-direction: column;
+        gap: 10px;
+      }
       
-      if (pharmacies.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fa-solid fa-store-slash"></i>
-            <h3>Aucune pharmacie partenaire</h3>
-            <p>Les pharmacies qui créent un compte apparaîtront ici.</p>
-            <button class="btn-primary" onclick="loadPharmacies()" style="margin-top: 15px;">
+      .search-filter {
+        flex-direction: column;
+      }
+      
+      .search-box {
+        min-width: 100%;
+      }
+      
+      .pharmacy-actions {
+        flex-direction: column;
+      }
+      
+      .btn-small {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 8px;
+      color: white;
+      z-index: 10000;
+      max-width: 400px;
+      animation: slideIn 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .notification-success {
+      background: #28a745;
+    }
+    
+    .notification-error {
+      background: #dc3545;
+    }
+    
+    .notification-info {
+      background: #17a2b8;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+  </style>
+</head>
+
+<body class="dashboard-page">
+
+  <!-- ✅ SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo"><i class="fa-solid fa-notes-medical"></i> ORDOPASS</div>
+    <nav>
+      <a href="medecin_dashboard.html"><i class="fa-solid fa-file-medical"></i> Consultations</a>
+      <a href="patients.html"><i class="fa-solid fa-users"></i> Patients</a>
+      <a href="teleconsultation.html"><i class="fa-solid fa-video"></i> Téléconsultation</a>
+      <a href="pharmacies.html" class="active"><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies</a>
+      <a href="medecin_messagerie.html"><i class="fa-solid fa-comment-medical"></i> Messagerie</a>
+      <a href="parametres.html"><i class="fa-solid fa-gear"></i> Paramètres</a>
+      <a href="medecin_facturation.html"><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</a>
+      <a href="medecin_rendezvous.html"><i class="fa-solid fa-calendar-check"></i> Rendez-vous</a>
+      <a href="medecin_ordonnance.html"><i class="fa-solid fa-prescription"></i> Ordonnances sécurisées</a>
+      <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+    </nav>
+  </aside>
+
+  <!-- ✅ CONTENU PRINCIPAL -->
+  <main class="main-area">
+    <header class="topbar">
+      <h1><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies partenaires</h1>
+      <div class="user-info">
+        <img src="https://i.pravatar.cc/40" class="avatar" alt="profil">
+        <span id="usernameDisplay"></span>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:20px;">
+          <h2>Liste des pharmacies</h2>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <button class="btn-primary" id="refreshBtn">
               <i class="fa-solid fa-rotate"></i> Actualiser
             </button>
           </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = pharmacies.map(pharmacy => `
-        <div class="pharmacy-card" data-pharmacy-id="${pharmacy._id || pharmacy.id}">
-          <div class="pharmacy-header">
-            <div class="pharmacy-info">
-              <h3>${pharmacy.nom}</h3>
-              <div class="pharmacy-status">
-                <span class="status-dot ${pharmacy.online ? 'online' : 'offline'}"></span>
-                <span class="${pharmacy.online ? 'status-online' : 'status-offline'}">
-                  ${pharmacy.online ? 'En ligne' : 'Hors ligne'}
-                </span>
-                ${pharmacy.services && pharmacy.services.length > 0 ? `
-                  <span style="color: #666; font-size: 14px;">
-                    • ${pharmacy.services.join(', ')}
-                  </span>
-                ` : ''}
-              </div>
-            </div>
-            <div class="pharmacy-actions">
-              <button class="btn-primary btn-small" onclick="sendOrdonnanceToPharmacy('${pharmacy._id || pharmacy.id}')">
-                <i class="fa-solid fa-paper-plane"></i> Envoyer ordonnance
-              </button>
-              <button class="btn-outline btn-small" onclick="viewPharmacyDetails('${pharmacy._id || pharmacy.id}')">
-                <i class="fa-solid fa-eye"></i> Détails
-              </button>
-              <button class="btn-outline btn-small" onclick="sendMessageToPharmacy('${pharmacy._id || pharmacy.id}', '${pharmacy.nom}')">
-                <i class="fa-solid fa-comment"></i> Message
-              </button>
-            </div>
-          </div>
-          
-          <div class="pharmacy-details">
-            <div class="detail-item">
-              <i class="fa-solid fa-location-dot"></i>
-              <span>${pharmacy.adresse}</span>
-            </div>
-            <div class="detail-item">
-              <i class="fa-solid fa-phone"></i>
-              <span>${pharmacy.telephone || 'Non renseigné'}</span>
-            </div>
-            <div class="detail-item">
-              <i class="fa-solid fa-envelope"></i>
-              <span>${pharmacy.email || 'Non renseigné'}</span>
-            </div>
-            <div class="detail-item">
-              <i class="fa-solid fa-clock"></i>
-              <span>${pharmacy.horaires || 'Horaires non spécifiés'}</span>
-            </div>
-          </div>
-
-          ${pharmacy.responsable ? `
-            <div class="detail-item">
-              <i class="fa-solid fa-user"></i>
-              <span>Responsable: ${pharmacy.responsable}</span>
-            </div>
-          ` : ''}
-
-          ${pharmacy.licenseNumber ? `
-            <div class="detail-item">
-              <i class="fa-solid fa-id-card"></i>
-              <span>License: ${pharmacy.licenseNumber}</span>
-            </div>
-          ` : ''}
-
-          ${pharmacy.experience ? `
-            <div class="detail-item">
-              <i class="fa-solid fa-star"></i>
-              <span>Expérience: ${pharmacy.experience} ans</span>
-            </div>
-          ` : ''}
         </div>
+
+        <div id="messageContainer"></div>
+
+        <!-- Statistiques -->
+        <div class="stats-cards">
+          <div class="stat-card">
+            <div class="stat-number" id="totalPharmacies">0</div>
+            <div class="stat-label">Total pharmacies</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="onlinePharmacies">0</div>
+            <div class="stat-label">En ligne</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="activePharmacies">0</div>
+            <div class="stat-label">Actives</div>
+          </div>
+        </div>
+
+        <!-- Recherche et filtres -->
+        <div class="search-filter">
+          <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Rechercher une pharmacie...">
+          </div>
+          <select class="filter-select" id="statusFilter">
+            <option value="all">Tous les statuts</option>
+            <option value="online">En ligne</option>
+            <option value="offline">Hors ligne</option>
+          </select>
+          <select class="filter-select" id="serviceFilter">
+            <option value="all">Tous les services</option>
+            <option value="livraison">Livraison</option>
+            <option value="urgence">Urgence</option>
+            <option value="24h">24h/24</option>
+          </select>
+        </div>
+
+        <!-- Carte (placeholder) -->
+        <div class="map-container">
+          <div style="text-align: center;">
+            <i class="fa-solid fa-map" style="font-size: 48px; margin-bottom: 10px; display: block; color: #ccc;"></i>
+            <p>Carte des pharmacies partenaires</p>
+            <small>Fonctionnalité à venir</small>
+          </div>
+        </div>
+
+        <!-- Liste des pharmacies -->
+        <div id="pharmaciesList">
+          <div class="loading">
+            <i class="fa-solid fa-spinner fa-spin"></i> Chargement des pharmacies...
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
  <script src="/socket.io/socket.io.js"></script>
-
 <script>
-document.addEventListener("DOMContentLoaded", function(){
+/* ===== Vérification session ===== */
+const user = JSON.parse(localStorage.getItem("user"));
 
-  const user = JSON.parse(localStorage.getItem("user"));
+if (!user) {
+  alert("⚠️ Veuillez vous connecter.");
+  window.location.href = "index.html";
+}
 
-  if(!user){
-    alert("⚠️ Veuillez vous connecter");
-    window.location.href = "medecin_login.html";
-    return;
-  }
+if (user.role !== "medecin") {
+  alert("⚠️ Accès réservé aux médecins.");
+  window.location.href = "index.html";
+}
 
-  if(user.role !== "medecin"){
-    alert("⚠️ Accès refusé");
-    window.location.href = "medecin_login.html";
-    return;
-  }
+document.getElementById("usernameDisplay").textContent = user.username;
 
-  document.getElementById("usernameDisplay").textContent = user.username;
-
-  document.getElementById("logout").addEventListener("click", ()=>{
-    localStorage.removeItem("user");
-    window.location.href="index.html";
-  });
-
-  document.getElementById("refreshBtn").addEventListener("click", loadPharmacies);
-
-  loadPharmacies();
+/* Logout */
+document.getElementById("logout").addEventListener("click", function(e){
+  e.preventDefault();
+  localStorage.removeItem("user");
+  window.location.href="index.html";
 });
 
+/* ===== Socket ===== */
+const socket = io();
 
-// =====================
-// 📥 Charger pharmacies
-// =====================
+socket.on("connect", ()=>{
+  console.log("✅ Socket connecté (pharmacies)");
+  socket.emit("user_join",{
+    username:user.username,
+    role:"medecin"
+  });
+});
+
+/* ===== Pharmacies ===== */
+let allPharmacies = [];
+
 function loadPharmacies(){
-  let pharmacies = JSON.parse(localStorage.getItem("pharmacies")) || [];
+  const pharmacies = JSON.parse(localStorage.getItem("pharmacies")) || [];
 
+  allPharmacies = pharmacies;
   displayPharmacies(pharmacies);
   updateStats(pharmacies);
 }
 
-
-// =====================
-// 📊 Stats
-// =====================
-function updateStats(pharmacies){
-  document.getElementById("totalPharmacies").textContent = pharmacies.length;
-  document.getElementById("onlinePharmacies").textContent =
-    pharmacies.filter(p => p.online === true).length;
-  document.getElementById("activePharmacies").textContent = pharmacies.length;
-}
-
-
-// =====================
-// 🏥 Affichage pharmacies
-// =====================
 function displayPharmacies(pharmacies){
   const container = document.getElementById("pharmaciesList");
 
-  if(pharmacies.length === 0){
-    container.innerHTML = `
-      <div class="empty-state">
-        <i class="fa-solid fa-store-slash"></i>
-        <h3>Aucune pharmacie partenaire</h3>
-        <p>Les pharmacies qui créent un compte apparaîtront ici.</p>
-      </div>
-    `;
+  if(pharmacies.length===0){
+    container.innerHTML="<p>Aucune pharmacie enregistrée</p>";
     return;
   }
 
-  container.innerHTML = "";
-
-  pharmacies.forEach(pharmacy=>{
-    container.innerHTML += `
-      <div class="pharmacy-card">
-        <div class="pharmacy-header">
-          <div class="pharmacy-info">
-            <h3>${pharmacy.nom}</h3>
-            <div class="pharmacy-status">
-              <span class="status-dot ${pharmacy.online ? 'online':'offline'}"></span>
-              <span class="${pharmacy.online ? 'status-online':'status-offline'}">
-                ${pharmacy.online ? 'En ligne':'Hors ligne'}
-              </span>
-            </div>
-          </div>
-          <div class="pharmacy-actions">
-            <button class="btn-primary btn-small" onclick="alert('Ordonnance envoyée')">
-              <i class="fa-solid fa-paper-plane"></i> Envoyer ordonnance
-            </button>
-          </div>
-        </div>
-
-        <div class="pharmacy-details">
-          <div class="detail-item">
-            <i class="fa-solid fa-location-dot"></i>
-            ${pharmacy.adresse || 'Non renseignée'}
-          </div>
-          <div class="detail-item">
-            <i class="fa-solid fa-phone"></i>
-            ${pharmacy.telephone || 'Non renseigné'}
-          </div>
-          <div class="detail-item">
-            <i class="fa-solid fa-envelope"></i>
-            ${pharmacy.email || 'Non renseigné'}
-          </div>
-        </div>
+  container.innerHTML = pharmacies.map(p=>`
+    <div class="pharmacy-card">
+      <div class="pharmacy-header">
+        <h3>${p.nom}</h3>
+        <span class="${p.online?'status-online':'status-offline'}">
+          ${p.online?'🟢 En ligne':'🔴 Hors ligne'}
+        </span>
       </div>
-    `;
-  });
+      <div class="pharmacy-details">
+        <div>${p.adresse}</div>
+        <div>${p.telephone||''}</div>
+      </div>
+    </div>
+  `).join("");
 }
+
+function updateStats(pharmacies){
+  document.getElementById("totalPharmacies").textContent = pharmacies.length;
+  document.getElementById("onlinePharmacies").textContent = pharmacies.filter(p=>p.online).length;
+  document.getElementById("activePharmacies").textContent = pharmacies.length;
+}
+
+/* ===== Filtres ===== */
+document.getElementById("refreshBtn").onclick = loadPharmacies;
+document.getElementById("searchInput").oninput = filterPharmacies;
+document.getElementById("statusFilter").onchange = filterPharmacies;
+
+function filterPharmacies(){
+  const search = searchInput.value.toLowerCase();
+  const status = statusFilter.value;
+
+  const filtered = allPharmacies.filter(p=>{
+    let ok = p.nom.toLowerCase().includes(search);
+    if(status==="online") ok &= p.online;
+    if(status==="offline") ok &= !p.online;
+    return ok;
+  });
+
+  displayPharmacies(filtered);
+  updateStats(filtered);
+}
+
+/* ===== Init ===== */
+document.addEventListener("DOMContentLoaded", ()=>{
+  loadPharmacies();
+});
 </script>
 </body> 
 </html>
