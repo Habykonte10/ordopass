@@ -17,7 +17,6 @@
 .tab.active{background:#2a5298;color:white}
 .tab-content{display:none}
 .tab-content.active{display:block}
-.stat-card{padding:15px;background:#f8f9fa;border-radius:8px}
 .document-card{border-left:4px solid #2a5298;padding:15px;background:white;margin-bottom:15px;border-radius:8px}
 .btn{padding:8px 15px;border:none;border-radius:5px;cursor:pointer}
 .btn-primary{background:#2a5298;color:white}
@@ -78,7 +77,7 @@
 <option value="Non">Non</option>
 </select>
 
-<button class="btn btn-primary">Enregistrer facture</button>
+<button class="btn btn-primary" type="submit">Enregistrer facture</button>
 
 </form>
 </div>
@@ -96,76 +95,80 @@
 <script>
 const { jsPDF } = window.jspdf;
 
-const user = JSON.parse(localStorage.getItem("currentUser"));
-if(!user || user.role!=="medecin"){
- alert("Accès refusé");
- location.href="index.html";
+/* ✅ CORRECTION ICI */
+const user = JSON.parse(localStorage.getItem("user"));
+
+if(!user || user.role !== "medecin"){
+  alert("⚠️ Accès refusé");
+  window.location.href="index.html";
+  return;
 }
-document.getElementById("usernameDisplay").textContent=user.username;
+
+document.getElementById("usernameDisplay").textContent = user.username;
 
 // Tabs
 document.querySelectorAll(".tab").forEach(tab=>{
-tab.onclick=()=>{
-document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
-tab.classList.add("active");
-document.getElementById(tab.dataset.tab).classList.add("active");
-if(tab.dataset.tab==="list") loadFactures();
-}
+  tab.onclick=()=>{
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
+    tab.classList.add("active");
+    document.getElementById(tab.dataset.tab).classList.add("active");
+    if(tab.dataset.tab==="list") loadFactures();
+  }
 });
 
 // Logout
 document.getElementById("logout").onclick=()=>{
-localStorage.clear();
-location.href="index.html";
+  localStorage.clear();
+  location.href="index.html";
 }
 
 // Save facture
 document.getElementById("factureForm").addEventListener("submit",e=>{
-e.preventDefault();
+  e.preventDefault();
 
-const facture={
-id:Date.now(),
-patient:patient.value,
-description:description.value,
-montant:montant.value,
-paiement:paiement.value,
-paye:facturePaye.value,
-date:new Date().toLocaleDateString()
-};
+  const facture={
+    id:Date.now(),
+    patient:patient.value,
+    description:description.value,
+    montant:montant.value,
+    paiement:paiement.value,
+    paye:facturePaye.value,
+    date:new Date().toLocaleDateString()
+  };
 
-let factures=JSON.parse(localStorage.getItem("factures"))||[];
-factures.push(facture);
-localStorage.setItem("factures",JSON.stringify(factures));
+  let factures=JSON.parse(localStorage.getItem("factures"))||[];
+  factures.push(facture);
+  localStorage.setItem("factures",JSON.stringify(factures));
 
-alert("Facture enregistrée");
-document.getElementById("factureForm").reset();
+  alert("✅ Facture enregistrée");
+  document.getElementById("factureForm").reset();
 });
 
 // Load factures
 function loadFactures(){
-const list=document.getElementById("facturesList");
-let factures=JSON.parse(localStorage.getItem("factures"))||[];
+  const list=document.getElementById("facturesList");
+  let factures=JSON.parse(localStorage.getItem("factures"))||[];
 
-if(factures.length===0){
-list.innerHTML="<p>Aucune facture</p>";
-return;
-}
+  if(factures.length===0){
+    list.innerHTML="<p>Aucune facture</p>";
+    return;
+  }
 
-list.innerHTML="";
+  list.innerHTML="";
 
-factures.forEach(f=>{
-list.innerHTML+=`
-<div class="document-card">
-<b>${f.patient}</b><br>
-${f.description}<br>
-Montant: ${f.montant} FCFA<br>
-Paiement: ${f.paiement}<br>
-Statut: <span class="badge ${f.paye==="Oui"?"badge-success":"badge-warning"}">${f.paye}</span><br>
-Date: ${f.date}
-</div>
-`;
-});
+  factures.forEach(f=>{
+    list.innerHTML+=`
+      <div class="document-card">
+        <b>${f.patient}</b><br>
+        ${f.description}<br>
+        Montant: ${f.montant} FCFA<br>
+        Paiement: ${f.paiement}<br>
+        Statut: <span class="badge ${f.paye==="Oui"?"badge-success":"badge-warning"}">${f.paye}</span><br>
+        Date: ${f.date}
+      </div>
+    `;
+  });
 }
 </script>
 
