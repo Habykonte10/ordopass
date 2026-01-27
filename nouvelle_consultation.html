@@ -927,5 +927,117 @@ document.addEventListener("DOMContentLoaded", function(){
 
 });
 </script>
+<script>
+/* ===============================
+   SESSION
+================================ */
+const user = JSON.parse(localStorage.getItem("user"));
+if (!user || user.role !== "medecin") {
+  alert("⚠️ Accès refusé");
+  location.href = "medecin_login.html";
+}
+
+document.getElementById("usernameDisplay").textContent = user.username || "Médecin";
+
+/* ===============================
+   CONSULTATION + PATIENT
+================================ */
+document.getElementById("consultationForm").addEventListener("submit", function(e){
+  e.preventDefault();
+
+  const consultation = {
+    id: Date.now(),
+    ticket: ticket.value,
+    patient: {
+      nom: nom.value,
+      prenom: prenom.value,
+      age: age.value,
+      genre: genre.value,
+      telephone: telephone.value,
+      adresse: adresse.value
+    },
+    date,
+    heure: heure.value,
+    motif: motif.value,
+    symptomes: symptomes.value,
+    statut: statut.value,
+    medecin: user.username
+  };
+
+  let consultations = JSON.parse(localStorage.getItem("consultations")) || [];
+  consultations.push(consultation);
+  localStorage.setItem("consultations", JSON.stringify(consultations));
+
+  alert("✅ Consultation enregistrée avec succès");
+});
+
+/* ===============================
+   ORDONNANCE
+================================ */
+function saveOrdonnance(){
+  const ordonnance = {
+    id: Date.now(),
+    patient: nom.value + " " + prenom.value,
+    medicament: medicament.value,
+    dosage: dosage.value,
+    posologie: posologie.value,
+    duree: duree.value,
+    points: pointsImportants.value,
+    medecin: nomMedecin.value,
+    date: new Date().toLocaleDateString()
+  };
+
+  let ordonnances = JSON.parse(localStorage.getItem("ordonnances")) || [];
+  ordonnances.push(ordonnance);
+  localStorage.setItem("ordonnances", JSON.stringify(ordonnances));
+
+  document.getElementById("ordonnancePdfBtn").disabled = false;
+  document.getElementById("sendOrdonnanceBtn").style.display = "inline-flex";
+
+  alert("✅ Ordonnance sauvegardée");
+}
+
+/* ===============================
+   FACTURE
+================================ */
+function saveFactureFromConsultation(){
+  const facture = {
+    id: Date.now(),
+    patient: nom.value + " " + prenom.value,
+    description: factureDescription.value,
+    montant: factureMontant.value,
+    paiement: facturePaiement.value,
+    paye: facturePaye.value,
+    type: typeFacture.value,
+    date: new Date().toLocaleDateString()
+  };
+
+  let factures = JSON.parse(localStorage.getItem("factures")) || [];
+  factures.push(facture);
+  localStorage.setItem("factures", JSON.stringify(factures));
+
+  document.getElementById("facturePdfBtn").disabled = false;
+
+  alert("✅ Facture enregistrée");
+}
+
+/* ===============================
+   BOUTONS SIMPLES
+================================ */
+function savePatientAndConsultation(){
+  alert("✅ Patient + consultation enregistrés");
+}
+
+function goBack(){
+  history.back();
+}
+
+function cancelForm(){
+  if(confirm("Annuler la consultation ?")){
+    location.reload();
+  }
+}
+</script>
+
 </body>
 </html>
