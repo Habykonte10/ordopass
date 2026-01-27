@@ -1,188 +1,732 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Ordonnances - OrdoPass</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ordonnances - OrdoPass</title>
 
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    .preview { 
+      margin-top:20px; 
+      border:1px solid #ddd; 
+      padding:25px; 
+      border-radius:8px; 
+      background: white; 
+      display: none;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .preview .logo { 
+      max-width:120px; 
+      margin-bottom:10px; 
+      display:block; 
+      margin-left:auto; 
+      margin-right:auto; 
+    }
+    .signature { 
+      max-width:150px; 
+      margin-top:15px; 
+    }
+    .btn-secondary { 
+      background:#28a745; 
+      color:#fff; 
+      padding:10px 20px; 
+      border:none; 
+      border-radius:5px; 
+      cursor:pointer; 
+      font-size: 14px; 
+    }
+    .btn-warning { 
+      background:#ffc107; 
+      color:#212529; 
+      padding:10px 20px; 
+      border:none; 
+      border-radius:5px; 
+      cursor:pointer; 
+      font-size: 14px; 
+    }
+    .btn-danger { 
+      background:#dc3545; 
+      color:#fff; 
+      padding:10px 20px; 
+      border:none; 
+      border-radius:5px; 
+      cursor:pointer; 
+      font-size: 14px; 
+    }
+    .medecin-name { 
+      text-align: center; 
+      font-weight: bold; 
+      font-size: 18px; 
+      margin-bottom: 10px; 
+    }
+    .center-content { 
+      text-align:center; 
+    }
+    .form-group { 
+      margin-bottom: 15px; 
+    }
+    label { 
+      display: block; 
+      margin-bottom: 5px; 
+      font-weight: bold; 
+      color: #333;
+    }
+    input, select, textarea { 
+      width: 100%; 
+      padding: 10px; 
+      border: 2px solid #e9ecef; 
+      border-radius: 6px; 
+      box-sizing: border-box; 
+      font-size: 14px;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #2a5298;
+      outline: none;
+    }
+    .tabs { 
+      display: flex; 
+      margin-bottom: 20px; 
+      border-bottom: 1px solid #ddd; 
+      background: white;
+      border-radius: 8px;
+      padding: 0 10px;
+    }
+    .tab { 
+      padding: 12px 20px; 
+      cursor: pointer; 
+      border-bottom: 3px solid transparent; 
+      font-weight: 500;
+    }
+    .tab.active { 
+      border-bottom: 3px solid #2a5298; 
+      font-weight: bold; 
+      color: #2a5298;
+    }
+    .tab-content { 
+      display: none; 
+    }
+    .tab-content.active { 
+      display: block; 
+    }
+    .ordonnance-list { 
+      max-height: 400px; 
+      overflow-y: auto; 
+    }
+    .ordonnance-item { 
+      border: 1px solid #ddd; 
+      padding: 15px; 
+      margin-bottom: 10px; 
+      border-radius: 5px; 
+      background: #f8f9fa;
+    }
+    .ordonnance-item h4 { 
+      margin: 0 0 10px 0; 
+      color: #2a5298;
+    }
+    .status-badge { 
+      padding: 3px 8px; 
+      border-radius: 12px; 
+      font-size: 12px; 
+    }
+    .status-active { 
+      background: #d4edda; 
+      color: #155724; 
+    }
+    .status-delivree { 
+      background: #cce7ff; 
+      color: #004085; 
+    }
+    .status-annulee { 
+      background: #f8d7da; 
+      color: #721c24; 
+    }
+    .status-envoyee { 
+      background: #fff3cd; 
+      color: #856404; 
+    }
+    .status-en_cours { 
+      background: #d1ecf1; 
+      color: #0c5460; 
+    }
+    .status-pret { 
+      background: #e2e3e5; 
+      color: #383d41; 
+    }
+    .status-recuperee { 
+      background: #d4edda; 
+      color: #155724; 
+    }
+    .buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .buttons button {
+      flex: 1;
+      min-width: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background-color: white;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 8px;
+      width: 80%;
+      max-width: 500px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+    }
+    .modal-close {
+      cursor: pointer;
+      font-size: 24px;
+      color: #999;
+    }
+    .pharmacie-item {
+      padding: 10px;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .pharmacie-item:hover {
+      background-color: #f5f5f5;
+    }
+    .pharmacie-item.selected {
+      background-color: #e6f7ff;
+      border-color: #2a5298;
+    }
+    .online-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+    .online {
+      background-color: #28a745;
+    }
+    .offline {
+      background-color: #dc3545;
+    }
 
-<style>
-.preview{margin-top:20px;border:1px solid #ddd;padding:20px;border-radius:8px;background:#fff}
-.tabs{display:flex;margin-bottom:15px}
-.tab{padding:10px 20px;cursor:pointer;border-bottom:3px solid transparent}
-.tab.active{border-bottom:3px solid #2a5298;color:#2a5298;font-weight:bold}
-.tab-content{display:none}
-.tab-content.active{display:block}
-.ordonnance-item{border:1px solid #ddd;padding:10px;border-radius:6px;margin-bottom:10px;background:#f8f9fa}
-.badge{padding:4px 8px;border-radius:10px;font-size:12px}
-.btn{padding:8px 15px;border:none;border-radius:5px;cursor:pointer}
-.btn-primary{background:#2a5298;color:white}
-.btn-secondary{background:#28a745;color:white}
-</style>
+    /* Styles pour le mode consultation */
+    .consultation-mode {
+      background-color: #e8f4fd;
+      border-left: 4px solid #2a5298;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
+
+    .consultation-mode .badge {
+      background: #2a5298;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      margin-left: 10px;
+    }
+
+    .btn-back {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 15px;
+      transition: all 0.3s;
+    }
+
+    .btn-back:hover {
+      background: #5a6268;
+    }
+
+    /* Styles améliorés pour l'ordonnance */
+    .ordonnance-beautiful {
+      background: white;
+      border: 2px solid #2a5298;
+      border-radius: 10px;
+      padding: 30px;
+      margin: 20px 0;
+      box-shadow: 0 4px 15px rgba(42, 82, 152, 0.1);
+      font-family: 'Georgia', serif;
+    }
+
+    .ordonnance-header {
+      text-align: center;
+      border-bottom: 3px double #2a5298;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+
+    .ordonnance-title {
+      color: #2a5298;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .ordonnance-subtitle {
+      color: #666;
+      font-size: 16px;
+      font-style: italic;
+    }
+
+    .ordonnance-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .ordonnance-section {
+      margin-bottom: 25px;
+    }
+
+    .ordonnance-section-title {
+      color: #2a5298;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+
+    .ordonnance-medicaments {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #2a5298;
+    }
+
+    .medicament-item {
+      padding: 10px 0;
+      border-bottom: 1px dashed #ddd;
+    }
+
+    .medicament-item:last-child {
+      border-bottom: none;
+    }
+
+    .medicament-name {
+      font-weight: bold;
+      color: #2a5298;
+      font-size: 16px;
+    }
+
+    .ordonnance-footer {
+      border-top: 2px solid #2a5298;
+      padding-top: 30px;
+      margin-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .signature-area {
+      text-align: center;
+    }
+
+    .signature-image {
+      max-width: 200px;
+      height: auto;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #000;
+      padding-bottom: 5px;
+    }
+
+    .doctor-stamp {
+      color: #2a5298;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .qr-code-area {
+      text-align: center;
+    }
+
+    .ordonnance-security {
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+      margin-top: 20px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 5px;
+    }
+
+    /* Styles pour les notifications */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 5px;
+      color: white;
+      z-index: 10000;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      max-width: 400px;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .notification.success {
+      background: #28a745;
+    }
+
+    .notification.error {
+      background: #dc3545;
+    }
+
+    .notification.info {
+      background: #2a5298;
+    }
+
+    /* Styles pour les pharmacies */
+    .pharmacie-marker {
+      background: transparent !important;
+      border: none !important;
+    }
+
+    .leaflet-popup-content {
+      margin: 8px 12px;
+    }
+
+    .leaflet-popup-content-wrapper {
+      border-radius: 8px;
+    }
+
+    .pharmacie-item {
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+    }
+
+    .pharmacie-item:hover {
+      border-color: #2a5298;
+      box-shadow: 0 2px 8px rgba(42, 82, 152, 0.1);
+    }
+
+    .pharmacie-item.selected {
+      border-color: #2a5298;
+      background-color: #e8f4fd;
+      box-shadow: 0 2px 8px rgba(42, 82, 152, 0.15);
+    }
+
+    .select-pharmacie-btn {
+      white-space: nowrap;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* Amélioration responsive */
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .clinic-info {
+        text-align: center;
+        margin-top: 15px;
+      }
+      
+      .actions {
+        flex-direction: column;
+      }
+
+      .tabs {
+        flex-direction: column;
+      }
+
+      .tab {
+        border-radius: 0;
+        margin-right: 0;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .ordonnance-content {
+        grid-template-columns: 1fr;
+      }
+
+      .pharmacie-item {
+        padding: 12px;
+      }
+      
+      .pharmacie-item h4 {
+        font-size: 14px;
+      }
+
+      .modal-content {
+        width: 95%;
+        margin: 5% auto;
+      }
+    }
+  </style>
 </head>
 
 <body class="dashboard-page">
 
-<aside class="sidebar">
-<div class="logo"><i class="fa-solid fa-notes-medical"></i> ORDOPASS</div>
-<nav>
-<a href="medecin_dashboard.html">Consultations</a>
-<a href="patients.html">Patients</a>
-<a href="teleconsultation.html">Téléconsultation</a>
-<a href="pharmacies.html">Pharmacies</a>
-<a href="medecin_ordonnance.html" class="active">Ordonnances</a>
-<a href="#" id="logout">Déconnexion</a>
-</nav>
-</aside>
+  <!-- ✅ SIDEBAR FIXE IDENTIQUE -->
+  <aside class="sidebar">
+    <div class="logo">
+      <i class="fa-solid fa-notes-medical"></i>
+      <span>ORDOPASS</span>
+    </div>
+    <nav>
+      <a href="medecin_dashboard.html"><i class="fa-solid fa-file-medical"></i> <span>Consultations</span></a>
+      <a href="patients.html"><i class="fa-solid fa-users"></i> <span>Patients</span></a>
+      <a href="teleconsultation.html"><i class="fa-solid fa-video"></i> <span>Téléconsultation</span></a>
+      <a href="pharmacies.html"><i class="fa-solid fa-prescription-bottle-medical"></i> <span>Pharmacies</span></a>
+      <a href="medecin_messagerie.html"><i class="fa-solid fa-comment-medical"></i> <span>Messagerie</span></a>
+      <a href="parametres.html"><i class="fa-solid fa-gear"></i> <span>Paramètres</span></a>
+      <a href="medecin_facturation.html"><i class="fa-solid fa-file-invoice-dollar"></i> <span>Facturation</span></a>
+      <a href="medecin_rendezvous.html"><i class="fa-solid fa-calendar-check"></i> <span>Rendez-vous</span></a>
+      <a href="medecin_ordonnance.html" class="active"><i class="fa-solid fa-prescription"></i> <span>Ordonnances sécurisées</span></a>
+      <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> <span>Déconnexion</span></a>
+    </nav>
+  </aside>
 
-<main class="main-area">
+  <!-- ✅ CONTENU PRINCIPAL -->
+  <main class="main-area">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <h1><i class="fa-solid fa-prescription"></i> Ordonnances sécurisées</h1>
+      <div class="user-info">
+        <img src="https://i.pravatar.cc/40" class="avatar" alt="profil">
+        <span id="usernameDisplay"></span>
+      </div>
+    </header>
 
-<header class="topbar">
-<h1>Ordonnances sécurisées</h1>
-<span id="usernameDisplay"></span>
-</header>
+    <!-- CONTENU DÉFILANT -->
+    <section class="content">
+      <!-- Bouton de retour pour le mode consultation -->
+      <div id="backButtonContainer" style="display: none;">
+        <button class="btn-back" onclick="exitConsultationMode()">
+          <i class="fa-solid fa-arrow-left"></i> Retour au profil patient
+        </button>
+      </div>
 
-<section class="content">
+      <!-- Indicateur de mode consultation -->
+      <div id="consultationModeIndicator" class="consultation-mode" style="display: none;">
+        <i class="fa-solid fa-eye"></i> 
+        <strong>Mode consultation</strong>
+        <span class="badge">Affichage seule</span>
+        <span style="margin-left: 10px; font-size: 0.9rem;">
+          Vous consultez une ordonnance existante. Les modifications sont limitées.
+        </span>
+        <button onclick="exitConsultationMode()" class="btn-outline" style="margin-left: 15px; padding: 4px 8px;">
+          <i class="fa-solid fa-pen"></i> Activer l'édition
+        </button>
+      </div>
 
-<div class="tabs">
-<div class="tab active" data-tab="create-tab">Créer</div>
-<div class="tab" data-tab="list-tab">Mes ordonnances</div>
-<div class="tab" data-tab="search-tab">Rechercher</div>
-</div>
+      <div class="tabs">
+        <div class="tab active" data-tab="create">Créer une ordonnance</div>
+        <div class="tab" data-tab="list">Mes ordonnances</div>
+        <div class="tab" data-tab="search">Rechercher</div>
+      </div>
 
-<!-- CREATION -->
-<div class="tab-content active" id="create-tab">
+      <!-- Création d'ordonnance -->
+      <div class="tab-content active" id="create-tab">
+        <div class="card">
+          <h2><i class="fa-solid fa-file-prescription"></i> Créer une ordonnance</h2>
 
-<form id="ordForm">
+          <form id="ordForm" autocomplete="off">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <div class="form-group">
+                <label>Nom du médecin *</label>
+                <input type="text" id="nomMedecin" placeholder="Dr ..." required>
+              </div>
 
-<input id="nomMedecin" placeholder="Nom du médecin" required>
-<input id="nom" placeholder="Nom patient" required>
-<input id="age" type="number" placeholder="Âge" required>
-<input id="adresse" placeholder="Adresse" required>
+              <div class="form-group">
+                <label>Nom du patient *</label>
+                <input type="text" id="nom" required>
+              </div>
 
-<textarea id="medicaments" placeholder="Médicaments..." required></textarea>
+              <div class="form-group">
+                <label>Âge *</label>
+                <input type="number" id="age" required>
+              </div>
 
-<button type="button" id="previewBtn" class="btn btn-primary">Prévisualiser</button>
-<button type="button" id="saveBtn" class="btn btn-secondary">Sauvegarder</button>
+              <div class="form-group">
+                <label>Sexe *</label>
+                <select id="genre" required>
+                  <option value="">-- Choisir --</option>
+                  <option value="F">F</option>
+                  <option value="M">M</option>
+                </select>
+              </div>
 
-</form>
+              <div class="form-group">
+                <label>Adresse *</label>
+                <input type="text" id="adresse" required>
+              </div>
 
-<div class="preview" id="preview" style="display:none"></div>
+              <div class="form-group">
+                <label>Poids (optionnel)</label>
+                <input type="text" id="poids" placeholder="ex: 65 kg">
+              </div>
+            </div>
 
-</div>
+            <div class="form-group">
+              <label>Médicaments et posologie *</label>
+              <textarea id="medicaments" rows="5" placeholder="Ex: Paracétamol 1000mg - 1 comprimé 3 fois par jour pendant 5 jours&#10;Vitamine C - 1 comprimé par jour" required></textarea>
+            </div>
 
-<!-- LISTE -->
-<div class="tab-content" id="list-tab">
-<div id="ordonnanceList"></div>
-</div>
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" id="dateOrd">
+            </div>
 
-<!-- RECHERCHE -->
-<div class="tab-content" id="search-tab">
-<input id="searchCode" placeholder="Code ordonnance">
-<button id="searchBtn" class="btn btn-primary">Rechercher</button>
-<div id="searchResult"></div>
-</div>
+            <div class="buttons">
+              <button type="button" id="genBtn" class="btn-primary">
+                <i class="fa-solid fa-eye"></i> Prévisualiser
+              </button>
+              <button type="button" id="saveBtn" class="btn-secondary">
+                <i class="fa-solid fa-save"></i> Sauvegarder
+              </button>
+              <button type="button" id="sendBtn" class="btn-warning" disabled>
+                <i class="fa-solid fa-paper-plane"></i> Envoyer à pharmacie
+              </button>
+              <button type="button" id="pdfBtn" class="btn-danger" disabled>
+                <i class="fa-solid fa-file-pdf"></i> Télécharger PDF
+              </button>
+            </div>
+          </form>
 
-</section>
-</main>
+          <!-- Aperçu -->
+          <div class="preview" id="preview">
+            <!-- L'ordonnance beautifiée sera chargée ici dynamiquement -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Liste des ordonnances -->
+      <div class="tab-content" id="list-tab">
+        <div class="card">
+          <h2><i class="fa-solid fa-list"></i> Mes ordonnances</h2>
+          <div class="ordonnance-list" id="ordonnanceList">
+            <!-- Les ordonnances seront chargées ici -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Recherche d'ordonnance -->
+      <div class="tab-content" id="search-tab">
+        <div class="card">
+          <h2><i class="fa-solid fa-search"></i> Rechercher une ordonnance</h2>
+          <div class="form-group">
+            <label>Code de l'ordonnance</label>
+            <input type="text" id="searchCode" placeholder="Entrez le code de l'ordonnance">
+          </div>
+          <button type="button" id="searchBtn" class="btn-primary">
+            <i class="fa-solid fa-search"></i> Rechercher
+          </button>
+          
+          <div class="preview" id="searchResult" style="display: none;">
+            <h3>Résultat de la recherche</h3>
+            <div id="searchContent"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal pour sélectionner une pharmacie -->
+  <div id="pharmacieModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-map-location-dot"></i> Sélectionner une pharmacie</h3>
+        <span class="modal-close">&times;</span>
+      </div>
+      
+      <!-- Liste des pharmacies uniquement -->
+      <div style="margin-top: 15px;">
+        <h4><i class="fa-solid fa-list"></i> Liste des pharmacies disponibles</h4>
+        <div id="pharmacieList">
+          <!-- Les pharmacies seront chargées ici -->
+        </div>
+      </div>
+      
+      <div class="buttons" style="margin-top: 20px;">
+        <button id="confirmSendBtn" class="btn-primary" disabled>
+          <i class="fa-solid fa-paper-plane"></i> Envoyer
+        </button>
+        <button id="cancelSendBtn" class="btn-secondary">
+          <i class="fa-solid fa-times"></i> Annuler
+        </button>
+      </div>
+    </div>
+  </div>
 
 <script>
-// ✅ SESSION CORRIGÉE
+/* ===== Vérification de session ===== */
 const user = JSON.parse(localStorage.getItem("user"));
-if(!user || user.role !== "medecin"){
- alert("Accès refusé");
- location.href="index.html";
+
+if (!user) {
+  alert("⚠️ Veuillez vous connecter");
+  window.location.href = "index.html";
 }
+
+if (user.role !== "medecin") {
+  alert("⚠️ Accès refusé");
+  window.location.href = "index.html";
+}
+
+/* Afficher le nom du médecin */
 document.getElementById("usernameDisplay").textContent = user.username;
 
-// LOGOUT
-document.getElementById("logout").onclick=()=>{
- localStorage.removeItem("user");
- location.href="index.html";
-}
-
-// TABS
-document.querySelectorAll(".tab").forEach(tab=>{
- tab.onclick=()=>{
- document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
- document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
- tab.classList.add("active");
- document.getElementById(tab.dataset.tab).classList.add("active");
- if(tab.dataset.tab==="list-tab") loadOrdonnances();
- }
+/* ===== Logout ===== */
+document.getElementById("logout").addEventListener("click", () => {
+  localStorage.removeItem("user");
+  window.location.href = "index.html";
 });
-
-// PREVIEW
-document.getElementById("previewBtn").onclick=()=>{
- const html=`
- <h3>Ordonnance</h3>
- <b>Médecin:</b> ${nomMedecin.value}<br>
- <b>Patient:</b> ${nom.value}<br>
- <b>Age:</b> ${age.value}<br>
- <b>Adresse:</b> ${adresse.value}<br><br>
- <b>Médicaments:</b><br>${medicaments.value.replace(/\n/g,"<br>")}
- `;
- preview.innerHTML=html;
- preview.style.display="block";
-}
-
-// SAVE
-document.getElementById("saveBtn").onclick=()=>{
- const ordonnance={
- id:Date.now(),
- code:"ORD-"+Math.floor(Math.random()*100000),
- medecin:nomMedecin.value,
- patient:nom.value,
- age:age.value,
- adresse:adresse.value,
- medicaments:medicaments.value,
- date:new Date().toLocaleDateString()
- };
-
- let list=JSON.parse(localStorage.getItem("ordonnances"))||[];
- list.push(ordonnance);
- localStorage.setItem("ordonnances",JSON.stringify(list));
-
- alert("Ordonnance enregistrée");
- document.getElementById("ordForm").reset();
- preview.style.display="none";
-}
-
-// LOAD LIST
-function loadOrdonnances(){
- const listDiv=document.getElementById("ordonnanceList");
- let list=JSON.parse(localStorage.getItem("ordonnances"))||[];
- if(list.length===0){listDiv.innerHTML="Aucune ordonnance";return;}
- listDiv.innerHTML="";
- list.forEach(o=>{
- listDiv.innerHTML+=`
- <div class="ordonnance-item">
- <b>${o.patient}</b><br>
- Code: ${o.code}<br>
- Date: ${o.date}<br>
- </div>
- `;
- });
-}
-
-// SEARCH
-document.getElementById("searchBtn").onclick=()=>{
- const code=searchCode.value;
- let list=JSON.parse(localStorage.getItem("ordonnances"))||[];
- let found=list.find(o=>o.code===code);
- if(found){
- searchResult.innerHTML=`<div class="preview">
- <b>${found.patient}</b><br>
- ${found.medicaments}
- </div>`;
- }else{
- searchResult.innerHTML="Aucune ordonnance trouvée";
- }
-}
 </script>
-
-</body>
+</body> 
 </html>
