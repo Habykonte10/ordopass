@@ -888,46 +888,7 @@
   </main>
 
  
-    
-        <script>
-document.addEventListener("DOMContentLoaded", function(){
-
-  // 🔐 Vérification de session
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  if(!user){
-    alert("⚠️ Accès refusé : veuillez vous connecter");
-    window.location.href = "medecin_login.html";
-    return;
-  }
-
-  if(user.role !== "medecin"){
-    alert("⚠️ Accès refusé : rôle invalide");
-    window.location.href = "medecin_login.html";
-    return;
-  }
-
-  // 👤 Afficher le nom utilisateur
-  const usernameDisplay = document.getElementById("usernameDisplay");
-  if(usernameDisplay){
-    usernameDisplay.textContent = user.username || user.nom || "Médecin";
-  }
-
-  // 🚪 Déconnexion
-  const logoutBtn = document.getElementById("logout");
-  if(logoutBtn){
-    logoutBtn.addEventListener("click", function(e){
-      e.preventDefault();
-      if(confirm("Voulez-vous vous déconnecter ?")){
-        localStorage.removeItem("user");
-        window.location.href = "index.html";
-      }
-    });
-  }
-
-});
-</script>
-<script>
+  <script>
 /* ===============================
    SESSION
 ================================ */
@@ -1039,5 +1000,6 @@ function cancelForm(){
 }
 </script>
 
+       
 </body>
 </html>
