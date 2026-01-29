@@ -1,1005 +1,133 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
   <title>Nouvelle Consultation - OrdoPass</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://meet.jit.si/external_api.js"></script>
-  
-  <!-- Styles pour la facturation -->
-  <style>
-    body { font-family: Arial, sans-serif; margin:0; background:#f5f5f5; }
-    .avatar { width:40px; height:40px; border-radius:50%; object-fit:cover; }
-    .status.done { color:green; font-weight:bold; }
-    .status.pending { color:orange; font-weight:bold; }
-    .btn-outline { border:1px solid #2a5298; color:#2a5298; padding:8px 15px; border-radius:5px; cursor:pointer; background:#fff; }
-    .btn-primary { background:#2a5298; color:#fff; padding:8px 15px; border:none; border-radius:5px; cursor:pointer; }
-    .btn-success { background:#28a745; color:#fff; padding:8px 15px; border:none; border-radius:5px; cursor:pointer; }
-    .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000; }
-    .modal-content { background:#fff; padding:25px; border-radius:8px; width:90%; max-width:800px; max-height:90vh; overflow-y:auto; }
-    .modal-content input, .modal-content select, .modal-content textarea { width:100%; padding:10px; margin-bottom:15px; box-sizing:border-box; border:1px solid #ddd; border-radius:5px; }
-    table { width:100%; border-collapse:collapse; margin-top:20px; }
-    th, td { padding:12px; text-align:left; border-bottom:1px solid #ccc; }
-    
-    .consultation-form { background:white; padding:25px; border-radius:8px; margin:20px 0; }
-    .form-section { margin-bottom:30px; padding-bottom:20px; border-bottom:1px solid #eee; }
-    .form-section h3 { color:#2a5298; margin-bottom:15px; }
-    .form-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:15px; margin-bottom:20px; }
-    .form-group { margin-bottom:15px; }
-    .form-label { display:block; margin-bottom:5px; font-weight:bold; color:#555; }
-    .form-control { width:100%; padding:10px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box; }
-    textarea.form-control { min-height:80px; resize:vertical; }
-    .medication-item, .analysis-item, .facture-item { 
-      background:#f9f9f9; border:1px solid #eee; border-radius:5px; padding:15px; margin-bottom:10px; 
-    }
-    .item-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-    .remove-btn { background:#dc3545; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer; }
-    .action-buttons { 
-      display: flex; 
-      gap: 10px; 
-      margin-top: 25px; 
-      flex-wrap: wrap; 
-      justify-content: space-between; 
-      align-items: center; 
-    }
-    .action-buttons-left {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .action-buttons-right {
-      display: flex;
-      gap: 10px;
-      margin-left: auto;
-    }
-    
-    .btn-success {
-      background: #28a745;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 14px;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.3s;
-    }
-    
-    .btn-success:hover {
-      background: #218838;
-    }
-
-    .loading { 
-      display: none; 
-      text-align: center; 
-      padding: 20px; 
-      color: #2a5298; 
-    }
-    .spinner {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #2a5298;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 2s linear infinite;
-      margin: 0 auto 10px;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .ticket-info {
-      background: #e8f4fd;
-      border: 1px solid #2a5298;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 20px;
-    }
-    .ticket-number {
-      font-size: 24px;
-      font-weight: bold;
-      color: #2a5298;
-      text-align: center;
-      margin: 10px 0;
-    }
-    .ticket-warning {
-      color: #dc3545;
-      font-size: 12px;
-      margin-top: 5px;
-    }
-    .btn-danger {
-      background: #dc3545;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 14px;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .btn-danger:hover {
-      background: #c82333;
-    }
-    
-    .ordonnance-section {
-      background: #f9f9f9;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    .ordonnance-preview {
-      margin-top: 20px;
-      border: 1px solid #ddd;
-      padding: 25px;
-      border-radius: 8px;
-      background: white;
-      display: none;
-    }
-    .ordonnance-preview .logo {
-      max-width: 120px;
-      margin-bottom: 10px;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .signature {
-      max-width: 150px;
-      margin-top: 15px;
-    }
-    .medecin-name {
-      text-align: center;
-      font-weight: bold;
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-    .center-content {
-      text-align: center;
-    }
-    .btn-secondary {
-      background: #28a745;
-      color: #fff;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    
-    .points-importants {
-      background: #fff3cd;
-      border: 1px solid #ffeaa7;
-      border-radius: 5px;
-      padding: 15px;
-      margin-top: 15px;
-    }
-    .points-importants h4 {
-      margin-top: 0;
-      color: #856404;
-    }
-    .points-importants textarea {
-      width: 100%;
-      min-height: 80px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      padding: 8px;
-      box-sizing: border-box;
-    }
-    
-    /* Styles pour la facturation intégrée */
-    .facturation-section {
-      background: #f0f8ff;
-      border: 1px solid #b8daff;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    .facture-preview {
-      margin-top: 20px;
-      border: 1px solid #ddd;
-      padding: 25px;
-      border-radius: 8px;
-      background: white;
-      display: none;
-    }
-    .facture-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      border-bottom: 2px solid #2a5298;
-      padding-bottom: 15px;
-    }
-    .facture-logo {
-      max-width: 100px;
-    }
-    .facture-title {
-      text-align: center;
-      color: #2a5298;
-      margin: 10px 0;
-    }
-    .facture-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 20px 0;
-    }
-    .facture-table th, .facture-table td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: left;
-    }
-    .facture-table th {
-      background: #f8f9fa;
-      font-weight: bold;
-    }
-    .total-zone {
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 5px;
-      margin-top: 20px;
-    }
-    
-    .teleconsultation-section {
-      background: #f0f0f5;
-      border: 1px solid #d6d6e7;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    .teleconsultation-options {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-    .teleconsultation-option {
-      background: white;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      padding: 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .teleconsultation-option:hover {
-      border-color: #2a5298;
-      transform: translateY(-2px);
-    }
-    .teleconsultation-option.selected {
-      border-color: #2a5298;
-      background: #f0f8ff;
-    }
-    .teleconsultation-icon {
-      font-size: 40px;
-      color: #2a5298;
-      margin-bottom: 10px;
-    }
-    .video-container {
-      background: #000;
-      border-radius: 8px;
-      margin: 20px 0;
-      position: relative;
-      min-height: 300px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-    }
-    .video-controls {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 15px;
-    }
-    .video-btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .video-btn.primary {
-      background: #2a5298;
-      color: white;
-    }
-    .video-btn.danger {
-      background: #dc3545;
-      color: white;
-    }
-    .video-btn.success {
-      background: #28a745;
-      color: white;
-    }
-    .participant-list {
-      background: white;
-      border-radius: 8px;
-      padding: 15px;
-      margin-top: 15px;
-    }
-    .participant-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px;
-      border-bottom: 1px solid #eee;
-    }
-    .participant-item:last-child {
-      border-bottom: none;
-    }
-    .invite-link {
-      background: #f8f9fa;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      padding: 10px;
-      margin-top: 10px;
-      display: flex;
-      gap: 10px;
-    }
-    .invite-link input {
-      flex: 1;
-      border: none;
-      background: transparent;
-    }
-    .invite-link button {
-      background: #2a5298;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 3px;
-      cursor: pointer;
-    }
-    
-    #jitsi-container {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #000;
-      z-index: 9999;
-    }
-    #jitsi-close {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: #dc3545;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      cursor: pointer;
-      z-index: 10000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    #jitsi-meet {
-      width: 100%;
-      height: 100%;
-    }
-
-    /* Styles pour les notifications */
-    .notification {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 15px 20px;
-      border-radius: 5px;
-      color: white;
-      z-index: 10000;
-      font-weight: bold;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      max-width: 400px;
-      animation: slideIn 0.3s ease-out;
-    }
-
-    .notification.success {
-      background: #28a745;
-    }
-
-    .notification.error {
-      background: #dc3545;
-    }
-
-    .notification.info {
-      background: #2a5298;
-    }
-
-    @keyframes slideIn {
-      from {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-  </style>
 </head>
+
 <body class="dashboard-page">
 
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="logo"><i class="fa-solid fa-notes-medical"></i> ORDOPASS</div>
-    <nav>
-      <a href="medecin_dashboard.html"><i class="fa-solid fa-file-medical"></i> Consultations</a>
-      <a href="patients.html"><i class="fa-solid fa-users"></i> Patients</a>
-      <a href="teleconsultation.html"><i class="fa-solid fa-video"></i> Téléconsultation</a>
-      <a href="pharmacies.html"><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies</a>
-      <a href="medecin_messagerie.html"><i class="fa-solid fa-comment-medical"></i> Messagerie</a>
-      <a href="parametres.html"><i class="fa-solid fa-gear"></i> Paramètres</a>
-      <a href="medecin_facturation.html"><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</a>
-      <a href="medecin_rendezvous.html"><i class="fa-solid fa-calendar-check"></i> Rendez-vous</a>
-      <a href="medecin_ordonnance.html"><i class="fa-solid fa-prescription"></i> Ordonnances sécurisées</a>
-      <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
-    </nav>
-  </aside>
+<!-- ================= SIDEBAR ================= -->
+<aside class="sidebar">
+  <div class="logo"><i class="fa-solid fa-notes-medical"></i> ORDOPASS</div>
+  <nav>
+    <a href="medecin_dashboard.html"><i class="fa-solid fa-file-medical"></i> Consultations</a>
+    <a href="patients.html"><i class="fa-solid fa-users"></i> Patients</a>
+    <a href="teleconsultation.html"><i class="fa-solid fa-video"></i> Téléconsultation</a>
+    <a href="pharmacies.html"><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies</a>
+    <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+  </nav>
+</aside>
 
-  <!-- Contenu -->
-  <main class="main-area">
-    <header class="topbar">
-      <h1><i class="fa-solid fa-file-medical"></i> Nouvelle Consultation</h1>
-      <div class="user-info">
-        <img src="https://i.pravatar.cc/40" class="avatar" alt="profil">
-        <span id="usernameDisplay"></span>
-      </div>
-    </header>
+<!-- ================= MAIN ================= -->
+<main class="main-area">
 
-    <section class="content">
-      <div class="card">
-        <!-- Loading indicator -->
-        <div id="loadingIndicator" class="loading">
-          <div class="spinner"></div>
-          <p>Enregistrement en cours...</p>
-        </div>
+<header class="topbar">
+  <h1>Nouvelle consultation</h1>
+  <span id="usernameDisplay"></span>
+</header>
 
-        <form id="consultationForm" class="consultation-form">
-          <!-- Informations de base -->
-          <div class="form-section">
-            <h3>Informations de la consultation</h3>
-            
-            <!-- Section Ticket -->
-            <div class="ticket-info">
-              <h4><i class="fa-solid fa-ticket"></i> Gestion du Ticket</h4>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label class="form-label">Numéro de ticket *</label>
-                  <input type="text" class="form-control" id="ticket" required 
-                         placeholder="Ex: HOP-2024-001" 
-                         onblur="checkTicketAvailability()">
-                  <div class="ticket-warning" id="ticketWarning"></div>
-                  <button type="button" class="btn-outline" onclick="generateHospitalTicket()" style="margin-top: 5px; width: 100%;">
-                    <i class="fa-solid fa-gear"></i> Générer un ticket hospitalier
-                  </button>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Type de consultation</label>
-                  <select class="form-control" id="typeConsultation" onchange="updateTicketPrefix()">
-                    <option value="consultation">Consultation Standard</option>
-                    <option value="urgence">Urgence</option>
-                    <option value="controle">Contrôle</option>
-                    <option value="specialiste">Spécialiste</option>
-                    <option value="teleconsultation">Consultation en ligne</option>
-                  </select>
-                </div>
-              </div>
-              <div id="currentTicketDisplay" class="ticket-number"></div>
-            </div>
+<section class="content">
+  <div class="card">
 
-            <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label">Nom du patient *</label>
-                <input type="text" class="form-control" id="nom" required placeholder="Entrez le nom du patient">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Prénom du patient *</label>
-                <input type="text" class="form-control" id="prenom" required placeholder="Entrez le prénom du patient">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Âge *</label>
-                <input type="number" class="form-control" id="age" placeholder="Âge du patient" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Sexe *</label>
-                <select class="form-control" id="genre" required>
-                  <option value="">-- Choisir --</option>
-                  <option>F</option>
-                  <option>M</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Téléphone</label>
-                <input type="tel" class="form-control" id="telephone" placeholder="Ex: +221 77 123 45 67">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Adresse</label>
-                <input type="text" class="form-control" id="adresse" placeholder="Adresse du patient">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Poids (optionnel)</label>
-                <input type="text" class="form-control" id="poids" placeholder="Poids du patient">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Image du patient (URL)</label>
-                <input type="text" class="form-control" id="image" placeholder="https://example.com/photo.jpg">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Date *</label>
-                <input type="date" class="form-control" id="date" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Heure *</label>
-                <input type="time" class="form-control" id="heure" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Motif de consultation *</label>
-                <input type="text" class="form-control" id="motif" required placeholder="Ex: Fièvre, Maux de tête...">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Statut *</label>
-                <select class="form-control" id="statut" required>
-                  <option value="En attente">En attente</option>
-                  <option value="En cours">En cours</option>
-                  <option value="Terminé">Terminé</option>
-                </select>
-              </div>
-            </div>
-          </div>
+<form id="consultationForm">
 
-          <!-- Téléconsultation -->
-          <div class="form-section teleconsultation-section" id="teleconsultationSection">
-            <h3><i class="fa-solid fa-video"></i> Consultation en ligne</h3>
-            
-            <div class="teleconsultation-options">
-              <div class="teleconsultation-option" onclick="selectTeleconsultationOption('video')">
-                <div class="teleconsultation-icon">
-                  <i class="fa-solid fa-video"></i>
-                </div>
-                <h4>Vidéoconférence</h4>
-                <p>Consultation en direct par vidéo</p>
-              </div>
-              <div class="teleconsultation-option" onclick="selectTeleconsultationOption('audio')">
-                <div class="teleconsultation-icon">
-                  <i class="fa-solid fa-phone"></i>
-                </div>
-                <h4>Appel audio</h4>
-                <p>Consultation par téléphone</p>
-              </div>
-              <div class="teleconsultation-option" onclick="selectTeleconsultationOption('chat')">
-                <div class="teleconsultation-icon">
-                  <i class="fa-solid fa-comments"></i>
-                </div>
-                <h4>Messagerie</h4>
-                <p>Consultation par chat</p>
-              </div>
-            </div>
+<h3>Informations patient</h3>
 
-            <div id="videoConsultationOptions" style="display: none;">
-              <div class="form-grid">
-                <div class="form-group">
-                  <label class="form-label">Lien de la consultation</label>
-                  <div class="invite-link">
-                    <input type="text" id="consultationLink" readonly value="https://ordopass.sn/consultation/">
-                    <button type="button" onclick="copyConsultationLink()">
-                      <i class="fa-solid fa-copy"></i> Copier
-                    </button>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Durée prévue (minutes)</label>
-                  <input type="number" class="form-control" id="dureeConsultation" value="30" min="15" max="120">
-                </div>
-              </div>
+<input id="ticket" placeholder="Numéro de ticket" required>
+<input id="nom" placeholder="Nom" required>
+<input id="prenom" placeholder="Prénom" required>
+<input id="age" type="number" placeholder="Âge" required>
+<input id="telephone" placeholder="Téléphone">
+<input id="adresse" placeholder="Adresse">
+<input id="image" placeholder="URL image (optionnel)">
 
-              <div class="video-controls">
-                <button type="button" class="video-btn primary" onclick="startJitsiMeeting()">
-                  <i class="fa-solid fa-play"></i> Démarrer la consultation vidéo
-                </button>
-                <button type="button" class="video-btn success" onclick="generateConsultationLink()">
-                  <i class="fa-solid fa-link"></i> Générer le lien
-                </button>
-                <button type="button" class="video-btn danger" onclick="resetVideo()">
-                  <i class="fa-solid fa-rotate-left"></i> Réinitialiser
-                </button>
-              </div>
+<h3>Consultation</h3>
 
-              <div class="participant-list">
-                <h4>Participants</h4>
-                <div class="participant-item">
-                  <img src="https://i.pravatar.cc/40" class="avatar" alt="Médecin">
-                  <div>
-                    <strong>Dr. <span id="medecinName"></span></strong>
-                    <p style="margin: 0; color: #666;">Médecin</p>
-                  </div>
-                </div>
-                <div class="participant-item">
-                  <img src="https://i.pravatar.cc/40?img=5" class="avatar" alt="Patient">
-                  <div>
-                    <strong id="patientName"></strong>
-                    <p style="margin: 0; color: #666;">Patient</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+<input id="date" type="date" required>
+<input id="heure" type="time" required>
+<input id="motif" placeholder="Motif" required>
 
-          <!-- Symptômes -->
-          <div class="form-section">
-            <h3>Symptômes</h3>
-            <div class="form-group">
-              <label class="form-label">Description des symptômes *</label>
-              <textarea class="form-control" id="symptomes" placeholder="Décrire les symptômes du patient..." required></textarea>
-            </div>
-          </div>
+<select id="statut">
+  <option>En attente</option>
+  <option>En cours</option>
+  <option>Terminé</option>
+</select>
 
-          <!-- Analyses à faire -->
-          <div class="form-section">
-            <h3>Analyses médicales</h3>
-            <div class="form-group">
-              <label class="form-label">Analyses prescrites</label>
-              <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <input type="text" class="form-control" id="newAnalysis" placeholder="Nom de l'analyse" style="flex:1;">
-                <button type="button" class="btn-outline" onclick="addAnalysis()">
-                  <i class="fa-solid fa-plus"></i> Ajouter
-                </button>
-              </div>
-              <div id="analysesList"></div>
-            </div>
-          </div>
+<!-- ================= BOUTONS ================= -->
+<div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap">
 
-          <!-- Examens physiques -->
-          <div class="form-section">
-            <h3>Examens physiques</h3>
-            <div class="form-group">
-              <label class="form-label">Résultats des examens</label>
-              <textarea class="form-control" id="examens" placeholder="Résultats des examens physiques..."></textarea>
-            </div>
-          </div>
+<button type="button" class="btn-success" id="saveAllBtn">
+  <i class="fa-solid fa-user-plus"></i> Ajouter patient et consultation
+</button>
 
-          <!-- Ordonnances -->
-          <div class="form-section ordonnance-section">
-            <h3><i class="fa-solid fa-prescription"></i> Ordonnance médicale</h3>
-            
-            <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label">Nom du médecin *</label>
-                <input type="text" class="form-control" id="nomMedecin" placeholder="Dr ..." required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Médicament *</label>
-                <input type="text" class="form-control" id="medicament" placeholder="Nom du médicament">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Dosage *</label>
-                <input type="text" class="form-control" id="dosage" placeholder="Ex: 500mg">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Posologie *</label>
-                <input type="text" class="form-control" id="posologie" placeholder="Ex: 1 comprimé matin et soir">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Durée *</label>
-                <input type="text" class="form-control" id="duree" placeholder="Ex: 5 jours">
-              </div>
-            </div>
-            <button type="button" class="btn-outline" onclick="addMedication()">
-              <i class="fa-solid fa-plus"></i> Ajouter le médicament
-            </button>
-            <div id="medicationsList" style="margin-top:15px;"></div>
-            
-            <!-- Points importants pour l'ordonnance -->
-            <div class="points-importants">
-              <h4><i class="fa-solid fa-exclamation-circle"></i> Points importants pour l'ordonnance</h4>
-              <textarea class="form-control" id="pointsImportants" placeholder="Indications spéciales, contre-indications, conseils particuliers..."></textarea>
-            </div>
-            
-            <div style="margin-top: 20px;">
-              <button type="button" class="btn-secondary" onclick="generateOrdonnancePreview()">
-                <i class="fa-solid fa-eye"></i> Prévisualiser l'ordonnance
-              </button>
-              <button type="button" class="btn-primary" onclick="saveOrdonnance()">
-                <i class="fa-solid fa-save"></i> Sauvegarder l'ordonnance
-              </button>
-              <button type="button" class="btn-success" id="ordonnancePdfBtn" onclick="generateOrdonnancePDF()" disabled>
-                <i class="fa-solid fa-file-pdf"></i> Télécharger PDF
-              </button>
-              <button type="button" class="btn-warning" onclick="openPharmacieModal()" id="sendOrdonnanceBtn" style="display: none;">
-                <i class="fa-solid fa-paper-plane"></i> Envoyer à pharmacie
-              </button>
-            </div>
-            
-            <!-- Aperçu de l'ordonnance -->
-            <div class="ordonnance-preview" id="ordonnancePreview">
-              <img id="logoImg" alt="Logo OrdoPass" class="logo">
-              <h2 style="text-align: center;">Ordonnance médicale</h2>
-              <p class="medecin-name">Médecin : <span id="pMedecin"></span></p>
+<button type="button" class="btn-outline" onclick="history.back()">
+  Retour
+</button>
 
-              <div class="center-content">
-                <p><b>Patient :</b> <span id="pNom"></span></p>
-                <p><b>Âge :</b> <span id="pAge"></span> • <b>Sexe :</b> <span id="pGenre"></span></p>
-                <p><b>Adresse :</b> <span id="pAdresse"></span></p>
-                <p><b>Poids :</b> <span id="pPoids"></span></p>
-                <p><b>Date :</b> <span id="pDate"></span></p>
-                <p><b>Code :</b> <span id="pCode"></span></p>
-                <p><b>Prescription :</b><br><span id="pMedic" style="white-space: pre-line;"></span></p>
-                
-                <!-- Affichage des points importants -->
-                <div id="pPointsImportants" style="text-align: left; margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
-                  <strong>Points importants :</strong><br>
-                  <span id="pPointsText"></span>
-                </div>
-              </div>
+</div>
 
-              <div id="qrcode" style="text-align: center; margin: 20px 0;"></div>
-              <img id="signImg" alt="Signature du médecin" class="signature" style="display: block; margin: 0 auto;">
-            </div>
-          </div>
+</form>
+</div>
+</section>
+</main>
 
-          <!-- Facturation intégrée -->
-          <div class="form-section facturation-section">
-            <h3><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</h3>
-            
-            <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label">Description *</label>
-                <input type="text" class="form-control" id="factureDescription" placeholder="Ex: Consultation médicale" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Montant (FCFA) *</label>
-                <input type="number" class="form-control" id="factureMontant" placeholder="Montant de la consultation" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Méthode de paiement</label>
-                <select class="form-control" id="facturePaiement">
-                  <option value="Espèces">Espèces</option>
-                  <option value="Carte bancaire">Carte bancaire</option>
-                  <option value="Wave">Wave</option>
-                  <option value="Orange Money">Orange Money</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Facture payée ?</label>
-                <select class="form-control" id="facturePaye">
-                  <option value="Non">Non</option>
-                  <option value="Oui">Oui</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Type de document</label>
-                <select class="form-control" id="typeFacture">
-                  <option value="FACTURE">Facture</option>
-                  <option value="FACTURE PROFORMA">Proforma</option>
-                </select>
-              </div>
-            </div>
-            
-            <div style="margin-top: 20px;">
-              <button type="button" class="btn-secondary" onclick="generateFacturePreview()">
-                <i class="fa-solid fa-eye"></i> Prévisualiser la facture
-              </button>
-              <button type="button" class="btn-primary" onclick="saveFactureFromConsultation()">
-                <i class="fa-solid fa-save"></i> Sauvegarder la facture
-              </button>
-              <button type="button" class="btn-success" id="facturePdfBtn" onclick="generateFacturePDF()" disabled>
-                <i class="fa-solid fa-file-pdf"></i> Télécharger PDF
-              </button>
-            </div>
-            
-            <!-- Aperçu de la facture -->
-            <div class="facture-preview" id="facturePreview">
-              <div class="facture-header">
-                <div class="facture-logo">
-                  <img src="https://via.placeholder.com/100x50/2a5298/ffffff?text=ORDOPASS" alt="Logo OrdoPass" style="width:100px;">
-                </div>
-                <div style="text-align: center;">
-                  <h3 style="margin:0; color:#2a5298;">CLINIQUE ORDOPASS</h3>
-                  <small>www.ordopass.sn</small>
-                </div>
-              </div>
-              
-              <h2 class="facture-title" id="factureTitle">FACTURE</h2>
-              
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                <div>
-                  <p><b>N° Patient :</b> <span id="facturePatientId"></span></p>
-                  <p><b>Date :</b> <span id="factureDate"></span></p>
-                </div>
-                <div>
-                  <p><b>Ticket :</b> <span id="factureTicket"></span></p>
-                  <p><b>Médecin :</b> <span id="factureMedecin"></span></p>
-                </div>
-              </div>
-              
-              <hr>
-              
-              <div style="margin-bottom: 20px;">
-                <p><b>Patient :</b> <span id="facturePatient"></span></p>
-                <p><b>Âge :</b> <span id="factureAge"></span> ans</p>
-                <p><b>Adresse :</b> <span id="factureAdresse"></span></p>
-              </div>
-              
-              <table class="facture-table">
-                <thead>
-                  <tr>
-                    <th>Désignation</th>
-                    <th>Qté</th>
-                    <th>PU (FCFA)</th>
-                    <th>Montant (FCFA)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td id="factureDescriptionPreview"></td>
-                    <td>1</td>
-                    <td id="facturePrixUnitaire"></td>
-                    <td id="factureTotal"></td>
-                  </tr>
-                </tbody>
-              </table>
-              
-              <div class="total-zone">
-                <p><b>TOTAL GÉNÉRAL :</b> <span id="factureMontantTotal"></span> FCFA</p>
-                <p><b>Méthode de paiement :</b> <span id="facturePaiementPreview"></span></p>
-                <p><b>Facture payée :</b> <span id="facturePayePreview"></span></p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Boutons d'action -->
-          <div class="action-buttons">
-            <div class="action-buttons-left">
-              <button type="submit" class="btn-primary">
-                <i class="fa-solid fa-floppy-disk"></i> Enregistrer la consultation
-              </button>
-              <button type="button" class="btn-success" onclick="savePatientAndConsultation()">
-                <i class="fa-solid fa-user-plus"></i> Ajouter patient et consultation
-              </button>
-              <button type="button" class="btn-outline" onclick="goBack()">
-                <i class="fa-solid fa-arrow-left"></i> Retour
-              </button>
-            </div>
-            <div class="action-buttons-right">
-              <button type="button" class="btn-danger" onclick="cancelForm()">
-                <i class="fa-solid fa-times"></i> Annuler
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </section>
-  </main>
-
- 
-  <script>
-/* ===============================
-   SESSION
-================================ */
+<!-- ================= SCRIPT ================= -->
+<script>
+/* ===== AUTH ===== */
 const user = JSON.parse(localStorage.getItem("user"));
-if (!user || user.role !== "medecin") {
-  alert("⚠️ Accès refusé");
+if(!user || user.role !== "medecin"){
+  alert("Accès refusé");
   location.href = "medecin_login.html";
 }
+document.getElementById("usernameDisplay").textContent = user.username;
 
-document.getElementById("usernameDisplay").textContent = user.username || "Médecin";
+/* ===== SAVE PATIENT + CONSULTATION ===== */
+document.getElementById("saveAllBtn").addEventListener("click", ()=>{
 
-/* ===============================
-   CONSULTATION + PATIENT
-================================ */
-document.getElementById("consultationForm").addEventListener("submit", function(e){
-  e.preventDefault();
+  const patient = {
+    id: Date.now(),
+    name: nom.value + " " + prenom.value,
+    age: age.value,
+    phone: telephone.value,
+    address: adresse.value,
+    image: image.value || "https://i.pravatar.cc/40",
+    added: new Date().toLocaleDateString()
+  };
+
+  let patients = JSON.parse(localStorage.getItem("patients")) || [];
+  patients.unshift(patient);
+  localStorage.setItem("patients", JSON.stringify(patients));
 
   const consultation = {
     id: Date.now(),
     ticket: ticket.value,
-    patient: {
-      nom: nom.value,
-      prenom: prenom.value,
-      age: age.value,
-      genre: genre.value,
-      telephone: telephone.value,
-      adresse: adresse.value
-    },
-    date,
+    patientName: patient.name,
+    image: patient.image,
+    date: date.value,
     heure: heure.value,
     motif: motif.value,
-    symptomes: symptomes.value,
-    statut: statut.value,
-    medecin: user.username
+    statut: statut.value
   };
 
   let consultations = JSON.parse(localStorage.getItem("consultations")) || [];
-  consultations.push(consultation);
+  consultations.unshift(consultation);
   localStorage.setItem("consultations", JSON.stringify(consultations));
 
-  alert("✅ Consultation enregistrée avec succès");
+  alert("✅ Patient et consultation enregistrés");
+
+  location.href = "medecin_dashboard.html";
 });
 
-/* ===============================
-   ORDONNANCE
-================================ */
-function saveOrdonnance(){
-  const ordonnance = {
-    id: Date.now(),
-    patient: nom.value + " " + prenom.value,
-    medicament: medicament.value,
-    dosage: dosage.value,
-    posologie: posologie.value,
-    duree: duree.value,
-    points: pointsImportants.value,
-    medecin: nomMedecin.value,
-    date: new Date().toLocaleDateString()
-  };
-
-  let ordonnances = JSON.parse(localStorage.getItem("ordonnances")) || [];
-  ordonnances.push(ordonnance);
-  localStorage.setItem("ordonnances", JSON.stringify(ordonnances));
-
-  document.getElementById("ordonnancePdfBtn").disabled = false;
-  document.getElementById("sendOrdonnanceBtn").style.display = "inline-flex";
-
-  alert("✅ Ordonnance sauvegardée");
-}
-
-/* ===============================
-   FACTURE
-================================ */
-function saveFactureFromConsultation(){
-  const facture = {
-    id: Date.now(),
-    patient: nom.value + " " + prenom.value,
-    description: factureDescription.value,
-    montant: factureMontant.value,
-    paiement: facturePaiement.value,
-    paye: facturePaye.value,
-    type: typeFacture.value,
-    date: new Date().toLocaleDateString()
-  };
-
-  let factures = JSON.parse(localStorage.getItem("factures")) || [];
-  factures.push(facture);
-  localStorage.setItem("factures", JSON.stringify(factures));
-
-  document.getElementById("facturePdfBtn").disabled = false;
-
-  alert("✅ Facture enregistrée");
-}
-
-/* ===============================
-   BOUTONS SIMPLES
-================================ */
-function savePatientAndConsultation(){
-  alert("✅ Patient + consultation enregistrés");
-}
-
-function goBack(){
-  history.back();
-}
-
-function cancelForm(){
-  if(confirm("Annuler la consultation ?")){
-    location.reload();
-  }
-}
+/* ===== LOGOUT ===== */
+document.getElementById("logout").onclick = ()=>{
+  localStorage.removeItem("user");
+  location.href="index.html";
+};
 </script>
 
-       
 </body>
 </html>
