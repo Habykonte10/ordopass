@@ -3,179 +3,208 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Ordonnances - OrdoPass</title>
-
-  <link rel="stylesheet" href="style.css">
+  <title>Facturation - OrdoPass</title>
+  <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="/socket.io/socket.io.js"></script>
-
   <style>
-    .preview { 
-      margin-top:20px; 
-      border:1px solid #ddd; 
-      padding:25px; 
-      border-radius:8px; 
-      background: white; 
-      display: none;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .preview .logo { 
-      max-width:120px; 
-      margin-bottom:10px; 
-      display:block; 
-      margin-left:auto; 
-      margin-right:auto; 
-    }
-    .signature { 
-      max-width:150px; 
-      margin-top:15px; 
-    }
-    .btn-secondary { 
-      background:#28a745; 
-      color:#fff; 
-      padding:10px 20px; 
-      border:none; 
-      border-radius:5px; 
-      cursor:pointer; 
-      font-size: 14px; 
-    }
-    .btn-warning { 
-      background:#ffc107; 
-      color:#212529; 
-      padding:10px 20px; 
-      border:none; 
-      border-radius:5px; 
-      cursor:pointer; 
-      font-size: 14px; 
-    }
-    .btn-danger { 
-      background:#dc3545; 
-      color:#fff; 
-      padding:10px 20px; 
-      border:none; 
-      border-radius:5px; 
-      cursor:pointer; 
-      font-size: 14px; 
-    }
-    .medecin-name { 
-      text-align: center; 
-      font-weight: bold; 
-      font-size: 18px; 
-      margin-bottom: 10px; 
-    }
-    .center-content { 
-      text-align:center; 
-    }
-    .form-group { 
-      margin-bottom: 15px; 
-    }
-    label { 
-      display: block; 
-      margin-bottom: 5px; 
-      font-weight: bold; 
-      color: #333;
-    }
-    input, select, textarea { 
-      width: 100%; 
-      padding: 10px; 
-      border: 2px solid #e9ecef; 
-      border-radius: 6px; 
-      box-sizing: border-box; 
-      font-size: 14px;
-    }
-    input:focus, select:focus, textarea:focus {
-      border-color: #2a5298;
-      outline: none;
-    }
-    .tabs { 
-      display: flex; 
-      margin-bottom: 20px; 
-      border-bottom: 1px solid #ddd; 
+    .facture-card {
       background: white;
-      border-radius: 8px;
-      padding: 0 10px;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border-left: 4px solid #2a5298;
+      transition: all 0.3s ease;
     }
-    .tab { 
-      padding: 12px 20px; 
-      cursor: pointer; 
-      border-bottom: 3px solid transparent; 
-      font-weight: 500;
+
+    .facture-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
     }
-    .tab.active { 
-      border-bottom: 3px solid #2a5298; 
-      font-weight: bold; 
-      color: #2a5298;
-    }
-    .tab-content { 
-      display: none; 
-    }
-    .tab-content.active { 
-      display: block; 
-    }
-    .ordonnance-list { 
-      max-height: 400px; 
-      overflow-y: auto; 
-    }
-    .ordonnance-item { 
-      border: 1px solid #ddd; 
-      padding: 15px; 
-      margin-bottom: 10px; 
-      border-radius: 5px; 
-      background: #f8f9fa;
-    }
-    .ordonnance-item h4 { 
-      margin: 0 0 10px 0; 
-      color: #2a5298;
-    }
-    .status-badge { 
-      padding: 3px 8px; 
-      border-radius: 12px; 
-      font-size: 12px; 
-    }
-    .status-active { 
-      background: #d4edda; 
-      color: #155724; 
-    }
-    .status-delivree { 
-      background: #cce7ff; 
-      color: #004085; 
-    }
-    .status-annulee { 
-      background: #f8d7da; 
-      color: #721c24; 
-    }
-    .status-envoyee { 
-      background: #fff3cd; 
-      color: #856404; 
-    }
-    .status-en_cours { 
-      background: #d1ecf1; 
-      color: #0c5460; 
-    }
-    .status-pret { 
-      background: #e2e3e5; 
-      color: #383d41; 
-    }
-    .status-recuperee { 
-      background: #d4edda; 
-      color: #155724; 
-    }
-    .buttons {
+
+    .facture-header {
       display: flex;
-      gap: 10px;
-      margin-top: 20px;
-      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 15px;
     }
-    .buttons button {
-      flex: 1;
-      min-width: 120px;
+
+    .facture-info h3 {
+      margin: 0 0 8px 0;
+      color: #1e3c72;
+    }
+
+    .facture-status {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 5px;
+      gap: 8px;
     }
+
+    .status-paye {
+      color: #28a745;
+      font-weight: 600;
+    }
+
+    .status-impaye {
+      color: #dc3545;
+      font-weight: 600;
+    }
+
+    .status-encours {
+      color: #ffc107;
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .paye {
+      background: #28a745;
+    }
+
+    .impaye {
+      background: #dc3545;
+    }
+
+    .encours {
+      background: #ffc107;
+    }
+
+    .facture-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #666;
+    }
+
+    .detail-item i {
+      color: #2a5298;
+      width: 16px;
+    }
+
+    .facture-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      border: none;
+    }
+
+    .search-filter {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .filter-select {
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: white;
+      font-size: 14px;
+    }
+
+    .stats-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .stat-number {
+      font-size: 24px;
+      font-weight: bold;
+      color: #1e3c72;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .empty-state i {
+      font-size: 48px;
+      margin-bottom: 15px;
+      color: #ccc;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .total-amount {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+      text-align: center;
+      border: 2px solid #2a5298;
+    }
+
+    .total-label {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .total-value {
+      font-size: 28px;
+      font-weight: bold;
+      color: #2a5298;
+    }
+
     .modal {
       display: none;
       position: fixed;
@@ -186,210 +215,116 @@
       height: 100%;
       background-color: rgba(0,0,0,0.5);
     }
+
     .modal-content {
       background-color: white;
       margin: 10% auto;
-      padding: 20px;
+      padding: 30px;
       border-radius: 8px;
       width: 80%;
-      max-width: 500px;
+      max-width: 600px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
+
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
       border-bottom: 1px solid #ddd;
-      padding-bottom: 10px;
+      padding-bottom: 15px;
     }
+
     .modal-close {
       cursor: pointer;
       font-size: 24px;
       color: #999;
     }
-    .pharmacie-item {
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .form-control {
+      width: 100%;
       padding: 10px;
-      border: 1px solid #ddd;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s;
+      border: 2px solid #e9ecef;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 14px;
     }
-    .pharmacie-item:hover {
-      background-color: #f5f5f5;
-    }
-    .pharmacie-item.selected {
-      background-color: #e6f7ff;
+
+    .form-control:focus {
       border-color: #2a5298;
-    }
-    .online-indicator {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      margin-right: 5px;
-    }
-    .online {
-      background-color: #28a745;
-    }
-    .offline {
-      background-color: #dc3545;
+      outline: none;
     }
 
-    /* Styles pour le mode consultation */
-    .consultation-mode {
-      background-color: #e8f4fd;
-      border-left: 4px solid #2a5298;
-      padding: 15px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-    }
-
-    .consultation-mode .badge {
+    .btn-primary {
       background: #2a5298;
       color: white;
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 0.8rem;
-      margin-left: 10px;
-    }
-
-    .btn-back {
-      background: #6c757d;
-      color: white;
       border: none;
-      padding: 8px 15px;
+      padding: 10px 20px;
       border-radius: 5px;
       cursor: pointer;
       font-size: 14px;
-      text-decoration: none;
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      margin-bottom: 15px;
-      transition: all 0.3s;
     }
 
-    .btn-back:hover {
-      background: #5a6268;
-    }
-
-    /* Styles améliorés pour l'ordonnance */
-    .ordonnance-beautiful {
-      background: white;
-      border: 2px solid #2a5298;
-      border-radius: 10px;
-      padding: 30px;
-      margin: 20px 0;
-      box-shadow: 0 4px 15px rgba(42, 82, 152, 0.1);
-      font-family: 'Georgia', serif;
-    }
-
-    .ordonnance-header {
-      text-align: center;
-      border-bottom: 3px double #2a5298;
-      padding-bottom: 20px;
-      margin-bottom: 30px;
-    }
-
-    .ordonnance-title {
-      color: #2a5298;
-      font-size: 28px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    .ordonnance-subtitle {
-      color: #666;
-      font-size: 16px;
-      font-style: italic;
-    }
-
-    .ordonnance-content {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
-      margin-bottom: 30px;
-    }
-
-    .ordonnance-section {
-      margin-bottom: 25px;
-    }
-
-    .ordonnance-section-title {
-      color: #2a5298;
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 15px;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 5px;
-    }
-
-    .ordonnance-medicaments {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 8px;
-      border-left: 4px solid #2a5298;
-    }
-
-    .medicament-item {
-      padding: 10px 0;
-      border-bottom: 1px dashed #ddd;
-    }
-
-    .medicament-item:last-child {
-      border-bottom: none;
-    }
-
-    .medicament-name {
-      font-weight: bold;
-      color: #2a5298;
-      font-size: 16px;
-    }
-
-    .ordonnance-footer {
-      border-top: 2px solid #2a5298;
-      padding-top: 30px;
-      margin-top: 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-    }
-
-    .signature-area {
-      text-align: center;
-    }
-
-    .signature-image {
-      max-width: 200px;
-      height: auto;
-      margin-bottom: 10px;
-      border-bottom: 1px solid #000;
-      padding-bottom: 5px;
-    }
-
-    .doctor-stamp {
-      color: #2a5298;
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    .qr-code-area {
-      text-align: center;
-    }
-
-    .ordonnance-security {
-      text-align: center;
-      font-size: 12px;
-      color: #666;
-      margin-top: 20px;
-      padding: 10px;
-      background: #f8f9fa;
+    .btn-success {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
       border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
     }
 
-    /* Styles pour les notifications */
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-outline {
+      background: white;
+      color: #2a5298;
+      border: 2px solid #2a5298;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: flex-end;
+    }
+
     .notification {
       position: fixed;
       top: 20px;
@@ -416,42 +351,39 @@
       background: #2a5298;
     }
 
-    /* Styles pour les pharmacies */
-    .pharmacie-marker {
-      background: transparent !important;
-      border: none !important;
-    }
-
-    .leaflet-popup-content {
-      margin: 8px 12px;
-    }
-
-    .leaflet-popup-content-wrapper {
-      border-radius: 8px;
-    }
-
-    .pharmacie-item {
-      transition: all 0.3s ease;
+    .btn-export {
+      background: #17a2b8;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
       cursor: pointer;
-      border: 1px solid #e9ecef;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 10px;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
     }
 
-    .pharmacie-item:hover {
-      border-color: #2a5298;
-      box-shadow: 0 2px 8px rgba(42, 82, 152, 0.1);
+    .facture-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
     }
 
-    .pharmacie-item.selected {
-      border-color: #2a5298;
-      background-color: #e8f4fd;
-      box-shadow: 0 2px 8px rgba(42, 82, 152, 0.15);
+    .facture-table th, .facture-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
     }
 
-    .select-pharmacie-btn {
-      white-space: nowrap;
+    .facture-table th {
+      background: #f8f9fa;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .facture-table tr:hover {
+      background: #f5f5f5;
     }
 
     @keyframes slideIn {
@@ -465,44 +397,29 @@
       }
     }
 
-    /* Amélioration responsive */
     @media (max-width: 768px) {
-      .header {
+      .facture-header {
         flex-direction: column;
-        text-align: center;
+        gap: 10px;
       }
       
-      .clinic-info {
-        text-align: center;
-        margin-top: 15px;
-      }
-      
-      .actions {
+      .search-filter {
         flex-direction: column;
       }
-
-      .tabs {
-        flex-direction: column;
-      }
-
-      .tab {
-        border-radius: 0;
-        margin-right: 0;
-        border-bottom: 1px solid #ddd;
-      }
-
-      .ordonnance-content {
-        grid-template-columns: 1fr;
-      }
-
-      .pharmacie-item {
-        padding: 12px;
+      
+      .search-box {
+        min-width: 100%;
       }
       
-      .pharmacie-item h4 {
-        font-size: 14px;
+      .facture-actions {
+        flex-direction: column;
       }
-
+      
+      .btn-small {
+        width: 100%;
+        justify-content: center;
+      }
+      
       .modal-content {
         width: 95%;
         margin: 5% auto;
@@ -513,200 +430,234 @@
 
 <body class="dashboard-page">
 
-  <!-- ✅ SIDEBAR FIXE IDENTIQUE -->
+  <!-- SIDEBAR -->
   <aside class="sidebar">
-    <div class="logo">
-      <i class="fa-solid fa-notes-medical"></i>
-      <span>ORDOPASS</span>
-    </div>
+    <div class="logo"><i class="fa-solid fa-notes-medical"></i> ORDOPASS</div>
     <nav>
-      <a href="medecin_dashboard.html"><i class="fa-solid fa-file-medical"></i> <span>Consultations</span></a>
-      <a href="patients.html"><i class="fa-solid fa-users"></i> <span>Patients</span></a>
-      <a href="teleconsultation.html"><i class="fa-solid fa-video"></i> <span>Téléconsultation</span></a>
-      <a href="pharmacies.html"><i class="fa-solid fa-prescription-bottle-medical"></i> <span>Pharmacies</span></a>
-      <a href="medecin_messagerie.html"><i class="fa-solid fa-comment-medical"></i> <span>Messagerie</span></a>
-      <a href="parametres.html"><i class="fa-solid fa-gear"></i> <span>Paramètres</span></a>
-      <a href="medecin_facturation.html"><i class="fa-solid fa-file-invoice-dollar"></i> <span>Facturation</span></a>
-      <a href="medecin_rendezvous.html"><i class="fa-solid fa-calendar-check"></i> <span>Rendez-vous</span></a>
-      <a href="medecin_ordonnance.html" class="active"><i class="fa-solid fa-prescription"></i> <span>Ordonnances sécurisées</span></a>
-      <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> <span>Déconnexion</span></a>
+      <a href="medecin_dashboard.html"><i class="fa-solid fa-file-medical"></i> Consultations</a>
+      <a href="patients.html"><i class="fa-solid fa-users"></i> Patients</a>
+      <a href="teleconsultation.html"><i class="fa-solid fa-video"></i> Téléconsultation</a>
+      <a href="pharmacies.html"><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies</a>
+      <a href="medecin_messagerie.html"><i class="fa-solid fa-comment-medical"></i> Messagerie</a>
+      <a href="parametres.html"><i class="fa-solid fa-gear"></i> Paramètres</a>
+      <a href="medecin_facturation.html" class="active"><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</a>
+      <a href="medecin_rendezvous.html"><i class="fa-solid fa-calendar-check"></i> Rendez-vous</a>
+      <a href="medecin_ordonnance.html"><i class="fa-solid fa-prescription"></i> Ordonnances sécurisées</a>
+      <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
     </nav>
   </aside>
 
-  <!-- ✅ CONTENU PRINCIPAL -->
+  <!-- CONTENU PRINCIPAL -->
   <main class="main-area">
-    <!-- TOPBAR -->
     <header class="topbar">
-      <h1><i class="fa-solid fa-prescription"></i> Ordonnances sécurisées</h1>
+      <h1><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</h1>
       <div class="user-info">
         <img src="https://i.pravatar.cc/40" class="avatar" alt="profil">
         <span id="usernameDisplay"></span>
       </div>
     </header>
 
-    <!-- CONTENU DÉFILANT -->
     <section class="content">
-      <!-- Bouton de retour pour le mode consultation -->
-      <div id="backButtonContainer" style="display: none;">
-        <button class="btn-back" onclick="exitConsultationMode()">
-          <i class="fa-solid fa-arrow-left"></i> Retour au profil patient
-        </button>
-      </div>
-
-      <!-- Indicateur de mode consultation -->
-      <div id="consultationModeIndicator" class="consultation-mode" style="display: none;">
-        <i class="fa-solid fa-eye"></i> 
-        <strong>Mode consultation</strong>
-        <span class="badge">Affichage seule</span>
-        <span style="margin-left: 10px; font-size: 0.9rem;">
-          Vous consultez une ordonnance existante. Les modifications sont limitées.
-        </span>
-        <button onclick="exitConsultationMode()" class="btn-outline" style="margin-left: 15px; padding: 4px 8px;">
-          <i class="fa-solid fa-pen"></i> Activer l'édition
-        </button>
-      </div>
-
-      <div class="tabs">
-        <div class="tab active" data-tab="create">Créer une ordonnance</div>
-        <div class="tab" data-tab="list">Mes ordonnances</div>
-        <div class="tab" data-tab="search">Rechercher</div>
-      </div>
-
-      <!-- Création d'ordonnance -->
-      <div class="tab-content active" id="create-tab">
-        <div class="card">
-          <h2><i class="fa-solid fa-file-prescription"></i> Créer une ordonnance</h2>
-
-          <form id="ordForm" autocomplete="off">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-              <div class="form-group">
-                <label>Nom du médecin *</label>
-                <input type="text" id="nomMedecin" placeholder="Dr ..." required>
-              </div>
-
-              <div class="form-group">
-                <label>Nom du patient *</label>
-                <input type="text" id="nom" required>
-              </div>
-
-              <div class="form-group">
-                <label>Âge *</label>
-                <input type="number" id="age" required>
-              </div>
-
-              <div class="form-group">
-                <label>Sexe *</label>
-                <select id="genre" required>
-                  <option value="">-- Choisir --</option>
-                  <option value="F">F</option>
-                  <option value="M">M</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label>Adresse *</label>
-                <input type="text" id="adresse" required>
-              </div>
-
-              <div class="form-group">
-                <label>Poids (optionnel)</label>
-                <input type="text" id="poids" placeholder="ex: 65 kg">
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Médicaments et posologie *</label>
-              <textarea id="medicaments" rows="5" placeholder="Ex: Paracétamol 1000mg - 1 comprimé 3 fois par jour pendant 5 jours&#10;Vitamine C - 1 comprimé par jour" required></textarea>
-            </div>
-
-            <div class="form-group">
-              <label>Date</label>
-              <input type="date" id="dateOrd">
-            </div>
-
-            <div class="buttons">
-              <button type="button" id="genBtn" class="btn-primary">
-                <i class="fa-solid fa-eye"></i> Prévisualiser
-              </button>
-              <button type="button" id="saveBtn" class="btn-secondary">
-                <i class="fa-solid fa-save"></i> Sauvegarder
-              </button>
-              <button type="button" id="sendBtn" class="btn-warning" disabled>
-                <i class="fa-solid fa-paper-plane"></i> Envoyer à pharmacie
-              </button>
-              <button type="button" id="pdfBtn" class="btn-danger" disabled>
-                <i class="fa-solid fa-file-pdf"></i> Télécharger PDF
-              </button>
-            </div>
-          </form>
-
-          <!-- Aperçu -->
-          <div class="preview" id="preview">
-            <!-- L'ordonnance beautifiée sera chargée ici dynamiquement -->
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:20px;">
+          <h2>Gestion des factures</h2>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <button class="btn-primary" onclick="openCreateFactureModal()">
+              <i class="fa-solid fa-plus"></i> Nouvelle facture
+            </button>
+            <button class="btn-export" onclick="exportToExcel()">
+              <i class="fa-solid fa-file-excel"></i> Exporter Excel
+            </button>
+            <button class="btn-outline" id="refreshBtn">
+              <i class="fa-solid fa-rotate"></i> Actualiser
+            </button>
           </div>
         </div>
-      </div>
 
-      <!-- Liste des ordonnances -->
-      <div class="tab-content" id="list-tab">
-        <div class="card">
-          <h2><i class="fa-solid fa-list"></i> Mes ordonnances</h2>
-          <div class="ordonnance-list" id="ordonnanceList">
-            <!-- Les ordonnances seront chargées ici -->
+        <!-- Statistiques -->
+        <div class="stats-cards">
+          <div class="stat-card">
+            <div class="stat-number" id="totalFactures">0</div>
+            <div class="stat-label">Total factures</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="totalMontant">0 FCFA</div>
+            <div class="stat-label">Montant total</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="facturesPayees">0</div>
+            <div class="stat-label">Factures payées</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="montantPaye">0 FCFA</div>
+            <div class="stat-label">Montant payé</div>
           </div>
         </div>
-      </div>
 
-      <!-- Recherche d'ordonnance -->
-      <div class="tab-content" id="search-tab">
-        <div class="card">
-          <h2><i class="fa-solid fa-search"></i> Rechercher une ordonnance</h2>
-          <div class="form-group">
-            <label>Code de l'ordonnance</label>
-            <input type="text" id="searchCode" placeholder="Entrez le code de l'ordonnance">
+        <!-- Recherche et filtres -->
+        <div class="search-filter">
+          <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Rechercher un patient, une facture...">
           </div>
-          <button type="button" id="searchBtn" class="btn-primary">
-            <i class="fa-solid fa-search"></i> Rechercher
+          <select class="filter-select" id="statusFilter">
+            <option value="all">Tous les statuts</option>
+            <option value="paye">Payé</option>
+            <option value="impaye">Impayé</option>
+            <option value="encours">En cours</option>
+          </select>
+          <select class="filter-select" id="typeFilter">
+            <option value="all">Tous les types</option>
+            <option value="FACTURE">Facture</option>
+            <option value="FACTURE PROFORMA">Proforma</option>
+            <option value="ACOMPTE">Acompte</option>
+          </select>
+          <input type="date" class="filter-select" id="dateFilter" placeholder="Filtrer par date">
+        </div>
+
+        <!-- Tableau des factures -->
+        <div style="overflow-x: auto;">
+          <table class="facture-table" id="facturesTable">
+            <thead>
+              <tr>
+                <th>N° Facture</th>
+                <th>Patient</th>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Montant</th>
+                <th>Statut</th>
+                <th>Type</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="facturesList">
+              <!-- Les factures seront chargées ici -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Total général -->
+        <div class="total-amount">
+          <div class="total-label">TOTAL GÉNÉRAL</div>
+          <div class="total-value" id="totalGeneral">0 FCFA</div>
+          <div style="margin-top: 10px; font-size: 14px; color: #666;">
+            <span id="totalFacturesCount">0</span> factures - 
+            <span id="totalMontantPaye">0 FCFA</span> payé - 
+            <span id="totalMontantImpaye">0 FCFA</span> restant
+          </div>
+        </div>
+
+        <!-- État vide -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+          <i class="fa-solid fa-file-invoice"></i>
+          <h3>Aucune facture</h3>
+          <p>Commencez par créer votre première facture</p>
+          <button class="btn-primary" onclick="openCreateFactureModal()" style="margin-top: 15px;">
+            <i class="fa-solid fa-plus"></i> Créer une facture
           </button>
-          
-          <div class="preview" id="searchResult" style="display: none;">
-            <h3>Résultat de la recherche</h3>
-            <div id="searchContent"></div>
-          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Modal pour sélectionner une pharmacie -->
-  <div id="pharmacieModal" class="modal">
+  <!-- Modal création/édition de facture -->
+  <div id="factureModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3><i class="fa-solid fa-map-location-dot"></i> Sélectionner une pharmacie</h3>
+        <h3 id="modalTitle"><i class="fa-solid fa-file-invoice-dollar"></i> Nouvelle facture</h3>
         <span class="modal-close">&times;</span>
       </div>
       
-      <!-- Liste des pharmacies uniquement -->
-      <div style="margin-top: 15px;">
-        <h4><i class="fa-solid fa-list"></i> Liste des pharmacies disponibles</h4>
-        <div id="pharmacieList">
-          <!-- Les pharmacies seront chargées ici -->
+      <form id="factureForm">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div class="form-group">
+            <label class="form-label">Numéro de facture *</label>
+            <input type="text" class="form-control" id="factureNumero" required placeholder="Ex: FACT-2024-001">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" class="form-control" id="factureDate" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Patient *</label>
+            <input type="text" class="form-control" id="facturePatient" required placeholder="Nom du patient">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Téléphone patient</label>
+            <input type="text" class="form-control" id="factureTelephone" placeholder="Ex: +221 77 123 45 67">
+          </div>
+          
+          <div class="form-group" style="grid-column: span 2;">
+            <label class="form-label">Adresse patient</label>
+            <input type="text" class="form-control" id="factureAdresse" placeholder="Adresse complète">
+          </div>
+          
+          <div class="form-group" style="grid-column: span 2;">
+            <label class="form-label">Description *</label>
+            <input type="text" class="form-control" id="factureDescription" required placeholder="Ex: Consultation médicale, analyses...">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Montant (FCFA) *</label>
+            <input type="number" class="form-control" id="factureMontant" required placeholder="0">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Type de document *</label>
+            <select class="form-control" id="factureType" required>
+              <option value="FACTURE">Facture</option>
+              <option value="FACTURE PROFORMA">Facture Proforma</option>
+              <option value="ACOMPTE">Acompte</option>
+              <option value="AVOIR">Avoir</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Méthode de paiement</label>
+            <select class="form-control" id="facturePaiement">
+              <option value="Espèces">Espèces</option>
+              <option value="Carte bancaire">Carte bancaire</option>
+              <option value="Wave">Wave</option>
+              <option value="Orange Money">Orange Money</option>
+              <option value="Virement">Virement bancaire</option>
+              <option value="Chèque">Chèque</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Statut *</label>
+            <select class="form-control" id="factureStatut" required>
+              <option value="impaye">Impayé</option>
+              <option value="encours">En cours de paiement</option>
+              <option value="paye">Payé</option>
+            </select>
+          </div>
+          
+          <div class="form-group" style="grid-column: span 2;">
+            <label class="form-label">Notes additionnelles</label>
+            <textarea class="form-control" id="factureNotes" rows="3" placeholder="Notes, conditions de paiement, etc."></textarea>
+          </div>
         </div>
-      </div>
-      
-      <div class="buttons" style="margin-top: 20px;">
-        <button id="confirmSendBtn" class="btn-primary" disabled>
-          <i class="fa-solid fa-paper-plane"></i> Envoyer
-        </button>
-        <button id="cancelSendBtn" class="btn-secondary">
-          <i class="fa-solid fa-times"></i> Annuler
-        </button>
-      </div>
+        
+        <div class="actions">
+          <button type="button" class="btn-outline" onclick="closeModal()">
+            <i class="fa-solid fa-times"></i> Annuler
+          </button>
+          <button type="submit" class="btn-primary">
+            <i class="fa-solid fa-save"></i> Enregistrer
+          </button>
+          <button type="button" class="btn-success" id="generatePdfBtn" onclick="generateFacturePDF()">
+            <i class="fa-solid fa-file-pdf"></i> Générer PDF
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
 <script>
-/* ===== Vérification de session ===== */
+/* ===== Vérification session ===== */
 const user = JSON.parse(localStorage.getItem("user"));
 
 if (!user) {
@@ -729,70 +680,244 @@ document.getElementById("logout").addEventListener("click", () => {
 });
 
 /* ===== Variables globales ===== */
-let currentOrdonnance = null;
-let currentOrdonnanceId = null;
-let selectedPharmacie = null;
+let allFactures = [];
+let currentFacture = null;
+let currentFactureId = null;
 
 /* ===== Initialisation ===== */
 document.addEventListener('DOMContentLoaded', function() {
-  // Initialiser la date
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('dateOrd').value = today;
+  // Charger les factures
+  loadFactures();
   
-  // Remplir le nom du médecin
-  if (user.username) {
-    document.getElementById('nomMedecin').value = user.username;
-  }
-  
-  // Initialiser les onglets
-  initTabs();
-  
-  // Charger les ordonnances
-  loadOrdonnances();
-  
-  // Charger les pharmacies
-  loadPharmacies();
-  
-  // Événements des boutons
-  document.getElementById('genBtn').addEventListener('click', generatePreview);
-  document.getElementById('saveBtn').addEventListener('click', saveOrdonnance);
-  document.getElementById('sendBtn').addEventListener('click', openPharmacieModal);
-  document.getElementById('pdfBtn').addEventListener('click', generatePDF);
-  document.getElementById('searchBtn').addEventListener('click', searchOrdonnance);
+  // Événements
+  document.getElementById('refreshBtn').addEventListener('click', loadFactures);
+  document.getElementById('searchInput').addEventListener('input', filterFactures);
+  document.getElementById('statusFilter').addEventListener('change', filterFactures);
+  document.getElementById('typeFilter').addEventListener('change', filterFactures);
+  document.getElementById('dateFilter').addEventListener('change', filterFactures);
   
   // Modal events
   document.querySelector('.modal-close').addEventListener('click', closeModal);
-  document.getElementById('cancelSendBtn').addEventListener('click', closeModal);
-  document.getElementById('confirmSendBtn').addEventListener('click', sendToPharmacie);
+  document.getElementById('factureForm').addEventListener('submit', saveFacture);
   
-  // Vérifier si on vient d'enregistrer une facture
+  // Vérifier si une facture vient d'être enregistrée
   checkRecentFacture();
+  
+  // Initialiser la date d'aujourd'hui
+  document.getElementById('factureDate').value = new Date().toISOString().split('T')[0];
 });
 
-/* ===== Gestion des onglets ===== */
-function initTabs() {
-  const tabs = document.querySelectorAll('.tab');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', function() {
-      const tabId = this.getAttribute('data-tab');
-      
-      // Retirer la classe active de tous les onglets et contenus
-      tabs.forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-      });
-      
-      // Activer l'onglet et le contenu correspondant
-      this.classList.add('active');
-      document.getElementById(tabId + '-tab').classList.add('active');
-    });
-  });
+/* ===== Charger les factures ===== */
+function loadFactures() {
+  allFactures = JSON.parse(localStorage.getItem('factures')) || [];
+  
+  // Trier par date (plus récentes d'abord)
+  allFactures.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  displayFactures(allFactures);
+  updateStats(allFactures);
 }
 
-/* ===== Générer l'aperçu ===== */
-function generatePreview() {
+function displayFactures(factures) {
+  const container = document.getElementById('facturesList');
+  const emptyState = document.getElementById('emptyState');
+  
+  if (factures.length === 0) {
+    container.innerHTML = '';
+    emptyState.style.display = 'block';
+    return;
+  }
+  
+  emptyState.style.display = 'none';
+  
+  container.innerHTML = factures.map(facture => `
+    <tr>
+      <td><strong>${facture.numero || facture.code || 'N/A'}</strong></td>
+      <td>${facture.patient}</td>
+      <td>${formatDate(facture.date)}</td>
+      <td>${facture.description}</td>
+      <td><strong>${formatMoney(facture.montant)} FCFA</strong></td>
+      <td>
+        <span class="status-dot ${facture.statut || 'impaye'}"></span>
+        <span class="status-${facture.statut || 'impaye'}">
+          ${getStatusText(facture.statut || 'impaye')}
+        </span>
+      </td>
+      <td>${facture.type || 'FACTURE'}</td>
+      <td>
+        <div style="display: flex; gap: 5px;">
+          <button class="btn-small btn-outline" onclick="viewFacture('${facture.id}')">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+          <button class="btn-small btn-primary" onclick="editFacture('${facture.id}')">
+            <i class="fa-solid fa-edit"></i>
+          </button>
+          <button class="btn-small btn-success" onclick="generateSinglePDF('${facture.id}')">
+            <i class="fa-solid fa-file-pdf"></i>
+          </button>
+          <button class="btn-small btn-danger" onclick="deleteFacture('${facture.id}')">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function formatDate(dateString) {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('fr-FR');
+}
+
+function formatMoney(amount) {
+  return parseInt(amount).toLocaleString('fr-FR');
+}
+
+function getStatusText(status) {
+  const statusMap = {
+    'paye': 'Payé',
+    'impaye': 'Impayé',
+    'encours': 'En cours'
+  };
+  return statusMap[status] || status;
+}
+
+function updateStats(factures) {
+  const totalFactures = factures.length;
+  const totalMontant = factures.reduce((sum, f) => sum + (parseFloat(f.montant) || 0), 0);
+  const facturesPayees = factures.filter(f => f.statut === 'paye').length;
+  const montantPaye = factures.filter(f => f.statut === 'paye')
+    .reduce((sum, f) => sum + (parseFloat(f.montant) || 0), 0);
+  const montantImpaye = totalMontant - montantPaye;
+  
+  // Mettre à jour les statistiques
+  document.getElementById('totalFactures').textContent = totalFactures;
+  document.getElementById('totalMontant').textContent = formatMoney(totalMontant) + ' FCFA';
+  document.getElementById('facturesPayees').textContent = facturesPayees;
+  document.getElementById('montantPaye').textContent = formatMoney(montantPaye) + ' FCFA';
+  
+  // Mettre à jour le total général
+  document.getElementById('totalGeneral').textContent = formatMoney(totalMontant) + ' FCFA';
+  document.getElementById('totalFacturesCount').textContent = totalFactures;
+  document.getElementById('totalMontantPaye').textContent = formatMoney(montantPaye) + ' FCFA';
+  document.getElementById('totalMontantImpaye').textContent = formatMoney(montantImpaye) + ' FCFA';
+}
+
+/* ===== Filtrer les factures ===== */
+function filterFactures() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const status = document.getElementById('statusFilter').value;
+  const type = document.getElementById('typeFilter').value;
+  const dateFilter = document.getElementById('dateFilter').value;
+  
+  const filtered = allFactures.filter(facture => {
+    let ok = true;
+    
+    // Filtre par recherche
+    if (search) {
+      ok = facture.patient.toLowerCase().includes(search) || 
+            facture.description.toLowerCase().includes(search) ||
+            (facture.numero && facture.numero.toLowerCase().includes(search));
+    }
+    
+    // Filtre par statut
+    if (status !== 'all') {
+      ok = ok && facture.statut === status;
+    }
+    
+    // Filtre par type
+    if (type !== 'all') {
+      ok = ok && facture.type === type;
+    }
+    
+    // Filtre par date
+    if (dateFilter) {
+      const factureDate = new Date(facture.date).toISOString().split('T')[0];
+      ok = ok && factureDate === dateFilter;
+    }
+    
+    return ok;
+  });
+  
+  displayFactures(filtered);
+  updateStats(filtered);
+}
+
+/* ===== Gestion des modals ===== */
+function openCreateFactureModal() {
+  document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-file-invoice-dollar"></i> Nouvelle facture';
+  document.getElementById('factureForm').reset();
+  document.getElementById('factureDate').value = new Date().toISOString().split('T')[0];
+  
+  // Générer un numéro de facture automatique
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = (now.getMonth() + 1).toString().padStart(2, '0');
+  const day = now.getDate().toString().padStart(2, '0');
+  const count = allFactures.filter(f => f.date && f.date.startsWith(`${year}-${month}-${day}`)).length + 1;
+  document.getElementById('factureNumero').value = `FACT-${year}${month}${day}-${count.toString().padStart(3, '0')}`;
+  
+  currentFacture = null;
+  currentFactureId = null;
+  document.getElementById('factureModal').style.display = 'block';
+}
+
+function closeModal() {
+  document.getElementById('factureModal').style.display = 'none';
+  document.getElementById('factureForm').reset();
+}
+
+function viewFacture(factureId) {
+  const facture = allFactures.find(f => f.id == factureId);
+  if (!facture) return;
+  
+  alert(`
+    FACTURE #${facture.numero || facture.code}
+    
+    Patient: ${facture.patient}
+    Date: ${formatDate(facture.date)}
+    Description: ${facture.description}
+    Montant: ${formatMoney(facture.montant)} FCFA
+    Type: ${facture.type || 'FACTURE'}
+    Statut: ${getStatusText(facture.statut || 'impaye')}
+    Paiement: ${facture.paiement || 'Non spécifié'}
+    Notes: ${facture.notes || 'Aucune'}
+  `);
+}
+
+function editFacture(factureId) {
+  const facture = allFactures.find(f => f.id == factureId);
+  if (!facture) {
+    showNotification('Facture non trouvée', 'error');
+    return;
+  }
+  
+  document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-edit"></i> Modifier la facture';
+  
+  // Remplir le formulaire
+  document.getElementById('factureNumero').value = facture.numero || facture.code || '';
+  document.getElementById('factureDate').value = facture.date || new Date().toISOString().split('T')[0];
+  document.getElementById('facturePatient').value = facture.patient || '';
+  document.getElementById('factureTelephone').value = facture.telephone || '';
+  document.getElementById('factureAdresse').value = facture.adresse || '';
+  document.getElementById('factureDescription').value = facture.description || '';
+  document.getElementById('factureMontant').value = facture.montant || '';
+  document.getElementById('factureType').value = facture.type || 'FACTURE';
+  document.getElementById('facturePaiement').value = facture.paiement || 'Espèces';
+  document.getElementById('factureStatut').value = facture.statut || 'impaye';
+  document.getElementById('factureNotes').value = facture.notes || '';
+  
+  currentFacture = facture;
+  currentFactureId = factureId;
+  document.getElementById('factureModal').style.display = 'block';
+}
+
+function saveFacture(e) {
+  e.preventDefault();
+  
   // Validation
-  const requiredFields = ['nomMedecin', 'nom', 'age', 'genre', 'adresse', 'medicaments'];
+  const requiredFields = ['factureNumero', 'factureDate', 'facturePatient', 'factureDescription', 'factureMontant'];
   for (const fieldId of requiredFields) {
     const field = document.getElementById(fieldId);
     if (!field.value.trim()) {
@@ -802,516 +927,202 @@ function generatePreview() {
     }
   }
   
-  // Générer un code unique
-  const code = generateOrdonnanceCode();
-  
-  // Créer l'objet ordonnance
-  currentOrdonnance = {
-    code: code,
-    medecin: document.getElementById('nomMedecin').value,
-    patient: document.getElementById('nom').value,
-    age: document.getElementById('age').value,
-    genre: document.getElementById('genre').value,
-    adresse: document.getElementById('adresse').value,
-    poids: document.getElementById('poids').value || 'Non spécifié',
-    medicaments: document.getElementById('medicaments').value,
-    date: document.getElementById('dateOrd').value || new Date().toISOString().split('T')[0],
-    statut: 'active',
+  // Créer l'objet facture
+  const facture = {
+    id: currentFactureId || Date.now(),
+    numero: document.getElementById('factureNumero').value,
+    date: document.getElementById('factureDate').value,
+    patient: document.getElementById('facturePatient').value,
+    telephone: document.getElementById('factureTelephone').value,
+    adresse: document.getElementById('factureAdresse').value,
+    description: document.getElementById('factureDescription').value,
+    montant: parseFloat(document.getElementById('factureMontant').value),
+    type: document.getElementById('factureType').value,
+    paiement: document.getElementById('facturePaiement').value,
+    statut: document.getElementById('factureStatut').value,
+    notes: document.getElementById('factureNotes').value,
+    medecin: user.username,
     createdAt: new Date().toISOString()
   };
   
-  // Afficher l'aperçu
-  displayPreview(currentOrdonnance);
+  // Sauvegarder dans localStorage
+  let factures = JSON.parse(localStorage.getItem('factures')) || [];
   
-  // Activer les boutons
-  document.getElementById('sendBtn').disabled = false;
-  document.getElementById('pdfBtn').disabled = false;
-}
-
-function generateOrdonnanceCode() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = (now.getMonth() + 1).toString().padStart(2, '0');
-  const day = now.getDate().toString().padStart(2, '0');
-  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-  return `ORD-${year}${month}${day}-${random}`;
-}
-
-function displayPreview(ordonnance) {
-  const previewDiv = document.getElementById('preview');
-  
-  const previewHTML = `
-    <div class="ordonnance-beautiful">
-      <div class="ordonnance-header">
-        <div class="ordonnance-title">ORDONNANCE MÉDICALE</div>
-        <div class="ordonnance-subtitle">Document sécurisé - OrdoPass</div>
-      </div>
-      
-      <div class="ordonnance-content">
-        <div class="ordonnance-section">
-          <div class="ordonnance-section-title">INFORMATIONS MÉDECIN</div>
-          <p><strong>Médecin :</strong> ${ordonnance.medecin}</p>
-          <p><strong>Date :</strong> ${ordonnance.date}</p>
-          <p><strong>Code ordonnance :</strong> ${ordonnance.code}</p>
-        </div>
-        
-        <div class="ordonnance-section">
-          <div class="ordonnance-section-title">INFORMATIONS PATIENT</div>
-          <p><strong>Patient :</strong> ${ordonnance.patient}</p>
-          <p><strong>Âge :</strong> ${ordonnance.age} ans</p>
-          <p><strong>Sexe :</strong> ${ordonnance.genre}</p>
-          <p><strong>Adresse :</strong> ${ordonnance.adresse}</p>
-          <p><strong>Poids :</strong> ${ordonnance.poids}</p>
-        </div>
-      </div>
-      
-      <div class="ordonnance-section">
-        <div class="ordonnance-section-title">PRESCRIPTION MÉDICALE</div>
-        <div class="ordonnance-medicaments">
-          ${ordonnance.medicaments.split('\n').map(line => `
-            <div class="medicament-item">
-              <div class="medicament-name">${line}</div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      
-      <div class="ordonnance-footer">
-        <div class="signature-area">
-          <div class="signature-image"></div>
-          <div class="doctor-stamp">
-            <div>${ordonnance.medecin}</div>
-            <div>Médecin traitant</div>
-          </div>
-        </div>
-        
-        <div class="qr-code-area" id="qrCodeContainer">
-          <!-- QR Code sera généré ici -->
-        </div>
-      </div>
-      
-      <div class="ordonnance-security">
-        <i class="fa-solid fa-shield-alt"></i> 
-        Cette ordonnance est sécurisée par OrdoPass. Code de vérification : ${ordonnance.code}
-      </div>
-    </div>
-  `;
-  
-  previewDiv.innerHTML = previewHTML;
-  previewDiv.style.display = 'block';
-  
-  // Générer le QR Code
-  const qrContainer = document.getElementById('qrCodeContainer');
-  qrContainer.innerHTML = '';
-  new QRCode(qrContainer, {
-    text: JSON.stringify({
-      code: ordonnance.code,
-      medecin: ordonnance.medecin,
-      patient: ordonnance.patient,
-      date: ordonnance.date
-    }),
-    width: 100,
-    height: 100
-  });
-}
-
-/* ===== Sauvegarder l'ordonnance ===== */
-function saveOrdonnance() {
-  if (!currentOrdonnance) {
-    showNotification('Veuillez d\'abord générer un aperçu', 'error');
-    return;
-  }
-  
-  // Ajouter un ID unique
-  currentOrdonnance.id = Date.now();
-  currentOrdonnanceId = currentOrdonnance.id;
-  
-  // Récupérer les ordonnances existantes
-  let ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
-  
-  // Vérifier si l'ordonnance existe déjà
-  const existingIndex = ordonnances.findIndex(o => o.id === currentOrdonnance.id);
-  if (existingIndex !== -1) {
-    ordonnances[existingIndex] = currentOrdonnance;
+  if (currentFactureId) {
+    // Mise à jour
+    const index = factures.findIndex(f => f.id == currentFactureId);
+    if (index !== -1) {
+      factures[index] = facture;
+    }
   } else {
-    ordonnances.push(currentOrdonnance);
+    // Nouvelle facture
+    factures.push(facture);
   }
   
-  // Sauvegarder dans le localStorage
-  localStorage.setItem('ordonnances', JSON.stringify(ordonnances));
+  localStorage.setItem('factures', JSON.stringify(factures));
   
-  // Mettre à jour la liste
-  loadOrdonnances();
+  // Marquer comme facture récente
+  localStorage.setItem('recentFacture', JSON.stringify(facture));
   
-  showNotification('Ordonnance sauvegardée avec succès !', 'success');
-}
-
-/* ===== Charger les ordonnances ===== */
-function loadOrdonnances() {
-  const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
-  const container = document.getElementById('ordonnanceList');
+  showNotification(
+    currentFactureId ? 'Facture mise à jour avec succès !' : 'Facture créée avec succès !',
+    'success'
+  );
   
-  if (ordonnances.length === 0) {
-    container.innerHTML = `
-      <div style="text-align: center; padding: 40px;">
-        <i class="fa-solid fa-file-prescription" style="font-size: 48px; color: #ccc;"></i>
-        <h3>Aucune ordonnance</h3>
-        <p>Commencez par créer une ordonnance</p>
-      </div>
-    `;
-    return;
-  }
-  
-  container.innerHTML = ordonnances.map(ord => `
-    <div class="ordonnance-item">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-        <div>
-          <h4>${ord.patient}</h4>
-          <p><strong>Médecin :</strong> ${ord.medecin}</p>
-          <p><strong>Date :</strong> ${ord.date}</p>
-          <p><strong>Code :</strong> ${ord.code}</p>
-        </div>
-        <div>
-          <span class="status-badge status-${ord.statut || 'active'}">
-            ${getStatusText(ord.statut || 'active')}
-          </span>
-        </div>
-      </div>
-      <div class="buttons" style="margin-top: 10px;">
-        <button class="btn-outline" onclick="viewOrdonnance(${ord.id})">
-          <i class="fa-solid fa-eye"></i> Voir
-        </button>
-        <button class="btn-outline" onclick="editOrdonnance(${ord.id})">
-          <i class="fa-solid fa-edit"></i> Modifier
-        </button>
-        <button class="btn-outline" onclick="deleteOrdonnance(${ord.id})">
-          <i class="fa-solid fa-trash"></i> Supprimer
-        </button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function getStatusText(status) {
-  const statusMap = {
-    'active': 'Active',
-    'delivree': 'Délivrée',
-    'annulee': 'Annulée',
-    'envoyee': 'Envoyée',
-    'en_cours': 'En cours',
-    'pret': 'Prête',
-    'recuperee': 'Récupérée'
-  };
-  return statusMap[status] || status;
-}
-
-/* ===== Gestion des pharmacies ===== */
-function loadPharmacies() {
-  const pharmacies = JSON.parse(localStorage.getItem('pharmacies')) || [];
-  
-  // Si pas de pharmacies, en créer quelques-unes par défaut
-  if (pharmacies.length === 0) {
-    const defaultPharmacies = [
-      {
-        id: '1',
-        nom: 'Pharmacie du Centre',
-        adresse: '123 Avenue de la République, Dakar',
-        telephone: '+221 33 821 45 67',
-        online: true
-      },
-      {
-        id: '2',
-        nom: 'Pharmacie de la Paix',
-        adresse: '456 Rue des Martyrs, Dakar',
-        telephone: '+221 33 822 34 56',
-        online: true
-      }
-    ];
-    localStorage.setItem('pharmacies', JSON.stringify(defaultPharmacies));
-  }
-}
-
-function openPharmacieModal() {
-  if (!currentOrdonnance) {
-    showNotification('Veuillez d\'abord sauvegarder l\'ordonnance', 'error');
-    return;
-  }
-  
-  const pharmacies = JSON.parse(localStorage.getItem('pharmacies')) || [];
-  const listContainer = document.getElementById('pharmacieList');
-  
-  if (pharmacies.length === 0) {
-    listContainer.innerHTML = '<p>Aucune pharmacie disponible</p>';
-    return;
-  }
-  
-  listContainer.innerHTML = pharmacies.map(pharma => `
-    <div class="pharmacie-item" data-id="${pharma.id}" onclick="selectPharmacie('${pharma.id}')">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <h4 style="margin: 0;">${pharma.nom}</h4>
-          <p style="margin: 5px 0; color: #666;">${pharma.adresse}</p>
-          <p style="margin: 0; color: #666;">${pharma.telephone}</p>
-        </div>
-        <div>
-          <span class="online-indicator ${pharma.online ? 'online' : 'offline'}"></span>
-          <span>${pharma.online ? 'En ligne' : 'Hors ligne'}</span>
-        </div>
-      </div>
-    </div>
-  `).join('');
-  
-  selectedPharmacie = null;
-  document.getElementById('confirmSendBtn').disabled = true;
-  document.getElementById('pharmacieModal').style.display = 'block';
-}
-
-function selectPharmacie(pharmacieId) {
-  // Retirer la sélection de tous les items
-  document.querySelectorAll('.pharmacie-item').forEach(item => {
-    item.classList.remove('selected');
-  });
-  
-  // Sélectionner l'item cliqué
-  const selectedItem = document.querySelector(`.pharmacie-item[data-id="${pharmacieId}"]`);
-  if (selectedItem) {
-    selectedItem.classList.add('selected');
-    selectedPharmacie = pharmacieId;
-    document.getElementById('confirmSendBtn').disabled = false;
-  }
-}
-
-function closeModal() {
-  document.getElementById('pharmacieModal').style.display = 'none';
-  selectedPharmacie = null;
-}
-
-function sendToPharmacie() {
-  if (!selectedPharmacie || !currentOrdonnance) {
-    showNotification('Veuillez sélectionner une pharmacie', 'error');
-    return;
-  }
-  
-  // Récupérer la pharmacie
-  const pharmacies = JSON.parse(localStorage.getItem('pharmacies')) || [];
-  const pharmacie = pharmacies.find(p => p.id === selectedPharmacie);
-  
-  if (!pharmacie) {
-    showNotification('Pharmacie non trouvée', 'error');
-    return;
-  }
-  
-  // Mettre à jour le statut de l'ordonnance
-  currentOrdonnance.statut = 'envoyee';
-  currentOrdonnance.pharmacieId = selectedPharmacie;
-  currentOrdonnance.pharmacieNom = pharmacie.nom;
-  currentOrdonnance.envoyeeLe = new Date().toISOString();
-  
-  // Sauvegarder les modifications
-  let ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
-  const index = ordonnances.findIndex(o => o.id === currentOrdonnanceId);
-  if (index !== -1) {
-    ordonnances[index] = currentOrdonnance;
-    localStorage.setItem('ordonnances', JSON.stringify(ordonnances));
-  }
-  
-  showNotification(`Ordonnance envoyée à ${pharmacie.nom}`, 'success');
   closeModal();
-  loadOrdonnances();
+  loadFactures();
+}
+
+function deleteFacture(factureId) {
+  if (!confirm('Voulez-vous vraiment supprimer cette facture ?')) {
+    return;
+  }
+  
+  let factures = JSON.parse(localStorage.getItem('factures')) || [];
+  factures = factures.filter(f => f.id != factureId);
+  localStorage.setItem('factures', JSON.stringify(factures));
+  
+  if (currentFactureId == factureId) {
+    currentFacture = null;
+    currentFactureId = null;
+  }
+  
+  showNotification('Facture supprimée', 'success');
+  loadFactures();
 }
 
 /* ===== Générer PDF ===== */
-function generatePDF() {
-  if (!currentOrdonnance) {
-    showNotification('Veuillez d\'abord générer un aperçu', 'error');
+function generateSinglePDF(factureId) {
+  const facture = allFactures.find(f => f.id == factureId);
+  if (!facture) {
+    showNotification('Facture non trouvée', 'error');
+    return;
+  }
+  
+  currentFacture = facture;
+  generateFacturePDF();
+}
+
+function generateFacturePDF() {
+  if (!currentFacture) {
+    showNotification('Veuillez d\'abord sélectionner ou créer une facture', 'error');
     return;
   }
   
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   
-  // Titre
+  // En-tête
   doc.setFontSize(20);
-  doc.text('ORDONNANCE MÉDICALE', 105, 20, { align: 'center' });
-  doc.setFontSize(12);
-  doc.text('Document sécurisé - OrdoPass', 105, 30, { align: 'center' });
+  doc.text('CLINIQUE ORDOPASS', 105, 20, { align: 'center' });
+  doc.setFontSize(16);
+  doc.text(currentFacture.type || 'FACTURE', 105, 30, { align: 'center' });
   
-  // Informations médecin
-  doc.setFontSize(14);
-  doc.text('Médecin : ' + currentOrdonnance.medecin, 20, 50);
-  doc.text('Date : ' + currentOrdonnance.date, 20, 60);
-  doc.text('Code : ' + currentOrdonnance.code, 20, 70);
+  // Informations de base
+  doc.setFontSize(12);
+  doc.text(`N° : ${currentFacture.numero || currentFacture.code}`, 20, 50);
+  doc.text(`Date : ${formatDate(currentFacture.date)}`, 120, 50);
+  doc.text(`Médecin : ${currentFacture.medecin || user.username}`, 20, 60);
   
   // Informations patient
-  doc.text('Patient : ' + currentOrdonnance.patient, 20, 90);
-  doc.text('Âge : ' + currentOrdonnance.age + ' ans', 20, 100);
-  doc.text('Sexe : ' + currentOrdonnance.genre, 20, 110);
-  doc.text('Adresse : ' + currentOrdonnance.adresse, 20, 120);
-  doc.text('Poids : ' + currentOrdonnance.poids, 20, 130);
-  
-  // Prescription
-  doc.setFontSize(16);
-  doc.text('PRESCRIPTION :', 20, 150);
+  doc.setFontSize(14);
+  doc.text('PATIENT :', 20, 80);
   doc.setFontSize(12);
+  doc.text(`Nom : ${currentFacture.patient}`, 20, 90);
+  if (currentFacture.telephone) {
+    doc.text(`Téléphone : ${currentFacture.telephone}`, 20, 100);
+  }
+  if (currentFacture.adresse) {
+    doc.text(`Adresse : ${currentFacture.adresse}`, 20, currentFacture.telephone ? 110 : 100);
+  }
   
-  let y = 160;
-  const lines = currentOrdonnance.medicaments.split('\n');
-  lines.forEach(line => {
-    if (line.trim()) {
-      doc.text('• ' + line, 25, y);
-      y += 10;
-    }
-  });
+  // Description et montant
+  let yPosition = currentFacture.telephone && currentFacture.adresse ? 130 : 120;
+  doc.setFontSize(14);
+  doc.text('DÉTAILS :', 20, yPosition);
+  doc.setFontSize(12);
+  yPosition += 10;
+  doc.text(`Description : ${currentFacture.description}`, 20, yPosition);
+  yPosition += 10;
+  doc.text(`Montant : ${formatMoney(currentFacture.montant)} FCFA`, 20, yPosition);
+  yPosition += 10;
+  doc.text(`Méthode de paiement : ${currentFacture.paiement || 'Non spécifié'}`, 20, yPosition);
+  yPosition += 10;
+  doc.text(`Statut : ${getStatusText(currentFacture.statut || 'impaye')}`, 20, yPosition);
+  
+  // Notes
+  if (currentFacture.notes) {
+    yPosition += 15;
+    doc.setFontSize(14);
+    doc.text('NOTES :', 20, yPosition);
+    doc.setFontSize(12);
+    yPosition += 10;
+    const splitNotes = doc.splitTextToSize(currentFacture.notes, 170);
+    doc.text(splitNotes, 20, yPosition);
+  }
+  
+  // Total
+  yPosition += 30;
+  doc.setFontSize(16);
+  doc.text(`TOTAL : ${formatMoney(currentFacture.montant)} FCFA`, 20, yPosition);
   
   // Signature
+  yPosition += 20;
   doc.setFontSize(12);
-  doc.text('Signature :', 20, y + 20);
-  doc.text(currentOrdonnance.medecin, 20, y + 30);
-  doc.text('Médecin traitant', 20, y + 35);
+  doc.text('Signature :', 20, yPosition);
+  doc.text(currentFacture.medecin || user.username, 20, yPosition + 10);
+  doc.text('Médecin traitant', 20, yPosition + 15);
   
   // Enregistrer le PDF
-  doc.save(`ordonnance-${currentOrdonnance.code}.pdf`);
+  doc.save(`facture-${currentFacture.numero || currentFacture.code}.pdf`);
   showNotification('PDF généré avec succès !', 'success');
 }
 
-/* ===== Recherche d'ordonnance ===== */
-function searchOrdonnance() {
-  const code = document.getElementById('searchCode').value.trim();
-  
-  if (!code) {
-    showNotification('Veuillez entrer un code', 'error');
+/* ===== Exporter vers Excel ===== */
+function exportToExcel() {
+  if (allFactures.length === 0) {
+    showNotification('Aucune facture à exporter', 'error');
     return;
   }
   
-  const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
-  const found = ordonnances.find(ord => ord.code === code);
+  // Créer le contenu CSV
+  let csvContent = "N° Facture;Patient;Date;Description;Montant (FCFA);Type;Statut;Paiement\n";
   
-  const resultDiv = document.getElementById('searchResult');
-  const contentDiv = document.getElementById('searchContent');
+  allFactures.forEach(facture => {
+    csvContent += `"${facture.numero || facture.code}";`
+                + `"${facture.patient}";`
+                + `"${formatDate(facture.date)}";`
+                + `"${facture.description}";`
+                + `"${facture.montant}";`
+                + `"${facture.type || 'FACTURE'}";`
+                + `"${getStatusText(facture.statut || 'impaye')}";`
+                + `"${facture.paiement || ''}"\n`;
+  });
   
-  if (!found) {
-    contentDiv.innerHTML = `
-      <div style="text-align: center; padding: 20px;">
-        <i class="fa-solid fa-search" style="font-size: 48px; color: #ccc;"></i>
-        <h4>Aucune ordonnance trouvée</h4>
-        <p>Vérifiez le code et réessayez</p>
-      </div>
-    `;
-  } else {
-    contentDiv.innerHTML = `
-      <div class="ordonnance-item">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-          <div>
-            <h4>${found.patient}</h4>
-            <p><strong>Médecin :</strong> ${found.medecin}</p>
-            <p><strong>Date :</strong> ${found.date}</p>
-            <p><strong>Code :</strong> ${found.code}</p>
-            <p><strong>Statut :</strong> ${getStatusText(found.statut || 'active')}</p>
-          </div>
-          <div>
-            <span class="status-badge status-${found.statut || 'active'}">
-              ${getStatusText(found.statut || 'active')}
-            </span>
-          </div>
-        </div>
-        <div class="buttons" style="margin-top: 10px;">
-          <button class="btn-outline" onclick="viewOrdonnance(${found.id})">
-            <i class="fa-solid fa-eye"></i> Voir détails
-          </button>
-          <button class="btn-outline" onclick="generatePDFFromSearch(${found.id})">
-            <i class="fa-solid fa-file-pdf"></i> PDF
-          </button>
-        </div>
-      </div>
-    `;
-  }
+  // Ajouter les totaux
+  const totalMontant = allFactures.reduce((sum, f) => sum + (parseFloat(f.montant) || 0), 0);
+  const montantPaye = allFactures.filter(f => f.statut === 'paye')
+    .reduce((sum, f) => sum + (parseFloat(f.montant) || 0), 0);
   
-  resultDiv.style.display = 'block';
-}
-
-function generatePDFFromSearch(ordonnanceId) {
-  const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
-  const ordonnance = ordonnances.find(o => o.id === ordonnanceId);
+  csvContent += `\n;;;;;;;\n`
+              + `"TOTAL GÉNÉRAL";;;;"${totalMontant}";;;\n`
+              + `"MONTANT PAYÉ";;;;"${montantPaye}";;;\n`
+              + `"RESTE À PAYER";;;;"${totalMontant - montantPaye}";;;`;
   
-  if (ordonnance) {
-    currentOrdonnance = ordonnance;
-    generatePDF();
-  }
-}
-
-/* ===== Voir/Modifier une ordonnance ===== */
-function viewOrdonnance(ordonnanceId) {
-  const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
-  const ordonnance = ordonnances.find(o => o.id === ordonnanceId);
+  // Créer et télécharger le fichier
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
   
-  if (ordonnance) {
-    // Activer l'onglet création
-    document.querySelector('.tab.active').classList.remove('active');
-    document.querySelector('.tab-content.active').classList.remove('active');
-    
-    document.querySelector('.tab[data-tab="create"]').classList.add('active');
-    document.getElementById('create-tab').classList.add('active');
-    
-    // Remplir le formulaire
-    document.getElementById('nomMedecin').value = ordonnance.medecin;
-    document.getElementById('nom').value = ordonnance.patient;
-    document.getElementById('age').value = ordonnance.age;
-    document.getElementById('genre').value = ordonnance.genre;
-    document.getElementById('adresse').value = ordonnance.adresse;
-    document.getElementById('poids').value = ordonnance.poids;
-    document.getElementById('medicaments').value = ordonnance.medicaments;
-    document.getElementById('dateOrd').value = ordonnance.date;
-    
-    // Générer l'aperçu
-    currentOrdonnance = ordonnance;
-    currentOrdonnanceId = ordonnanceId;
-    displayPreview(ordonnance);
-    
-    // Activer les boutons
-    document.getElementById('sendBtn').disabled = false;
-    document.getElementById('pdfBtn').disabled = false;
-    
-    // Afficher le mode consultation
-    document.getElementById('consultationModeIndicator').style.display = 'block';
-    document.getElementById('backButtonContainer').style.display = 'block';
-  }
-}
-
-function editOrdonnance(ordonnanceId) {
-  viewOrdonnance(ordonnanceId);
-  document.getElementById('consultationModeIndicator').style.display = 'none';
-  document.getElementById('backButtonContainer').style.display = 'none';
-}
-
-function deleteOrdonnance(ordonnanceId) {
-  if (confirm('Voulez-vous vraiment supprimer cette ordonnance ?')) {
-    let ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
-    ordonnances = ordonnances.filter(o => o.id !== ordonnanceId);
-    localStorage.setItem('ordonnances', JSON.stringify(ordonnances));
-    
-    if (currentOrdonnanceId === ordonnanceId) {
-      currentOrdonnance = null;
-      currentOrdonnanceId = null;
-    }
-    
-    loadOrdonnances();
-    showNotification('Ordonnance supprimée', 'success');
-  }
-}
-
-function exitConsultationMode() {
-  document.getElementById('consultationModeIndicator').style.display = 'none';
-  document.getElementById('backButtonContainer').style.display = 'none';
+  link.setAttribute("href", url);
+  link.setAttribute("download", `factures_ordopass_${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
   
-  // Réinitialiser le formulaire
-  document.getElementById('ordForm').reset();
-  if (user.username) {
-    document.getElementById('nomMedecin').value = user.username;
-  }
-  document.getElementById('dateOrd').value = new Date().toISOString().split('T')[0];
-  document.getElementById('preview').style.display = 'none';
-  currentOrdonnance = null;
-  currentOrdonnanceId = null;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  showNotification('Exportation réussie !', 'success');
 }
 
 /* ===== Vérifier si une facture vient d'être enregistrée ===== */
@@ -1320,12 +1131,7 @@ function checkRecentFacture() {
   if (recentFacture) {
     try {
       const facture = JSON.parse(recentFacture);
-      showNotification(`Facture ${facture.code} enregistrée avec succès !`, 'success');
-      
-      // Rediriger vers la page des factures
-      setTimeout(() => {
-        window.location.href = 'medecin_facturation.html';
-      }, 2000);
+      showNotification(`Facture ${facture.numero || facture.code} enregistrée avec succès !`, 'success');
       
       // Nettoyer
       localStorage.removeItem('recentFacture');
@@ -1349,5 +1155,5 @@ function showNotification(message, type) {
   }, 3000);
 }
 </script>
-</body> 
+</body>
 </html>
