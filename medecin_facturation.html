@@ -1,175 +1,552 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Facturation - OrdoPass</title>
+  <meta charset="UTF-8">
+  <title>Facturation - OrdoPass</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<style>
-.invoice-card{background:white;border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
-.tabs{display:flex;margin-bottom:15px}
-.tab{padding:10px 20px;border:1px solid #ccc;cursor:pointer}
-.tab.active{background:#2a5298;color:white}
-.tab-content{display:none}
-.tab-content.active{display:block}
-.document-card{border-left:4px solid #2a5298;padding:15px;background:white;margin-bottom:15px;border-radius:8px}
-.btn{padding:8px 15px;border:none;border-radius:5px;cursor:pointer}
-.btn-primary{background:#2a5298;color:white}
-.btn-outline{border:1px solid #2a5298;color:#2a5298;background:white}
-.badge{padding:4px 8px;border-radius:10px;font-size:12px}
-.badge-success{background:#d4edda;color:#155724}
-.badge-warning{background:#fff3cd;color:#856404}
-</style>
+  <style>
+    body { font-family: Arial, sans-serif; margin:0; background:#f5f5f5; }
+    .avatar { width:40px; height:40px; border-radius:50%; object-fit:cover; }
+    .btn-outline { border:1px solid #2a5298; color:#2a5298; padding:8px 15px; border-radius:5px; cursor:pointer; background:#fff; }
+    .btn-primary { background:#2a5298; color:#fff; padding:8px 15px; border:none; border-radius:5px; cursor:pointer; }
+    .btn-success { background:#28a745; color:#fff; padding:8px 15px; border:none; border-radius:5px; cursor:pointer; }
+    
+    .invoice-card { background:white; border-radius:12px; padding:25px; margin-bottom:20px; box-shadow:0 2px 10px rgba(0,0,0,.1); }
+    
+    .tabs { display:flex; margin-bottom:20px; border-bottom:1px solid #ddd; }
+    .tab { padding:12px 25px; border:none; background:none; cursor:pointer; font-size:16px; color:#666; }
+    .tab.active { color:#2a5298; border-bottom:3px solid #2a5298; font-weight:bold; }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+    
+    .document-card { 
+      border-left:4px solid #2a5298; 
+      padding:20px; 
+      background:white; 
+      margin-bottom:15px; 
+      border-radius:8px;
+      box-shadow:0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .badge { padding:4px 12px; border-radius:20px; font-size:12px; font-weight:bold; }
+    .badge-success { background:#d4edda; color:#155724; }
+    .badge-warning { background:#fff3cd; color:#856404; }
+    
+    /* Styles pour le formulaire */
+    .form-group { margin-bottom:20px; }
+    .form-label { display:block; margin-bottom:8px; font-weight:bold; color:#333; }
+    .form-control { 
+      width:100%; 
+      padding:12px; 
+      border:1px solid #ddd; 
+      border-radius:5px; 
+      box-sizing:border-box;
+      font-size:14px;
+    }
+    
+    /* Table des factures */
+    .factures-table {
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+    
+    .factures-table th {
+      padding:15px;
+      text-align:left;
+      border-bottom:2px solid #dee2e6;
+      background:#f8f9fa;
+      font-weight:600;
+      color:#495057;
+    }
+    
+    .factures-table td {
+      padding:15px;
+      vertical-align:middle;
+      border-bottom:1px solid #eee;
+    }
+    
+    .col-actions { text-align:center; width:150px; }
+    .col-status { width:100px; text-align:center; }
+    .col-montant { width:120px; }
+    .col-date { width:120px; }
+  </style>
 </head>
 
 <body class="dashboard-page">
 
-<!-- SIDEBAR -->
+<!-- SIDEBAR - Même menu que consultation -->
 <aside class="sidebar">
-<div class="logo"><i class="fa-solid fa-notes-medical"></i> ORDOPASS</div>
-<nav>
-<a href="medecin_dashboard.html">Consultations</a>
-<a href="patients.html">Patients</a>
-<a href="teleconsultation.html">Téléconsultation</a>
-<a href="pharmacies.html">Pharmacies</a>
-<a href="medecin_facturation.html" class="active">Facturation</a>
-<a href="#" id="logout">Déconnexion</a>
-</nav>
+  <div class="logo"><i class="fa-solid fa-notes-medical"></i> ORDOPASS</div>
+  <nav>
+    <a href="medecin_dashboard.html"><i class="fa-solid fa-file-medical"></i> Consultations</a>
+    <a href="patients.html"><i class="fa-solid fa-users"></i> Patients</a>
+    <a href="teleconsultation.html"><i class="fa-solid fa-video"></i> Téléconsultation</a>
+    <a href="pharmacies.html"><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies</a>
+    <a href="medecin_messagerie.html"><i class="fa-solid fa-comment-medical"></i> Messagerie</a>
+    <a href="parametres.html"><i class="fa-solid fa-gear"></i> Paramètres</a>
+    <a href="medecin_facturation.html" class="active"><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</a>
+    <a href="medecin_rendezvous.html"><i class="fa-solid fa-calendar-check"></i> Rendez-vous</a>
+    <a href="medecin_ordonnance.html"><i class="fa-solid fa-prescription"></i> Ordonnances sécurisées</a>
+    <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+  </nav>
 </aside>
 
 <main class="main-area">
+  <header class="topbar">
+    <h1><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</h1>
+    <div class="user-info">
+      <img src="https://i.pravatar.cc/40" class="avatar" alt="profil">
+      <span id="usernameDisplay"></span>
+    </div>
+  </header>
 
-<header class="topbar">
-<h1>Facturation</h1>
-<span id="usernameDisplay"></span>
-</header>
+  <section class="content">
+    <div class="tabs">
+      <button class="tab active" data-tab="new">Nouvelle facture</button>
+      <button class="tab" data-tab="list">Factures enregistrées</button>
+      <button class="tab" data-tab="stats">Statistiques</button>
+    </div>
 
-<section class="content">
+    <!-- NOUVELLE FACTURE -->
+    <div class="tab-content active" id="new">
+      <div class="invoice-card">
+        <h3 style="margin-top:0; margin-bottom:25px; color:#2a5298;"><i class="fa-solid fa-plus-circle"></i> Créer une nouvelle facture</h3>
+        
+        <form id="factureForm">
+          <div class="form-group">
+            <label class="form-label">Patient *</label>
+            <input type="text" class="form-control" id="patient" placeholder="Nom du patient" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Description *</label>
+            <input type="text" class="form-control" id="description" placeholder="Ex: Consultation médicale, Analyses..." required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Montant (FCFA) *</label>
+            <input type="number" class="form-control" id="montant" placeholder="Ex: 5000" min="0" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Méthode de paiement</label>
+            <select class="form-control" id="paiement">
+              <option value="Espèces">Espèces</option>
+              <option value="Carte bancaire">Carte bancaire</option>
+              <option value="Wave">Wave</option>
+              <option value="Orange Money">Orange Money</option>
+              <option value="Free Money">Free Money</option>
+              <option value="Virement bancaire">Virement bancaire</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Statut du paiement</label>
+            <select class="form-control" id="facturePaye">
+              <option value="Non">Non payé</option>
+              <option value="Oui">Payé</option>
+              <option value="Partiel">Partiellement payé</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Date de la facture</label>
+            <input type="date" class="form-control" id="dateFacture">
+          </div>
+          
+          <div style="margin-top:30px; display:flex; gap:15px;">
+            <button class="btn-primary" type="submit" style="flex:1;">
+              <i class="fa-solid fa-save"></i> Enregistrer la facture
+            </button>
+            <button class="btn-outline" type="button" onclick="document.getElementById('factureForm').reset()" style="flex:1;">
+              <i class="fa-solid fa-rotate-left"></i> Réinitialiser
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
 
-<div class="tabs">
-<div class="tab active" data-tab="new">Nouvelle facture</div>
-<div class="tab" data-tab="list">Factures enregistrées</div>
-</div>
+    <!-- LISTE FACTURES -->
+    <div class="tab-content" id="list">
+      <div class="invoice-card">
+        <h3 style="margin-top:0; margin-bottom:25px; color:#2a5298;"><i class="fa-solid fa-list"></i> Factures enregistrées</h3>
+        
+        <!-- Filtres -->
+        <div style="display:flex; gap:15px; margin-bottom:20px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:200px;">
+            <label style="display:block; margin-bottom:5px; font-weight:bold;">Filtrer par statut:</label>
+            <select class="form-control" id="filterStatus" onchange="loadFactures()">
+              <option value="all">Toutes les factures</option>
+              <option value="Oui">Payées</option>
+              <option value="Non">Non payées</option>
+              <option value="Partiel">Partiellement payées</option>
+            </select>
+          </div>
+          
+          <div style="flex:1; min-width:200px;">
+            <label style="display:block; margin-bottom:5px; font-weight:bold;">Rechercher patient:</label>
+            <input type="text" class="form-control" id="searchPatient" placeholder="Nom du patient..." onkeyup="loadFactures()">
+          </div>
+        </div>
+        
+        <!-- Statistiques rapides -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:25px;">
+          <div style="background:#e8f4fd; padding:20px; border-radius:8px; text-align:center;">
+            <h3 style="margin:0; color:#2a5298;" id="totalFactures">0</h3>
+            <p style="margin:5px 0 0 0; color:#666;">Total factures</p>
+          </div>
+          <div style="background:#d4edda; padding:20px; border-radius:8px; text-align:center;">
+            <h3 style="margin:0; color:#155724;" id="facturesPayees">0</h3>
+            <p style="margin:5px 0 0 0; color:#666;">Factures payées</p>
+          </div>
+          <div style="background:#fff3cd; padding:20px; border-radius:8px; text-align:center;">
+            <h3 style="margin:0; color:#856404;" id="facturesNonPayees">0</h3>
+            <p style="margin:5px 0 0 0; color:#666;">Factures non payées</p>
+          </div>
+          <div style="background:#f8d7da; padding:20px; border-radius:8px; text-align:center;">
+            <h3 style="margin:0; color:#721c24;" id="montantTotal">0</h3>
+            <p style="margin:5px 0 0 0; color:#666;">Montant total (FCFA)</p>
+          </div>
+        </div>
+        
+        <div id="facturesContainer">
+          <table class="factures-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Patient</th>
+                <th>Description</th>
+                <th class="col-montant">Montant</th>
+                <th>Paiement</th>
+                <th class="col-status">Statut</th>
+                <th class="col-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="facturesList">
+              <tr>
+                <td colspan="7" style="text-align:center; padding:40px;">
+                  <i class="fa-solid fa-spinner fa-spin"></i> Chargement des factures...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-<!-- NOUVELLE FACTURE -->
-<div class="tab-content active" id="new">
-
-<div class="invoice-card">
-<form id="factureForm">
-
-<input id="patient" placeholder="Nom du patient" required>
-<input id="description" placeholder="Description" required>
-<input id="montant" type="number" placeholder="Montant" required>
-
-<select id="paiement">
-<option>Espèces</option>
-<option>Wave</option>
-<option>Orange Money</option>
-</select>
-
-<select id="facturePaye">
-<option value="Oui">Oui</option>
-<option value="Non">Non</option>
-</select>
-
-<button class="btn btn-primary" type="submit">Enregistrer facture</button>
-
-</form>
-</div>
-
-</div>
-
-<!-- LISTE FACTURES -->
-<div class="tab-content" id="list">
-<div id="facturesList"></div>
-</div>
-
-</section>
+    <!-- STATISTIQUES -->
+    <div class="tab-content" id="stats">
+      <div class="invoice-card">
+        <h3 style="margin-top:0; margin-bottom:25px; color:#2a5298;"><i class="fa-solid fa-chart-bar"></i> Statistiques de facturation</h3>
+        
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:20px;">
+          <div style="background:white; padding:25px; border-radius:10px; border:1px solid #eee;">
+            <h4 style="margin-top:0; color:#2a5298;">Répartition par statut</h4>
+            <canvas id="statusChart" width="400" height="200"></canvas>
+          </div>
+          
+          <div style="background:white; padding:25px; border-radius:10px; border:1px solid #eee;">
+            <h4 style="margin-top:0; color:#2a5298;">Méthodes de paiement</h4>
+            <canvas id="paymentChart" width="400" height="200"></canvas>
+          </div>
+        </div>
+        
+        <div style="margin-top:30px; background:white; padding:25px; border-radius:10px; border:1px solid #eee;">
+          <h4 style="margin-top:0; color:#2a5298;">Détails financiers</h4>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:15px;">
+            <div>
+              <p style="margin:0; color:#666;">Total des revenus:</p>
+              <h3 style="margin:5px 0; color:#28a745;" id="totalRevenus">0 FCFA</h3>
+            </div>
+            <div>
+              <p style="margin:0; color:#666;">En attente de paiement:</p>
+              <h3 style="margin:5px 0; color:#dc3545;" id="montantAttente">0 FCFA</h3>
+            </div>
+            <div>
+              <p style="margin:0; color:#666;">Moyenne par facture:</p>
+              <h3 style="margin:5px 0; color:#2a5298;" id="moyenneFacture">0 FCFA</h3>
+            </div>
+            <div>
+              <p style="margin:0; color:#666;">Facture la plus élevée:</p>
+              <h3 style="margin:5px 0; color:#ffc107;" id="factureMax">0 FCFA</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </main>
 
 <script>
-const { jsPDF } = window.jspdf;
-
-/* ✅ CORRECTION ICI */
+// ================= SESSION =================
 const user = JSON.parse(localStorage.getItem("user"));
 
-if(!user || user.role !== "medecin"){
+if (!user || user.role !== "medecin") {
   alert("⚠️ Accès refusé");
-  window.location.href="index.html";
-  return;
+  window.location.href = "medecin_login.html";
 }
 
-document.getElementById("usernameDisplay").textContent = user.username;
+document.getElementById("usernameDisplay").textContent = user.username || "Médecin";
 
-// Tabs
-document.querySelectorAll(".tab").forEach(tab=>{
-  tab.onclick=()=>{
-    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-    document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
-    tab.classList.add("active");
-    document.getElementById(tab.dataset.tab).classList.add("active");
-    if(tab.dataset.tab==="list") loadFactures();
-  }
+// ================= VARIABLES =================
+let factures = JSON.parse(localStorage.getItem("factures")) || [];
+const { jsPDF } = window.jspdf;
+
+// ================= INITIALISATION =================
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialiser la date d'aujourd'hui
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('dateFacture').value = today;
+  
+  // Charger les factures
+  loadFactures();
+  loadStats();
+  
+  // Gestion des onglets
+  document.querySelectorAll(".tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+      
+      tab.classList.add("active");
+      document.getElementById(tab.dataset.tab).classList.add("active");
+      
+      if (tab.dataset.tab === "list") {
+        loadFactures();
+      } else if (tab.dataset.tab === "stats") {
+        loadStats();
+      }
+    });
+  });
 });
 
-// Logout
-document.getElementById("logout").onclick=()=>{
-  localStorage.clear();
-  location.href="index.html";
-}
-
-// Save facture
-document.getElementById("factureForm").addEventListener("submit",e=>{
+// ================= FORMULAIRE FACTURE =================
+document.getElementById("factureForm").addEventListener("submit", function(e) {
   e.preventDefault();
-
-  const facture={
-    id:Date.now(),
-    patient:patient.value,
-    description:description.value,
-    montant:montant.value,
-    paiement:paiement.value,
-    paye:facturePaye.value,
-    date:new Date().toLocaleDateString()
+  
+  const facture = {
+    id: Date.now(),
+    patient: document.getElementById("patient").value,
+    description: document.getElementById("description").value,
+    montant: parseFloat(document.getElementById("montant").value),
+    paiement: document.getElementById("paiement").value,
+    paye: document.getElementById("facturePaye").value,
+    date: document.getElementById("dateFacture").value || new Date().toISOString().split('T')[0],
+    medecin: user.username,
+    createdAt: new Date().toISOString()
   };
-
-  let factures=JSON.parse(localStorage.getItem("factures"))||[];
+  
   factures.push(facture);
-  localStorage.setItem("factures",JSON.stringify(factures));
-
-  alert("✅ Facture enregistrée");
+  localStorage.setItem("factures", JSON.stringify(factures));
+  
+  // Réinitialiser le formulaire
   document.getElementById("factureForm").reset();
+  document.getElementById("dateFacture").value = new Date().toISOString().split('T')[0];
+  
+  // Afficher notification
+  showNotification("✅ Facture enregistrée avec succès !", "success");
+  
+  // Recharger les listes
+  loadFactures();
+  loadStats();
 });
 
-// Load factures
-function loadFactures(){
-  const list=document.getElementById("facturesList");
-  let factures=JSON.parse(localStorage.getItem("factures"))||[];
+// ================= CHARGER FACTURES =================
+function loadFactures() {
+  let filteredFactures = [...factures];
+  const filterStatus = document.getElementById("filterStatus").value;
+  const searchPatient = document.getElementById("searchPatient").value.toLowerCase();
+  
+  // Filtrer par statut
+  if (filterStatus !== "all") {
+    filteredFactures = filteredFactures.filter(f => f.paye === filterStatus);
+  }
+  
+  // Filtrer par recherche patient
+  if (searchPatient) {
+    filteredFactures = filteredFactures.filter(f => 
+      f.patient.toLowerCase().includes(searchPatient)
+    );
+  }
+  
+  // Trier par date (plus récent en premier)
+  filteredFactures.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  // Mettre à jour l'affichage
+  const tbody = document.getElementById("facturesList");
+  tbody.innerHTML = "";
+  
+  if (filteredFactures.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align:center; padding:40px;">
+          <i class="fa-solid fa-file-invoice" style="font-size:40px; color:#ddd; margin-bottom:10px; display:block;"></i>
+          <p style="color:#999;">Aucune facture trouvée</p>
+        </td>
+      </tr>
+    `;
+  } else {
+    filteredFactures.forEach(facture => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${facture.date}</td>
+          <td><strong>${facture.patient}</strong></td>
+          <td>${facture.description}</td>
+          <td><strong>${formatMontant(facture.montant)} FCFA</strong></td>
+          <td>${facture.paiement}</td>
+          <td>
+            <span class="badge ${facture.paye === 'Oui' ? 'badge-success' : facture.paye === 'Partiel' ? 'badge-warning' : ''}">
+              ${facture.paye === 'Oui' ? 'Payé' : facture.paye === 'Partiel' ? 'Partiel' : 'Non payé'}
+            </span>
+          </td>
+          <td style="text-align:center;">
+            <button onclick="viewFacture(${facture.id})" class="action-btn view-btn" title="Voir">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+            <button onclick="editFacture(${facture.id})" class="action-btn edit-btn" title="Modifier">
+              <i class="fa-solid fa-pen"></i>
+            </button>
+            <button onclick="deleteFacture(${facture.id})" class="action-btn delete-btn" title="Supprimer">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+            <button onclick="generatePDF(${facture.id})" class="action-btn" title="PDF" style="color:#2a5298; border-color:#2a5298;">
+              <i class="fa-solid fa-file-pdf"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+  }
+  
+  // Mettre à jour les statistiques
+  updateStats(filteredFactures);
+}
 
-  if(factures.length===0){
-    list.innerHTML="<p>Aucune facture</p>";
+// ================= MISE À JOUR STATISTIQUES =================
+function updateStats(filteredFactures) {
+  const total = filteredFactures.length;
+  const payees = filteredFactures.filter(f => f.paye === 'Oui').length;
+  const nonPayees = filteredFactures.filter(f => f.paye === 'Non').length;
+  const montantTotal = filteredFactures.reduce((sum, f) => sum + f.montant, 0);
+  
+  document.getElementById("totalFactures").textContent = total;
+  document.getElementById("facturesPayees").textContent = payees;
+  document.getElementById("facturesNonPayees").textContent = nonPayees;
+  document.getElementById("montantTotal").textContent = formatMontant(montantTotal);
+}
+
+// ================= STATISTIQUES DÉTAILLÉES =================
+function loadStats() {
+  if (factures.length === 0) {
+    document.getElementById("totalRevenus").textContent = "0 FCFA";
+    document.getElementById("montantAttente").textContent = "0 FCFA";
+    document.getElementById("moyenneFacture").textContent = "0 FCFA";
+    document.getElementById("factureMax").textContent = "0 FCFA";
     return;
   }
-
-  list.innerHTML="";
-
-  factures.forEach(f=>{
-    list.innerHTML+=`
-      <div class="document-card">
-        <b>${f.patient}</b><br>
-        ${f.description}<br>
-        Montant: ${f.montant} FCFA<br>
-        Paiement: ${f.paiement}<br>
-        Statut: <span class="badge ${f.paye==="Oui"?"badge-success":"badge-warning"}">${f.paye}</span><br>
-        Date: ${f.date}
-      </div>
-    `;
-  });
+  
+  const totalRevenus = factures.filter(f => f.paye === 'Oui').reduce((sum, f) => sum + f.montant, 0);
+  const montantAttente = factures.filter(f => f.paye !== 'Oui').reduce((sum, f) => sum + f.montant, 0);
+  const moyenneFacture = factures.reduce((sum, f) => sum + f.montant, 0) / factures.length;
+  const factureMax = Math.max(...factures.map(f => f.montant));
+  
+  document.getElementById("totalRevenus").textContent = formatMontant(totalRevenus) + " FCFA";
+  document.getElementById("montantAttente").textContent = formatMontant(montantAttente) + " FCFA";
+  document.getElementById("moyenneFacture").textContent = formatMontant(moyenneFacture) + " FCFA";
+  document.getElementById("factureMax").textContent = formatMontant(factureMax) + " FCFA";
 }
+
+// ================= ACTIONS FACTURES =================
+function viewFacture(id) {
+  const facture = factures.find(f => f.id === id);
+  if (facture) {
+    alert(`Détails de la facture:\n\nPatient: ${facture.patient}\nDescription: ${facture.description}\nMontant: ${facture.montant} FCFA\nPaiement: ${facture.paiement}\nStatut: ${facture.paye}\nDate: ${facture.date}`);
+  }
+}
+
+function editFacture(id) {
+  const facture = factures.find(f => f.id === id);
+  if (facture) {
+    // Pré-remplir le formulaire
+    document.getElementById("patient").value = facture.patient;
+    document.getElementById("description").value = facture.description;
+    document.getElementById("montant").value = facture.montant;
+    document.getElementById("paiement").value = facture.paiement;
+    document.getElementById("facturePaye").value = facture.paye;
+    document.getElementById("dateFacture").value = facture.date;
+    
+    // Supprimer la facture pour la remplacer
+    factures = factures.filter(f => f.id !== id);
+    localStorage.setItem("factures", JSON.stringify(factures));
+    
+    showNotification("Modifiez la facture et cliquez sur Enregistrer", "info");
+  }
+}
+
+function deleteFacture(id) {
+  if (confirm("Êtes-vous sûr de vouloir supprimer cette facture ?")) {
+    factures = factures.filter(f => f.id !== id);
+    localStorage.setItem("factures", JSON.stringify(factures));
+    loadFactures();
+    loadStats();
+    showNotification("Facture supprimée avec succès", "success");
+  }
+}
+
+function generatePDF(id) {
+  const facture = factures.find(f => f.id === id);
+  if (!facture) return;
+  
+  const doc = new jsPDF();
+  
+  // En-tête
+  doc.setFontSize(20);
+  doc.text("ORDOPASS", 105, 20, { align: 'center' });
+  doc.setFontSize(16);
+  doc.text("FACTURE", 105, 30, { align: 'center' });
+  
+  // Informations
+  doc.setFontSize(12);
+  doc.text(`Date: ${facture.date}`, 20, 50);
+  doc.text(`Facture N°: ORD-${facture.id}`, 120, 50);
+  doc.text(`Médecin: ${user.username}`, 20, 60);
+  doc.text(`Patient: ${facture.patient}`, 20, 70);
+  doc.text(`Description: ${facture.description}`, 20, 80);
+  doc.text(`Montant: ${formatMontant(facture.montant)} FCFA`, 20, 90);
+  doc.text(`Méthode de paiement: ${facture.paiement}`, 20, 100);
+  doc.text(`Statut: ${facture.paye === 'Oui' ? 'Payé' : 'Non payé'}`, 20, 110);
+  
+  // Ligne de signature
+  doc.text("Signature du médecin:", 20, 150);
+  doc.text("Signature du patient:", 120, 150);
+  
+  doc.save(`facture-ORD-${facture.id}.pdf`);
+  showNotification("PDF généré avec succès", "success");
+}
+
+// ================= UTILITAIRES =================
+function formatMontant(montant) {
+  return montant.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
+function showNotification(message, type) {
+  // Créer une notification simple
+  alert(message);
+}
+
+// ================= DÉCONNEXION =================
+document.getElementById("logout").addEventListener("click", function(e) {
+  e.preventDefault();
+  if (confirm("Voulez-vous vraiment vous déconnecter ?")) {
+    localStorage.removeItem("user");
+    window.location.href = "index.html";
+  }
+});
 </script>
 
 </body>
