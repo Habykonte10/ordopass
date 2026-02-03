@@ -617,118 +617,49 @@
   <script>
 document.addEventListener("DOMContentLoaded", () => {
 
-  // ================= AUTH =================
   const user = JSON.parse(localStorage.getItem("user"));
 
-  if (!user) {
-    alert("⚠️ Accès refusé : vous devez vous connecter");
-    window.location.href = "medecin_login.html";
-    return;
-  }
-
-  if (user.role !== "medecin") {
-    alert("⚠️ Accès refusé : rôle invalide");
+  if (!user || user.role !== "medecin") {
+    alert("Veuillez vous connecter");
     window.location.href = "medecin_login.html";
     return;
   }
 
   document.getElementById("usernameDisplay").textContent = user.username;
 
-  // ================= VARIABLES =================
   let allPatients = [];
   let filteredPatients = [];
   let currentPage = 1;
   const patientsPerPage = 10;
-  let editId = null;
 
-  // ================= MESSAGE =================
-  function showMessage(message, type = 'info') {
-    const container = document.getElementById('messageContainer');
-    container.innerHTML = `
-      <div class="message ${type}">
-        ${message}
-      </div>
-    `;
-    setTimeout(() => { container.innerHTML = ''; }, 5000);
-  }
-
-  // ================= LOAD PATIENTS =================
   function loadPatients() {
-    try {
-      const patients = JSON.parse(localStorage.getItem("patients")) || [
-        {id:1, name:"Diop Awa", age:32, phone:"+221771234567", address:"Dakar", image:"https://i.pravatar.cc/40?u=awa", added:"13/07/2025"},
-        {id:2, name:"Konte Habiba", age:30, phone:"+221772345678", address:"Dakar", image:"https://i.pravatar.cc/40?u=habiba", added:"30/10/2025"},
-        {id:3, name:"Ba Aicha", age:30, phone:"+221773456789", address:"Non renseigné", image:"https://i.pravatar.cc/40?u=aicha", added:"29/10/2025"}
-      ];
+    const patients = JSON.parse(localStorage.getItem("patients")) || [
+      {id:1, name:"Diop Awa", age:32, phone:"+221771234567", address:"Dakar", image:"https://i.pravatar.cc/40?u=awa", added:"13/07/2025"},
+      {id:2, name:"Konte Habiba", age:30, phone:"+221772345678", address:"Dakar", image:"https://i.pravatar.cc/40?u=habiba", added:"30/10/2025"},
+      {id:3, name:"Ba Aicha", age:28, phone:"+221773456789", address:"Thiès", image:"https://i.pravatar.cc/40?u=aicha", added:"29/10/2025"}
+    ];
 
-      allPatients = patients;
-      filteredPatients = [...allPatients];
-      renderPatients();
-      updateStats();
-
-    } catch (error) {
-      showMessage("❌ Erreur lors du chargement des patients", "error");
-    }
-  }
-
-  // ================= FILTER =================
-  window.filterPatients = function() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-
-    filteredPatients = allPatients.filter(patient =>
-      patient.name.toLowerCase().includes(searchTerm)
-    );
-
-    currentPage = 1;
+    localStorage.setItem("patients", JSON.stringify(patients));
+    allPatients = patients;
+    filteredPatients = [...allPatients];
     renderPatients();
   }
 
-  window.clearSearch = function() {
-    document.getElementById('searchInput').value = '';
-    filterPatients();
-  }
-
-  // ================= STATS =================
-  function updateStats() {
-    const total = allPatients.length;
-    const adults = allPatients.filter(p => p.age >= 18).length;
-
-    document.getElementById('totalPatients').textContent = total;
-    document.getElementById('adultPatients').textContent = adults;
-  }
-
-  // ================= RENDER =================
   function renderPatients() {
     const tbody = document.getElementById("patientsBody");
-
-    if (filteredPatients.length === 0) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="7" class="no-data">
-            Aucun patient trouvé
-          </td>
-        </tr>
-      `;
-      return;
-    }
-
-    const start = (currentPage - 1) * patientsPerPage;
-    const end = start + patientsPerPage;
-    const patientsToShow = filteredPatients.slice(start, end);
-
     tbody.innerHTML = "";
 
-    patientsToShow.forEach(patient => {
+    filteredPatients.forEach(patient => {
       tbody.innerHTML += `
         <tr>
-          <td><img src="${patient.image || 'https://i.pravatar.cc/40'}" class="avatar"></td>
+          <td><img src="${patient.image}" class="avatar"></td>
           <td>${patient.name}</td>
           <td>${patient.age}</td>
-          <td>${patient.phone || ''}</td>
-          <td>${patient.address || ''}</td>
-          <td>${patient.added || ''}</td>
+          <td>${patient.phone}</td>
+          <td>${patient.address}</td>
+          <td>${patient.added}</td>
           <td>
-            <button onclick="viewPatient(${patient.id})">👁</button>
+            <button onclick="viewPatient(${patient.id})">👁 Profil</button>
             <button onclick="deletePatient(${patient.id})">🗑</button>
           </td>
         </tr>
@@ -736,34 +667,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ================= ACTIONS =================
   window.viewPatient = function(id) {
-    alert("Voir patient ID : " + id);
+    window.location.href = `profil_patient.html?id=${id}`;
   }
 
   window.deletePatient = function(id) {
     if (!confirm("Supprimer ce patient ?")) return;
-
     allPatients = allPatients.filter(p => p.id !== id);
     localStorage.setItem("patients", JSON.stringify(allPatients));
     filteredPatients = [...allPatients];
     renderPatients();
-    updateStats();
-    showMessage("Patient supprimé", "success");
   }
 
-  // ================= LOGOUT =================
   document.getElementById("logout").addEventListener("click", () => {
-    if (confirm("Déconnexion ?")) {
-      localStorage.removeItem("user");
-      window.location.href = "index.html";
-    }
+    localStorage.removeItem("user");
+    window.location.href = "index.html";
   });
 
-  // ================= START =================
   loadPatients();
-
 });
 </script>
+
 </body>
 </html>
