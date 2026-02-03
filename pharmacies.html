@@ -355,365 +355,6 @@
   </main>
 
   <script src="/socket.io/socket.io.js"></script>
- <script src="/socket.io/socket.io.js"></script>
-<<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Pharmacies Partenaires — OrdoPass</title>
-  <link rel="stylesheet" href="style.css" /> 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    .pharmacy-card {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      border-left: 4px solid #0ea5a0;
-      transition: all 0.3s ease;
-    }
-
-    .pharmacy-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-    }
-
-    .pharmacy-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 15px;
-    }
-
-    .pharmacy-info h3 {
-      margin: 0 0 8px 0;
-      color: #1e3c72;
-    }
-
-    .pharmacy-status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .status-online {
-      color: #28a745;
-      font-weight: 600;
-    }
-
-    .status-offline {
-      color: #dc3545;
-      font-weight: 600;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-
-    .online {
-      background: #28a745;
-    }
-
-    .offline {
-      background: #dc3545;
-    }
-
-    .pharmacy-details {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 15px;
-    }
-
-    .detail-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #666;
-    }
-
-    .detail-item i {
-      color: #0ea5a0;
-      width: 16px;
-    }
-
-    .pharmacy-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .btn-small {
-      padding: 6px 12px;
-      font-size: 12px;
-      border-radius: 6px;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      cursor: pointer;
-      border: none;
-    }
-
-    .search-filter {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
-    .search-box {
-      flex: 1;
-      min-width: 300px;
-    }
-
-    .search-box input {
-      width: 100%;
-      padding: 10px 15px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-
-    .filter-select {
-      padding: 10px 15px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      background: white;
-      font-size: 14px;
-    }
-
-    .stats-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-
-    .stat-card {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      text-align: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    .stat-number {
-      font-size: 24px;
-      font-weight: bold;
-      color: #1e3c72;
-      margin-bottom: 5px;
-    }
-
-    .stat-label {
-      color: #666;
-      font-size: 14px;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 40px;
-      color: #666;
-    }
-
-    .empty-state i {
-      font-size: 48px;
-      margin-bottom: 15px;
-      color: #ccc;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: #666;
-    }
-
-    .map-container {
-      height: 300px;
-      background: #f8f9fa;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #666;
-    }
-
-    .services-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-      margin-top: 10px;
-    }
-
-    .service-tag {
-      background: #e8f4fd;
-      color: #1e3c72;
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 12px;
-      border: 1px solid #d1e7ff;
-    }
-
-    @media (max-width: 768px) {
-      .pharmacy-header {
-        flex-direction: column;
-        gap: 10px;
-      }
-      
-      .search-filter {
-        flex-direction: column;
-      }
-      
-      .search-box {
-        min-width: 100%;
-      }
-      
-      .pharmacy-actions {
-        flex-direction: column;
-      }
-      
-      .btn-small {
-        width: 100%;
-        justify-content: center;
-      }
-    }
-
-    .notification {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 15px 20px;
-      border-radius: 8px;
-      color: white;
-      z-index: 10000;
-      max-width: 400px;
-      animation: slideIn 0.3s ease;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .notification-success {
-      background: #28a745;
-    }
-    
-    .notification-error {
-      background: #dc3545;
-    }
-    
-    .notification-info {
-      background: #17a2b8;
-    }
-    
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-  </style>
-</head>
-
-<body class="dashboard-page">
-
-  <!-- ✅ SIDEBAR -->
-  <aside class="sidebar">
-    <div class="logo"><i class="fa-solid fa-notes-medical"></i> ORDOPASS</div>
-    <nav>
-      <a href="medecin_dashboard.html"><i class="fa-solid fa-file-medical"></i> Consultations</a>
-      <a href="patients.html"><i class="fa-solid fa-users"></i> Patients</a>
-      <a href="teleconsultation.html"><i class="fa-solid fa-video"></i> Téléconsultation</a>
-      <a href="pharmacies.html" class="active"><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies</a>
-      <a href="medecin_messagerie.html"><i class="fa-solid fa-comment-medical"></i> Messagerie</a>
-      <a href="parametres.html"><i class="fa-solid fa-gear"></i> Paramètres</a>
-      <a href="medecin_facturation.html"><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</a>
-      <a href="medecin_rendezvous.html"><i class="fa-solid fa-calendar-check"></i> Rendez-vous</a>
-      <a href="medecin_ordonnance.html"><i class="fa-solid fa-prescription"></i> Ordonnances sécurisées</a>
-      <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
-    </nav>
-  </aside>
-
-  <!-- ✅ CONTENU PRINCIPAL -->
-  <main class="main-area">
-    <header class="topbar">
-      <h1><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies partenaires</h1>
-      <div class="user-info">
-        <img src="https://i.pravatar.cc/40" class="avatar" alt="profil">
-        <span id="usernameDisplay"></span>
-      </div>
-    </header>
-
-    <section class="content">
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:20px;">
-          <h2>Liste des pharmacies</h2>
-          <div style="display:flex; gap:10px; align-items:center;">
-            <button class="btn-primary" id="refreshBtn">
-              <i class="fa-solid fa-rotate"></i> Actualiser
-            </button>
-          </div>
-        </div>
-
-        <div id="messageContainer"></div>
-
-        <!-- Statistiques -->
-        <div class="stats-cards">
-          <div class="stat-card">
-            <div class="stat-number" id="totalPharmacies">0</div>
-            <div class="stat-label">Total pharmacies</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number" id="onlinePharmacies">0</div>
-            <div class="stat-label">En ligne</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number" id="activePharmacies">0</div>
-            <div class="stat-label">Actives</div>
-          </div>
-        </div>
-
-        <!-- Recherche et filtres -->
-        <div class="search-filter">
-          <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Rechercher une pharmacie...">
-          </div>
-          <select class="filter-select" id="statusFilter">
-            <option value="all">Tous les statuts</option>
-            <option value="online">En ligne</option>
-            <option value="offline">Hors ligne</option>
-          </select>
-          <select class="filter-select" id="serviceFilter">
-            <option value="all">Tous les services</option>
-            <option value="livraison">Livraison</option>
-            <option value="urgence">Urgence</option>
-            <option value="24h">24h/24</option>
-          </select>
-        </div>
-
-        <!-- Carte (placeholder) -->
-        <div class="map-container">
-          <div style="text-align: center;">
-            <i class="fa-solid fa-map" style="font-size: 48px; margin-bottom: 10px; display: block; color: #ccc;"></i>
-            <p>Carte des pharmacies partenaires</p>
-            <small>Fonctionnalité à venir</small>
-          </div>
-        </div>
-
-        <!-- Liste des pharmacies -->
-        <div id="pharmaciesList">
-          <div class="loading">
-            <i class="fa-solid fa-spinner fa-spin"></i> Chargement des pharmacies...
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <script src="/socket.io/socket.io.js"></script>
- <script src="/socket.io/socket.io.js"></script>
 <script>
 /* ===== Vérification session ===== */
 const user = JSON.parse(localStorage.getItem("user"));
@@ -763,21 +404,66 @@ function displayPharmacies(pharmacies){
   const container = document.getElementById("pharmaciesList");
 
   if(pharmacies.length===0){
-    container.innerHTML="<p>Aucune pharmacie enregistrée</p>";
+    container.innerHTML = `
+      <div class="empty-state">
+        <i class="fa-solid fa-prescription-bottle-medical"></i>
+        <h3>Aucune pharmacie enregistrée</h3>
+        <p>Commencez par ajouter des pharmacies partenaires</p>
+      </div>
+    `;
     return;
   }
 
   container.innerHTML = pharmacies.map(p=>`
     <div class="pharmacy-card">
       <div class="pharmacy-header">
-        <h3>${p.nom}</h3>
-        <span class="${p.online?'status-online':'status-offline'}">
-          ${p.online?'🟢 En ligne':'🔴 Hors ligne'}
-        </span>
+        <div class="pharmacy-info">
+          <h3>${p.nom}</h3>
+          <div class="services-list">
+            ${p.services && p.services.length > 0 ? 
+              p.services.map(service => `<span class="service-tag">${service}</span>`).join('') : 
+              '<span class="service-tag">Générale</span>'
+            }
+          </div>
+        </div>
+        <div class="pharmacy-status">
+          <span class="status-dot ${p.online ? 'online' : 'offline'}"></span>
+          <span class="${p.online?'status-online':'status-offline'}">
+            ${p.online?'En ligne':'Hors ligne'}
+          </span>
+        </div>
       </div>
       <div class="pharmacy-details">
-        <div>${p.adresse}</div>
-        <div>${p.telephone||''}</div>
+        <div class="detail-item">
+          <i class="fa-solid fa-location-dot"></i>
+          <span>${p.adresse || 'Adresse non renseignée'}</span>
+        </div>
+        <div class="detail-item">
+          <i class="fa-solid fa-phone"></i>
+          <span>${p.telephone || 'Téléphone non renseigné'}</span>
+        </div>
+        <div class="detail-item">
+          <i class="fa-solid fa-clock"></i>
+          <span>${p.horaires || 'Horaires non renseignés'}</span>
+        </div>
+        <div class="detail-item">
+          <i class="fa-solid fa-user-md"></i>
+          <span>Pharmacien: ${p.pharmacien || 'Non renseigné'}</span>
+        </div>
+      </div>
+      <div class="pharmacy-actions">
+        <button class="btn-small btn-primary" onclick="sendPrescription('${p.id}')">
+          <i class="fa-solid fa-paper-plane"></i> Envoyer ordonnance
+        </button>
+        <button class="btn-small btn-outline" onclick="viewPharmacyDetails('${p.id}')">
+          <i class="fa-solid fa-eye"></i> Détails
+        </button>
+        <button class="btn-small btn-outline" onclick="messagePharmacy('${p.id}')">
+          <i class="fa-solid fa-message"></i> Message
+        </button>
+        <button class="btn-small btn-outline" onclick="checkStock('${p.id}')">
+          <i class="fa-solid fa-box"></i> Vérifier stock
+        </button>
       </div>
     </div>
   `).join("");
@@ -786,22 +472,39 @@ function displayPharmacies(pharmacies){
 function updateStats(pharmacies){
   document.getElementById("totalPharmacies").textContent = pharmacies.length;
   document.getElementById("onlinePharmacies").textContent = pharmacies.filter(p=>p.online).length;
-  document.getElementById("activePharmacies").textContent = pharmacies.length;
+  document.getElementById("activePharmacies").textContent = pharmacies.filter(p=>p.active !== false).length;
 }
 
 /* ===== Filtres ===== */
 document.getElementById("refreshBtn").onclick = loadPharmacies;
 document.getElementById("searchInput").oninput = filterPharmacies;
 document.getElementById("statusFilter").onchange = filterPharmacies;
+document.getElementById("serviceFilter").onchange = filterPharmacies;
 
 function filterPharmacies(){
-  const search = searchInput.value.toLowerCase();
-  const status = statusFilter.value;
+  const search = document.getElementById("searchInput").value.toLowerCase();
+  const status = document.getElementById("statusFilter").value;
+  const service = document.getElementById("serviceFilter").value;
 
   const filtered = allPharmacies.filter(p=>{
-    let ok = p.nom.toLowerCase().includes(search);
-    if(status==="online") ok &= p.online;
-    if(status==="offline") ok &= !p.online;
+    let ok = true;
+    
+    // Filtre par recherche
+    if (search) {
+      ok = p.nom.toLowerCase().includes(search) || 
+            p.adresse.toLowerCase().includes(search) || 
+            (p.pharmacien && p.pharmacien.toLowerCase().includes(search));
+    }
+    
+    // Filtre par statut
+    if (status === "online") ok = ok && p.online;
+    if (status === "offline") ok = ok && !p.online;
+    
+    // Filtre par service
+    if (service !== "all") {
+      ok = ok && p.services && p.services.includes(service);
+    }
+    
     return ok;
   });
 
@@ -809,9 +512,161 @@ function filterPharmacies(){
   updateStats(filtered);
 }
 
-/* ===== Init ===== */
+/* ===== Fonctions d'action ===== */
+function sendPrescription(pharmacyId) {
+  const pharmacy = allPharmacies.find(p => p.id === pharmacyId);
+  if (!pharmacy) return;
+  
+  showNotification(`Ordonnance envoyée à ${pharmacy.nom}`, 'success');
+  
+  // Émettre l'événement socket pour envoyer l'ordonnance
+  socket.emit('send_prescription', {
+    pharmacyId: pharmacyId,
+    pharmacyName: pharmacy.nom,
+    from: user.username,
+    timestamp: new Date().toISOString()
+  });
+}
+
+function viewPharmacyDetails(pharmacyId) {
+  const pharmacy = allPharmacies.find(p => p.id === pharmacyId);
+  if (!pharmacy) return;
+  
+  const details = `
+    Nom: ${pharmacy.nom}
+    Adresse: ${pharmacy.adresse}
+    Téléphone: ${pharmacy.telephone || 'Non renseigné'}
+    Pharmacien: ${pharmacy.pharmacien || 'Non renseigné'}
+    Horaires: ${pharmacy.horaires || 'Non renseignés'}
+    Services: ${pharmacy.services ? pharmacy.services.join(', ') : 'Aucun'}
+    Statut: ${pharmacy.online ? '🟢 En ligne' : '🔴 Hors ligne'}
+  `;
+  
+  alert(details);
+}
+
+function messagePharmacy(pharmacyId) {
+  const pharmacy = allPharmacies.find(p => p.id === pharmacyId);
+  if (!pharmacy) return;
+  
+  const message = prompt(`Envoyer un message à ${pharmacy.nom}:`);
+  if (message) {
+    showNotification(`Message envoyé à ${pharmacy.nom}`, 'success');
+    
+    socket.emit('send_message', {
+      to: pharmacyId,
+      from: user.username,
+      message: message,
+      timestamp: new Date().toISOString()
+    });
+  }
+}
+
+function checkStock(pharmacyId) {
+  const pharmacy = allPharmacies.find(p => p.id === pharmacyId);
+  if (!pharmacy) return;
+  
+  const medication = prompt("Quel médicament souhaitez-vous vérifier?");
+  if (medication) {
+    showNotification(`Demande de stock envoyée à ${pharmacy.nom} pour: ${medication}`, 'info');
+    
+    socket.emit('check_stock', {
+      pharmacyId: pharmacyId,
+      medication: medication,
+      requester: user.username,
+      timestamp: new Date().toISOString()
+    });
+  }
+}
+
+/* ===== Fonctions utilitaires ===== */
+function showNotification(message, type) {
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type}`;
+  notification.innerHTML = `
+    <span>${message}</span>
+    <button onclick="this.parentElement.remove()" style="background:none; border:none; color:white; cursor:pointer;">
+      <i class="fa-solid fa-times"></i>
+    </button>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    if (notification.parentElement) {
+      notification.remove();
+    }
+  }, 5000);
+}
+
+/* ===== Événements Socket ===== */
+socket.on('prescription_received', (data) => {
+  showNotification(`✅ ${data.pharmacyName} a bien reçu votre ordonnance`, 'success');
+});
+
+socket.on('message_received', (data) => {
+  showNotification(`📩 ${data.from}: ${data.message}`, 'info');
+});
+
+socket.on('stock_response', (data) => {
+  showNotification(`📦 ${data.pharmacyName}: ${data.medication} - ${data.available ? 'Disponible' : 'En rupture'}`, data.available ? 'success' : 'error');
+});
+
+socket.on('pharmacy_status_update', (data) => {
+  // Mettre à jour le statut d'une pharmacie
+  const pharmacyIndex = allPharmacies.findIndex(p => p.id === data.pharmacyId);
+  if (pharmacyIndex !== -1) {
+    allPharmacies[pharmacyIndex].online = data.online;
+    filterPharmacies(); // Rafraîchir l'affichage
+  }
+});
+
+/* ===== Initialisation ===== */
 document.addEventListener("DOMContentLoaded", ()=>{
   loadPharmacies();
+  
+  // Charger des pharmacies par défaut si aucune n'existe
+  const existingPharmacies = JSON.parse(localStorage.getItem("pharmacies")) || [];
+  if (existingPharmacies.length === 0) {
+    const defaultPharmacies = [
+      {
+        id: '1',
+        nom: 'Pharmacie du Centre',
+        adresse: '123 Avenue de la République, Dakar',
+        telephone: '+221 33 821 45 67',
+        pharmacien: 'Dr. Marie Diop',
+        horaires: '8h-20h',
+        services: ['livraison', 'urgence', '24h'],
+        online: true,
+        active: true
+      },
+      {
+        id: '2',
+        nom: 'Pharmacie de la Paix',
+        adresse: '456 Rue des Martyrs, Dakar',
+        telephone: '+221 33 822 34 56',
+        pharmacien: 'Dr. Jean Ndiaye',
+        horaires: '24h/24',
+        services: ['24h', 'livraison'],
+        online: true,
+        active: true
+      },
+      {
+        id: '3',
+        nom: 'Pharmacie Liberté',
+        adresse: '789 Boulevard Liberté, Dakar',
+        telephone: '+221 33 823 78 90',
+        pharmacien: 'Dr. Aminata Fall',
+        horaires: '7h-22h',
+        services: ['livraison'],
+        online: false,
+        active: true
+      }
+    ];
+    
+    localStorage.setItem("pharmacies", JSON.stringify(defaultPharmacies));
+    loadPharmacies(); // Recharger avec les pharmacies par défaut
+  }
 });
 </script>
 </body> 
