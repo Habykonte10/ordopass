@@ -1094,7 +1094,7 @@ function loadPatientData() {
   
   if (!patientId) {
     alert("Aucun patient sélectionné");
-    window.location.href = "patients.html";
+    window.location.href = "medecin_dashboard.html";
     return;
   }
   
@@ -1104,7 +1104,7 @@ function loadPatientData() {
   
   if (!patient) {
     alert("Patient introuvable");
-    window.location.href = "patients.html";
+    window.location.href = "medecin_dashboard.html";
     return;
   }
   
@@ -1275,23 +1275,19 @@ function savePatientInfo() {
   showNotification("Informations du patient mises à jour avec succès", "success");
 }
 
-// Nouvelle consultation
+// NOUVELLE CONSULTATION - REDIRECTION VERS LA PAGE DE NOUVELLE CONSULTATION
 function newConsultation() {
   const patientId = getPatientFromURL();
-  window.location.href = `new-consultation.html?patientId=${patientId}`;
+  if (patientId) {
+    window.location.href = `nouvelle_consultation.html?patientId=${patientId}`;
+  } else {
+    window.location.href = "nouvelle_consultation.html";
+  }
 }
 
-// Voir toutes les consultations
+// HISTORIQUE DES CONSULTATIONS - REDIRECTION VERS LE DASHBOARD
 function viewAllConsultations() {
-  const consultationDetails = document.getElementById("consultationDetails");
-  const patientProfile = document.querySelector(".patient-profile");
-  const ordopassSection = document.querySelector(".history-section");
-  
-  consultationDetails.style.display = "none";
-  patientProfile.style.display = "grid";
-  ordopassSection.style.display = "block";
-  
-  loadConsultations();
+  window.location.href = "medecin_dashboard.html";
 }
 
 // Voir les détails d'une consultation
@@ -1549,7 +1545,7 @@ function showNotification(message, type = "info") {
   }, 3000);
 }
 
-// Retour à la liste des patients
+// RETOUR À LA LISTE DES PATIENTS
 function goBack() {
   window.location.href = "patients.html";
 }
