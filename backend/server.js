@@ -10,26 +10,24 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* ===== API TEST ===== */
+/* ===== TEST API ===== */
 app.get("/api/test", (req, res) => {
-  res.json({ status: "API OK" });
+  res.json({ message: "API OK" });
 });
 
-/* ===== ROUTES API ===== */
+/* ===== ROUTES ===== */
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/pharmacies", require("./routes/pharmacies"));
 
-/* ===== FRONTEND STATIC ===== */
-// ton frontend est dans le dossier racine "ordopass"
+/* ===== FRONTEND ===== */
 const frontendPath = path.join(__dirname, "..");
 app.use(express.static(frontendPath));
 
-/* Page d'accueil */
 app.get("/", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
 
-/* ⚠️ PAS DE app.get("*") */
+/* ❌ PAS DE app.get("*") */
 
 /* ===== DB ===== */
 mongoose.connect(process.env.MONGO_URI)
