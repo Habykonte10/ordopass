@@ -431,6 +431,24 @@
         opacity: 1;
       }
     }
+    
+    .btn-warning {
+      background: #ffc107;
+      color: #212529;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-warning:hover {
+      background: #e0a800;
+    }
   </style>
 </head>
 <body class="dashboard-page">
@@ -482,8 +500,7 @@
                 <div class="form-group">
                   <label class="form-label">Numéro de ticket *</label>
                   <input type="text" class="form-control" id="ticket" required 
-                         placeholder="Ex: HOP-2024-001" 
-                         onblur="checkTicketAvailability()">
+                         placeholder="Ex: HOP-2024-001">
                   <div class="ticket-warning" id="ticketWarning"></div>
                   <button type="button" class="btn-outline" onclick="generateHospitalTicket()" style="margin-top: 5px; width: 100%;">
                     <i class="fa-solid fa-gear"></i> Générer un ticket hospitalier
@@ -778,7 +795,8 @@
                 <label class="form-label">Facture payée ?</label>
                 <select class="form-control" id="facturePaye">
                   <option value="Non">Non</option>
-                  <option value="Oui">Oui</option                </select>
+                  <option value="Oui">Oui</option>
+                </select>
               </div>
               <div class="form-group">
                 <label class="form-label">Type de document</label>
@@ -864,8 +882,8 @@
           <!-- Boutons d'action -->
           <div class="action-buttons">
             <div class="action-buttons-left">
-              <button type="submit" class="btn-primary" id="enregistrerConsultationBtn" style="display:none;">
-                <i class="fa-solid fa-floppy-disk"></i> Enregistrer la consultation
+              <button type="button" class="btn-primary" id="enregistrerConsultationBtn" onclick="saveConsultationOnly()">
+                <i class="fa-solid fa-floppy-disk"></i> Enregistrer la consultation uniquement
               </button>
               <button type="button" class="btn-success" onclick="savePatientAndConsultation()">
                 <i class="fa-solid fa-user-plus"></i> Ajouter patient et consultation
@@ -885,7 +903,25 @@
     </section>
   </main>
 
- 
+  <!-- Jitsi Container -->
+  <div id="jitsi-container">
+    <button id="jitsi-close" onclick="resetVideo()">×</button>
+    <div id="jitsi-meet"></div>
+  </div>
+
+  <!-- Pharmacie Modal -->
+  <div id="pharmacieModal" class="modal">
+    <div class="modal-content">
+      <h3><i class="fa-solid fa-paper-plane"></i> Envoyer l'ordonnance à une pharmacie</h3>
+      <p>Sélectionnez une pharmacie pour envoyer l'ordonnance :</p>
+      <div id="pharmaciesList"></div>
+      <div style="margin-top: 20px;">
+        <button type="button" class="btn-success" onclick="sendOrdonnanceToPharmacie()">Envoyer</button>
+        <button type="button" class="btn-outline" onclick="closePharmacieModal()">Annuler</button>
+      </div>
+    </div>
+  </div>
+
   <script>
 /* ===============================
    SESSION
@@ -919,6 +955,19 @@ document.addEventListener('DOMContentLoaded', function() {
   if (user.username) {
     document.getElementById('nomMedecin').value = user.username;
   }
+  
+  // Générer un ticket automatiquement au chargement
+  generateHospitalTicket();
+  
+  // Écouter les changements sur le champ ticket
+  document.getElementById('ticket').addEventListener('blur', checkTicketAvailability);
+  document.getElementById('ticket').addEventListener('input', function() {
+    const ticket = this.value;
+    if (ticket) {
+      document.getElementById('currentTicketDisplay').innerHTML = 
+        `<i class="fa-solid fa-ticket"></i> Ticket actuel : <strong>${ticket}</strong>`;
+    }
+  });
 });
 
 /* ===============================
@@ -1034,6 +1083,222 @@ function removeAnalysis(index) {
 }
 
 /* ===============================
+   FONCTIONS POUR TICKET
+================================ */
+function generateHospitalTicket() {
+  const type = document.getElementById('typeConsultation').value;
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = (now.getMonth() + 1).toString().padStart(2, '0');
+  const day = now.getDate().toString().padStart(2, '0');
+  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+  
+  let prefix = 'CONS';
+  switch(type) {
+    case 'urgence': prefix = 'URG'; break;
+    case 'controle': prefix = 'CTRL'; break;
+    case 'specialiste': prefix = 'SPEC'; break;
+    case 'teleconsultation': prefix = 'TELEC'; break;
+  }
+  
+  const ticket = `${prefix}-${year}${month}${day}-${random}`;
+  document.getElementById('ticket').value = ticket;
+  
+  // Mettre à jour l'affichage du ticket actuel
+  document.getElementById('currentTicketDisplay').innerHTML = 
+    `<i class="fa-solid fa-ticket"></i> Ticket actuel : <strong>${ticket}</strong>`;
+  
+  // Vérifier la disponibilité
+  checkTicketAvailability();
+  
+  return ticket;
+}
+
+function checkTicketAvailability() {
+  const ticket = document.getElementById('ticket').value;
+  const warning = document.getElementById('ticketWarning');
+  
+  if (!ticket || ticket.trim() === '') {
+    warning.textContent = '⚠️ Veuillez générer ou saisir un ticket';
+    warning.style.color = '#dc3545';
+    return false;
+  }
+  
+  // Vérifier dans localStorage si le ticket existe déjà
+  const consultations = JSON.parse(localStorage.getItem('consultations')) || [];
+  const existing = consultations.find(c => c.ticket === ticket);
+  
+  if (existing) {
+    warning.textContent = '⚠️ Ce ticket est déjà utilisé';
+    warning.style.color = '#dc3545';
+    return false;
+  } else {
+    warning.textContent = '✓ Ticket disponible';
+    warning.style.color = '#28a745';
+    return true;
+  }
+}
+
+function updateTicketPrefix() {
+  const currentTicket = document.getElementById('ticket').value;
+  
+  // Si le ticket est vide ou est un ticket généré précédemment
+  if (!currentTicket || currentTicket.startsWith('CONS-') || currentTicket.startsWith('URG-') || 
+      currentTicket.startsWith('CTRL-') || currentTicket.startsWith('SPEC-') || currentTicket.startsWith('TELEC-')) {
+    generateHospitalTicket();
+  } else {
+    // Si c'est un ticket personnalisé, juste vérifier la disponibilité
+    checkTicketAvailability();
+  }
+}
+
+/* ===============================
+   FONCTION POUR ENREGISTRER UNIQUEMENT LA CONSULTATION
+================================ */
+function saveConsultationOnly() {
+  // Vérifier la disponibilité du ticket
+  if (!checkTicketAvailability()) {
+    showNotification('Veuillez utiliser un ticket disponible', 'error');
+    return;
+  }
+  
+  // Validation des champs obligatoires pour la consultation
+  const requiredFields = ['ticket', 'motif', 'symptomes', 'statut', 'nom', 'prenom', 'age', 'genre'];
+  for (const fieldId of requiredFields) {
+    const field = document.getElementById(fieldId);
+    if (!field.value.trim()) {
+      showNotification(`Le champ "${fieldId}" est obligatoire`, 'error');
+      field.focus();
+      return;
+    }
+  }
+  
+  // Afficher l'indicateur de chargement
+  document.getElementById('loadingIndicator').style.display = 'block';
+  
+  // Enregistrer la consultation
+  const consultation = {
+    id: Date.now(),
+    patientNom: document.getElementById('nom').value,
+    patientPrenom: document.getElementById('prenom').value,
+    patientAge: document.getElementById('age').value,
+    patientGenre: document.getElementById('genre').value,
+    patientTelephone: document.getElementById('telephone').value,
+    patientAdresse: document.getElementById('adresse').value,
+    ticket: document.getElementById('ticket').value,
+    typeConsultation: document.getElementById('typeConsultation').value,
+    date: document.getElementById('date').value,
+    heure: document.getElementById('heure').value,
+    motif: document.getElementById('motif').value,
+    symptomes: document.getElementById('symptomes').value,
+    analyses: analysesList,
+    examens: document.getElementById('examens').value,
+    statut: document.getElementById('statut').value,
+    medecin: user.username,
+    ordonnance: medicationsList.length > 0 ? medicationsList : null,
+    facture: {
+      description: document.getElementById('factureDescription').value,
+      montant: document.getElementById('factureMontant').value
+    },
+    createdAt: new Date().toISOString()
+  };
+  
+  // Sauvegarder dans localStorage
+  let consultations = JSON.parse(localStorage.getItem('consultations')) || [];
+  consultations.push(consultation);
+  localStorage.setItem('consultations', JSON.stringify(consultations));
+  
+  // Cacher l'indicateur de chargement
+  document.getElementById('loadingIndicator').style.display = 'none';
+  
+  showNotification('Consultation enregistrée avec succès !', 'success');
+  
+  // Redirection après 2 secondes
+  setTimeout(() => {
+    window.location.href = 'medecin_dashboard.html';
+  }, 2000);
+}
+
+/* ===============================
+   FONCTION POUR ENREGISTRER PATIENT ET CONSULTATION
+================================ */
+function savePatientAndConsultation() {
+  // Vérifier la disponibilité du ticket
+  if (!checkTicketAvailability()) {
+    showNotification('Veuillez utiliser un ticket disponible', 'error');
+    return;
+  }
+  
+  // Validation des champs obligatoires
+  const requiredFields = ['nom', 'prenom', 'age', 'genre', 'date', 'heure', 'motif', 'symptomes', 'statut', 'ticket'];
+  for (const fieldId of requiredFields) {
+    const field = document.getElementById(fieldId);
+    if (!field.value.trim()) {
+      showNotification(`Le champ "${fieldId}" est obligatoire`, 'error');
+      field.focus();
+      return;
+    }
+  }
+  
+  // Afficher l'indicateur de chargement
+  document.getElementById('loadingIndicator').style.display = 'block';
+  
+  // 1. Enregistrer le patient
+  const patient = {
+    id: Date.now(),
+    nom: document.getElementById('nom').value,
+    prenom: document.getElementById('prenom').value,
+    age: document.getElementById('age').value,
+    genre: document.getElementById('genre').value,
+    telephone: document.getElementById('telephone').value,
+    adresse: document.getElementById('adresse').value,
+    poids: document.getElementById('poids').value,
+    image: document.getElementById('image').value,
+    createdAt: new Date().toISOString()
+  };
+  
+  let patients = JSON.parse(localStorage.getItem('patients')) || [];
+  patients.push(patient);
+  localStorage.setItem('patients', JSON.stringify(patients));
+  
+  // 2. Enregistrer la consultation
+  const consultation = {
+    id: Date.now(),
+    patientId: patient.id,
+    ticket: document.getElementById('ticket').value,
+    typeConsultation: document.getElementById('typeConsultation').value,
+    date: document.getElementById('date').value,
+    heure: document.getElementById('heure').value,
+    motif: document.getElementById('motif').value,
+    symptomes: document.getElementById('symptomes').value,
+    analyses: analysesList,
+    examens: document.getElementById('examens').value,
+    statut: document.getElementById('statut').value,
+    medecin: user.username,
+    ordonnance: medicationsList.length > 0 ? medicationsList : null,
+    facture: {
+      description: document.getElementById('factureDescription').value,
+      montant: document.getElementById('factureMontant').value
+    },
+    createdAt: new Date().toISOString()
+  };
+  
+  let consultations = JSON.parse(localStorage.getItem('consultations')) || [];
+  consultations.push(consultation);
+  localStorage.setItem('consultations', JSON.stringify(consultations));
+  
+  // Cacher l'indicateur de chargement
+  document.getElementById('loadingIndicator').style.display = 'none';
+  
+  showNotification('Patient et consultation enregistrés avec succès !', 'success');
+  
+  // Redirection après 2 secondes
+  setTimeout(() => {
+    window.location.href = 'medecin_dashboard.html';
+  }, 2000);
+}
+
+/* ===============================
    FONCTIONS POUR ORDONNANCE
 ================================ */
 function generateOrdonnancePreview() {
@@ -1126,7 +1391,57 @@ function generateOrdonnancePDF() {
 }
 
 function openPharmacieModal() {
-  showNotification('Fonctionnalité d\'envoi à la pharmacie en développement', 'info');
+  // Charger la liste des pharmacies
+  const pharmacies = JSON.parse(localStorage.getItem('pharmacies')) || [];
+  const pharmacieListDiv = document.getElementById('pharmaciesList');
+  pharmacieListDiv.innerHTML = '';
+  
+  if (pharmacies.length === 0) {
+    pharmacieListDiv.innerHTML = '<p>Aucune pharmacie enregistrée.</p>';
+  } else {
+    pharmacies.forEach(pharmacie => {
+      const div = document.createElement('div');
+      div.className = 'pharmacie-item';
+      div.style.padding = '10px';
+      div.style.border = '1px solid #ddd';
+      div.style.marginBottom = '10px';
+      div.style.borderRadius = '5px';
+      div.innerHTML = `
+        <input type="radio" name="pharmacie" value="${pharmacie.id}" id="pharmacie_${pharmacie.id}">
+        <label for="pharmacie_${pharmacie.id}">
+          <strong>${pharmacie.nom}</strong><br>
+          <small>${pharmacie.adresse}</small>
+        </label>
+      `;
+      pharmacieListDiv.appendChild(div);
+    });
+  }
+  
+  document.getElementById('pharmacieModal').style.display = 'flex';
+}
+
+function closePharmacieModal() {
+  document.getElementById('pharmacieModal').style.display = 'none';
+}
+
+function sendOrdonnanceToPharmacie() {
+  const selected = document.querySelector('input[name="pharmacie"]:checked');
+  if (!selected) {
+    showNotification('Veuillez sélectionner une pharmacie', 'error');
+    return;
+  }
+  
+  // Récupérer l'ordonnance
+  const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
+  const derniereOrdonnance = ordonnances[ordonnances.length - 1];
+  
+  if (derniereOrdonnance) {
+    // Envoyer l'ordonnance à la pharmacie (simulation)
+    showNotification(`Ordonnance envoyée à la pharmacie ID: ${selected.value}`, 'success');
+    closePharmacieModal();
+  } else {
+    showNotification('Aucune ordonnance à envoyer', 'error');
+  }
 }
 
 /* ===============================
@@ -1201,49 +1516,6 @@ function generateFacturePDF() {
 }
 
 /* ===============================
-   FONCTIONS POUR TICKET ET TÉLÉCONSULTATION
-================================ */
-function generateHospitalTicket() {
-  const type = document.getElementById('typeConsultation').value;
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = (now.getMonth() + 1).toString().padStart(2, '0');
-  const day = now.getDate().toString().padStart(2, '0');
-  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-  
-  let prefix = 'CONS';
-  switch(type) {
-    case 'urgence': prefix = 'URG'; break;
-    case 'controle': prefix = 'CTRL'; break;
-    case 'specialiste': prefix = 'SPEC'; break;
-    case 'teleconsultation': prefix = 'TELEC'; break;
-  }
-  
-  const ticket = `${prefix}-${year}${month}${day}-${random}`;
-  document.getElementById('ticket').value = ticket;
-  document.getElementById('currentTicketDisplay').textContent = `Ticket actuel : ${ticket}`;
-}
-
-function checkTicketAvailability() {
-  const ticket = document.getElementById('ticket').value;
-  const consultations = JSON.parse(localStorage.getItem('consultations')) || [];
-  const existing = consultations.find(c => c.ticket === ticket);
-  
-  const warning = document.getElementById('ticketWarning');
-  if (existing) {
-    warning.textContent = '⚠️ Ce ticket est déjà utilisé';
-    warning.style.color = '#dc3545';
-  } else {
-    warning.textContent = '✓ Ticket disponible';
-    warning.style.color = '#28a745';
-  }
-}
-
-function updateTicketPrefix() {
-  generateHospitalTicket();
-}
-
-/* ===============================
    FONCTIONS POUR TÉLÉCONSULTATION
 ================================ */
 function selectTeleconsultationOption(type) {
@@ -1307,74 +1579,6 @@ function resetVideo() {
   }
   document.getElementById('jitsi-container').style.display = 'none';
   document.getElementById('consultationLink').value = 'https://ordopass.sn/consultation/';
-}
-
-/* ===============================
-   FONCTION PRINCIPALE
-================================ */
-function savePatientAndConsultation() {
-  // Validation des champs obligatoires
-  const requiredFields = ['nom', 'prenom', 'age', 'genre', 'date', 'heure', 'motif', 'symptomes', 'statut', 'ticket'];
-  for (const fieldId of requiredFields) {
-    const field = document.getElementById(fieldId);
-    if (!field.value.trim()) {
-      showNotification(`Le champ "${fieldId}" est obligatoire`, 'error');
-      field.focus();
-      return;
-    }
-  }
-  
-  // Afficher l'indicateur de chargement
-  document.getElementById('loadingIndicator').style.display = 'block';
-  
-  // 1. Enregistrer le patient
-  const patient = {
-    id: Date.now(),
-    nom: document.getElementById('nom').value,
-    prenom: document.getElementById('prenom').value,
-    age: document.getElementById('age').value,
-    genre: document.getElementById('genre').value,
-    telephone: document.getElementById('telephone').value,
-    adresse: document.getElementById('adresse').value,
-    poids: document.getElementById('poids').value,
-    image: document.getElementById('image').value,
-    createdAt: new Date().toISOString()
-  };
-  
-  let patients = JSON.parse(localStorage.getItem('patients')) || [];
-  patients.push(patient);
-  localStorage.setItem('patients', JSON.stringify(patients));
-  
-  // 2. Enregistrer la consultation
-  const consultation = {
-    id: Date.now(),
-    patientId: patient.id,
-    ticket: document.getElementById('ticket').value,
-    typeConsultation: document.getElementById('typeConsultation').value,
-    date: document.getElementById('date').value,
-    heure: document.getElementById('heure').value,
-    motif: document.getElementById('motif').value,
-    symptomes: document.getElementById('symptomes').value,
-    analyses: analysesList,
-    examens: document.getElementById('examens').value,
-    statut: document.getElementById('statut').value,
-    medecin: user.username,
-    createdAt: new Date().toISOString()
-  };
-  
-  let consultations = JSON.parse(localStorage.getItem('consultations')) || [];
-  consultations.push(consultation);
-  localStorage.setItem('consultations', JSON.stringify(consultations));
-  
-  // Cacher l'indicateur de chargement
-  document.getElementById('loadingIndicator').style.display = 'none';
-  
-  showNotification('Patient et consultation enregistrés avec succès !', 'success');
-  
-  // Redirection après 2 secondes
-  setTimeout(() => {
-    window.location.href = 'medecin_dashboard.html';
-  }, 2000);
 }
 
 /* ===============================

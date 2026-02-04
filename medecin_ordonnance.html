@@ -735,9 +735,20 @@ let currentOrdonnanceId = null;
 let selectedPharmacie = null;
 let allPharmacies = [];
 let currentPatientId = null;
+let isConsultationMode = false;
 
 /* ===== Initialisation ===== */
 document.addEventListener('DOMContentLoaded', function() {
+  // Récupérer les paramètres d'URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const patientId = urlParams.get('patientId');
+  const patientName = urlParams.get('patientName');
+  const patientAge = urlParams.get('patientAge');
+  const patientGender = urlParams.get('patientGender');
+  const patientAddress = urlParams.get('patientAddress');
+  const ordonnanceId = urlParams.get('ordonnanceId');
+  const mode = urlParams.get('mode');
+  
   // Initialiser la date
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('dateOrd').value = today;
@@ -747,14 +758,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('nomMedecin').value = user.username;
   }
   
-  // Récupérer les paramètres d'URL pour pré-remplir les infos patient
-  const urlParams = new URLSearchParams(window.location.search);
-  const patientId = urlParams.get('patientId');
-  const patientName = urlParams.get('patientName');
-  const patientAge = urlParams.get('patientAge');
-  const patientGender = urlParams.get('patientGender');
-  const patientAddress = urlParams.get('patientAddress');
-
   // Pré-remplir les champs si des infos patient sont fournies
   if (patientName) {
     document.getElementById('nom').value = decodeURIComponent(patientName);
@@ -777,6 +780,26 @@ document.addEventListener('DOMContentLoaded', function() {
   // Stocker l'ID patient pour référence
   if (patientId) {
     currentPatientId = patientId;
+  }
+  
+  // Vérifier si on est en mode consultation d'une ordonnance
+  if (ordonnanceId && mode === 'view') {
+    isConsultationMode = true;
+    // Afficher le mode consultation et charger l'ordonnance
+    document.getElementById('consultationModeIndicator').style.display = 'block';
+    document.getElementById('backButtonContainer').style.display = 'block';
+    
+    // Désactiver les onglets
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.style.pointerEvents = 'none';
+      tab.style.opacity = '0.5';
+    });
+    
+    // Activer l'onglet création et charger l'ordonnance
+    setTimeout(() => {
+      document.querySelector('.tab[data-tab="create"]').click();
+      viewOrdonnanceFromConsultation(ordonnanceId);
+    }, 300);
   }
   
   // Initialiser les onglets
@@ -809,6 +832,8 @@ function initTabs() {
   const tabs = document.querySelectorAll('.tab');
   tabs.forEach(tab => {
     tab.addEventListener('click', function() {
+      if (isConsultationMode) return; // Empêcher le changement d'onglet en mode consultation
+      
       const tabId = this.getAttribute('data-tab');
       
       // Retirer la classe active de tous les onglets et contenus
@@ -863,9 +888,12 @@ function generatePreview() {
   // Afficher l'aperçu
   displayPreview(currentOrdonnance);
   
-  // Activer les boutons
-  document.getElementById('sendBtn').disabled = false;
-  document.getElementById('pdfBtn').disabled = false;
+  // Activer les boutons (sauf en mode consultation)
+  if (!isConsultationMode) {
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('pdfBtn').disabled = false;
+    document.getElementById('saveBtn').disabled = false;
+  }
 }
 
 function generateOrdonnanceCode() {
@@ -957,6 +985,11 @@ function displayPreview(ordonnance) {
 
 /* ===== Sauvegarder l'ordonnance ===== */
 function saveOrdonnance() {
+  if (isConsultationMode) {
+    showNotification('Vous ne pouvez pas modifier cette ordonnance en mode consultation', 'error');
+    return;
+  }
+  
   if (!currentOrdonnance) {
     showNotification('Veuillez d\'abord générer un aperçu', 'error');
     return;
@@ -993,7 +1026,9 @@ function saveOrdonnance() {
   
   // Activer l'onglet "Mes ordonnances" après un délai
   setTimeout(() => {
-    document.querySelector('.tab[data-tab="list"]').click();
+    if (!isConsultationMode) {
+      document.querySelector('.tab[data-tab="list"]').click();
+    }
     loadOrdonnances();
     
     // Réinitialiser le formulaire
@@ -1005,6 +1040,7 @@ function saveOrdonnance() {
     document.getElementById('preview').style.display = 'none';
     document.getElementById('sendBtn').disabled = true;
     document.getElementById('pdfBtn').disabled = true;
+    document.getElementById('saveBtn').disabled = false;
     currentOrdonnance = null;
     currentOrdonnanceId = null;
     currentPatientId = null;
@@ -1341,6 +1377,41 @@ function generatePDFFromSearch(ordonnanceId) {
 }
 
 /* ===== Voir/Modifier une ordonnance ===== */
+function viewOrdonnanceFromConsultation(ordonnanceId) {
+  const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
+  const ordonnance = ordonnances.find(o => o.id == ordonnanceId);
+  
+  if (ordonnance) {
+    // Remplir le formulaire
+    document.getElementById('nomMedecin').value = ordonnance.medecin;
+    document.getElementById('nom').value = ordonnance.patient;
+    document.getElementById('age').value = ordonnance.age;
+    document.getElementById('genre').value = ordonnance.genre;
+    document.getElementById('adresse').value = ordonnance.adresse;
+    document.getElementById('poids').value = ordonnance.poids || '';
+    document.getElementById('medicaments').value = ordonnance.medicaments;
+    document.getElementById('dateOrd').value = ordonnance.date;
+    
+    // Désactiver les champs en mode consultation
+    const formElements = document.querySelectorAll('#ordForm input, #ordForm select, #ordForm textarea');
+    formElements.forEach(element => {
+      element.disabled = true;
+    });
+    
+    // Désactiver les boutons
+    document.getElementById('genBtn').disabled = true;
+    document.getElementById('saveBtn').disabled = true;
+    document.getElementById('sendBtn').disabled = true;
+    
+    // Générer l'aperçu
+    currentOrdonnance = ordonnance;
+    currentOrdonnanceId = ordonnanceId;
+    displayPreview(ordonnance);
+  } else {
+    showNotification('Ordonnance non trouvée', 'error');
+  }
+}
+
 function viewOrdonnance(ordonnanceId) {
   const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
   const ordonnance = ordonnances.find(o => o.id == ordonnanceId);
@@ -1371,17 +1442,52 @@ function viewOrdonnance(ordonnanceId) {
     // Activer les boutons
     document.getElementById('sendBtn').disabled = false;
     document.getElementById('pdfBtn').disabled = false;
+    document.getElementById('saveBtn').disabled = false;
     
-    // Afficher le mode consultation
+    // Afficher le mode consultation (mais avec possibilité d'édition)
     document.getElementById('consultationModeIndicator').style.display = 'block';
     document.getElementById('backButtonContainer').style.display = 'block';
+    isConsultationMode = true;
   }
 }
 
 function editOrdonnance(ordonnanceId) {
-  viewOrdonnance(ordonnanceId);
-  document.getElementById('consultationModeIndicator').style.display = 'none';
-  document.getElementById('backButtonContainer').style.display = 'none';
+  const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
+  const ordonnance = ordonnances.find(o => o.id == ordonnanceId);
+  
+  if (ordonnance) {
+    // Activer l'onglet création
+    document.querySelector('.tab.active').classList.remove('active');
+    document.querySelector('.tab-content.active').classList.remove('active');
+    
+    document.querySelector('.tab[data-tab="create"]').classList.add('active');
+    document.getElementById('create-tab').classList.add('active');
+    
+    // Remplir le formulaire
+    document.getElementById('nomMedecin').value = ordonnance.medecin;
+    document.getElementById('nom').value = ordonnance.patient;
+    document.getElementById('age').value = ordonnance.age;
+    document.getElementById('genre').value = ordonnance.genre;
+    document.getElementById('adresse').value = ordonnance.adresse;
+    document.getElementById('poids').value = ordonnance.poids;
+    document.getElementById('medicaments').value = ordonnance.medicaments;
+    document.getElementById('dateOrd').value = ordonnance.date;
+    
+    // Générer l'aperçu
+    currentOrdonnance = ordonnance;
+    currentOrdonnanceId = ordonnanceId;
+    displayPreview(ordonnance);
+    
+    // Activer les boutons
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('pdfBtn').disabled = false;
+    document.getElementById('saveBtn').disabled = false;
+    
+    // Masquer le mode consultation
+    document.getElementById('consultationModeIndicator').style.display = 'none';
+    document.getElementById('backButtonContainer').style.display = 'none';
+    isConsultationMode = false;
+  }
 }
 
 function deleteOrdonnance(ordonnanceId) {
@@ -1401,18 +1507,27 @@ function deleteOrdonnance(ordonnanceId) {
 }
 
 function exitConsultationMode() {
+  // Réactiver les onglets
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.style.pointerEvents = 'auto';
+    tab.style.opacity = '1';
+  });
+  
+  // Masquer les indicateurs de mode consultation
   document.getElementById('consultationModeIndicator').style.display = 'none';
   document.getElementById('backButtonContainer').style.display = 'none';
+  isConsultationMode = false;
   
-  // Réinitialiser le formulaire
-  document.getElementById('ordForm').reset();
-  if (user.username) {
-    document.getElementById('nomMedecin').value = user.username;
-  }
-  document.getElementById('dateOrd').value = new Date().toISOString().split('T')[0];
-  document.getElementById('preview').style.display = 'none';
-  currentOrdonnance = null;
-  currentOrdonnanceId = null;
+  // Réactiver les champs du formulaire
+  const formElements = document.querySelectorAll('#ordForm input, #ordForm select, #ordForm textarea');
+  formElements.forEach(element => {
+    element.disabled = false;
+  });
+  
+  // Réactiver les boutons
+  document.getElementById('genBtn').disabled = false;
+  document.getElementById('saveBtn').disabled = false;
+  document.getElementById('sendBtn').disabled = currentOrdonnance ? false : true;
 }
 
 /* ===== Vérifier si une ordonnance vient d'être enregistrée ===== */

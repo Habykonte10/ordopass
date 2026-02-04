@@ -1412,9 +1412,10 @@ function closeConsultationDetails() {
   ordopassSection.style.display = "block";
 }
 
-// Voir une ordonnance
+// Voir une ordonnance - MODIFIÉ POUR ALLER VERS LA PAGE DE CONSULTATION D'ORDONNANCE
 function viewOrdonnance(ordonnanceId) {
-  window.location.href = `ordonnance.html?id=${ordonnanceId}`;
+  // Rediriger vers la page de consultation d'ordonnance avec l'ID
+  window.location.href = `medecin_ordonnance.html?ordonnanceId=${ordonnanceId}&mode=view`;
 }
 
 // Ouvrir le modal pharmacie
