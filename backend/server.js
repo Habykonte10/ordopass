@@ -6,52 +6,37 @@ const mongoose = require("mongoose");
 
 const app = express();
 
-/* ===============================
-   MIDDLEWARES
-================================ */
-app.use(cors({
-  origin: "*",
-  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
-  allowedHeaders: ["Content-Type","Authorization"]
-}));
+/* ===== MIDDLEWARE ===== */
+app.use(cors());
 app.use(express.json());
 
-/* ===============================
-   API ROUTES
-================================ */
+/* ===== API TEST ===== */
 app.get("/api/test", (req, res) => {
   res.json({ status: "API OK" });
 });
 
+/* ===== ROUTES API ===== */
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/pharmacies", require("./routes/pharmacies"));
 
-/* ===============================
-   FRONTEND STATIC FILES
-================================ */
-// ordopass/
-app.use(express.static(path.join(__dirname, "..")));
+/* ===== FRONTEND STATIC ===== */
+// ton frontend est dans le dossier racine "ordopass"
+const frontendPath = path.join(__dirname, "..");
+app.use(express.static(frontendPath));
 
-/* page principale */
+/* Page d'accueil */
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "index.html"));
+  res.sendFile(path.join(frontendPath, "index.html"));
 });
 
-/* catch-all pages HTML */
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", req.path));
-});
+/* ⚠️ PAS DE app.get("*") */
 
-/* ===============================
-   DATABASE
-================================ */
+/* ===== DB ===== */
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connecté"))
   .catch(err => console.error("❌ MongoDB erreur :", err));
 
-/* ===============================
-   SERVER START
-================================ */
+/* ===== START ===== */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("🚀 Serveur lancé sur http://localhost:" + PORT);
