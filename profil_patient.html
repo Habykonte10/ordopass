@@ -660,6 +660,9 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       max-width: 400px;
       animation: slideIn 0.3s ease-out;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .notification.success {
@@ -952,48 +955,631 @@
 
   <script>
 let currentPatient = null;
+let currentConsultation = null;
 
+// Récupérer l'ID du patient depuis l'URL
 function getPatientFromURL() {
   const params = new URLSearchParams(window.location.search);
   return params.get("id");
 }
 
-function loadPatientData() {
-  const patientId = getPatientFromURL();
+// Initialiser les données si elles n'existent pas
+function initializeData() {
+  // Vérifier si les données existent déjà
+  if (!localStorage.getItem("patients")) {
+    // Créer des données d'exemple
+    const examplePatients = [
+      {
+        id: "1",
+        name: "Marième Diallo",
+        age: 32,
+        address: "Dakar, Sacré Coeur 3",
+        phone: "77 123 45 67",
+        idNumber: "1234567890",
+        gender: "Femme",
+        added: "15/03/2024",
+        paymentMethod: "Wave",
+        insurance: "Oui",
+        image: "https://i.pravatar.cc/80?img=5"
+      },
+      {
+        id: "2",
+        name: "Abdoulaye Sow",
+        age: 45,
+        address: "Thiaroye, Rue 10",
+        phone: "76 234 56 78",
+        idNumber: "0987654321",
+        gender: "Homme",
+        added: "20/03/2024",
+        paymentMethod: "Orange Money",
+        insurance: "Non",
+        image: "https://i.pravatar.cc/80?img=15"
+      }
+    ];
+    localStorage.setItem("patients", JSON.stringify(examplePatients));
+  }
+  
+  if (!localStorage.getItem("consultations")) {
+    const exampleConsultations = [
+      {
+        id: "consult1",
+        patientId: "1",
+        ticketNumber: "TKT-2024-001",
+        date: "15/03/2024",
+        symptoms: "Fièvre, maux de tête",
+        diagnosis: "Paludisme",
+        notes: "Patient à surveiller",
+        medications: ["Paracétamol", "Artéméther"]
+      },
+      {
+        id: "consult2",
+        patientId: "1",
+        ticketNumber: "TKT-2024-002",
+        date: "20/03/2024",
+        symptoms: "Toux, fatigue",
+        diagnosis: "Infection respiratoire",
+        notes: "Repos recommandé",
+        medications: ["Amoxicilline", "Sirop antitussif"]
+      }
+    ];
+    localStorage.setItem("consultations", JSON.stringify(exampleConsultations));
+  }
+  
+  if (!localStorage.getItem("ordonnances")) {
+    const exampleOrdonnances = [
+      {
+        id: "ordo1",
+        patientId: "1",
+        consultationId: "consult1",
+        date: "15/03/2024",
+        status: "active",
+        medications: [
+          { name: "Paracétamol", dosage: "500mg", frequency: "3x/jour", duration: "5 jours" },
+          { name: "Artéméther", dosage: "80mg", frequency: "2x/jour", duration: "3 jours" }
+        ],
+        notes: "Prendre après les repas"
+      },
+      {
+        id: "ordo2",
+        patientId: "1",
+        consultationId: "consult2",
+        date: "20/03/2024",
+        status: "envoyee",
+        sentToPharmacy: {
+          pharmacyId: "pharm1",
+          pharmacyName: "Pharmacie du Soleil",
+          date: "21/03/2024"
+        },
+        medications: [
+          { name: "Amoxicilline", dosage: "1g", frequency: "2x/jour", duration: "7 jours" }
+        ]
+      }
+    ];
+    localStorage.setItem("ordonnances", JSON.stringify(exampleOrdonnances));
+  }
+  
+  if (!localStorage.getItem("pharmacies")) {
+    const examplePharmacies = [
+      {
+        id: "pharm1",
+        name: "Pharmacie du Soleil",
+        address: "Dakar, Plateau",
+        phone: "33 821 10 20",
+        email: "contact@pharmasoleil.sn"
+      },
+      {
+        id: "pharm2",
+        name: "Pharmacie de la Liberté",
+        address: "Dakar, Liberté 6",
+        phone: "33 822 30 40",
+        email: "info@pharmaliberte.sn"
+      },
+      {
+        id: "pharm3",
+        name: "Pharmacie Centrale",
+        address: "Dakar, Médina",
+        phone: "33 823 50 60",
+        email: "centrale@pharma.sn"
+      }
+    ];
+    localStorage.setItem("pharmacies", JSON.stringify(examplePharmacies));
+  }
+}
 
+// Charger les données du patient
+function loadPatientData() {
+  initializeData();
+  
+  const patientId = getPatientFromURL();
+  
   if (!patientId) {
     alert("Aucun patient sélectionné");
     window.location.href = "patients.html";
     return;
   }
-
+  
+  // Récupérer les patients depuis le localStorage
   const patients = JSON.parse(localStorage.getItem("patients")) || [];
   const patient = patients.find(p => p.id == patientId);
-
+  
   if (!patient) {
     alert("Patient introuvable");
     window.location.href = "patients.html";
     return;
   }
-
+  
   currentPatient = patient;
-
+  
+  // Mettre à jour l'affichage
   document.getElementById("patientName").textContent = patient.name;
   document.getElementById("patientAge").textContent = patient.age + " ans";
   document.getElementById("patientAddress").textContent = patient.address;
   document.getElementById("patientPhone").textContent = patient.phone;
-  document.getElementById("patientAvatar").src = patient.image;
-  document.getElementById("patientAdded").textContent = patient.added;
+  document.getElementById("patientId").textContent = patient.idNumber || "Non spécifié";
+  document.getElementById("patientGender").textContent = patient.gender || "Non spécifié";
+  document.getElementById("patientAdded").textContent = patient.added || "Date inconnue";
+  document.getElementById("patientPayment").textContent = patient.paymentMethod || "Non spécifié";
+  document.getElementById("patientInsurance").textContent = patient.insurance || "Non spécifié";
+  document.getElementById("patientAvatar").src = patient.image || "https://i.pravatar.cc/80";
+  
+  // Charger les consultations et ordonnances
+  loadConsultations();
+  loadOrdonnances();
 }
 
+// Charger les consultations
+function loadConsultations() {
+  const consultations = JSON.parse(localStorage.getItem("consultations")) || [];
+  const patientId = getPatientFromURL();
+  const patientConsultations = consultations.filter(c => c.patientId == patientId);
+  
+  const tbody = document.querySelector("#consultationsTable tbody");
+  tbody.innerHTML = "";
+  
+  if (patientConsultations.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align: center; color: #777;">Aucune consultation enregistrée</td>
+      </tr>
+    `;
+    return;
+  }
+  
+  patientConsultations.forEach(consultation => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${consultation.ticketNumber || "N/A"}</td>
+      <td>${consultation.date}</td>
+      <td>${consultation.symptoms || "Non spécifié"}</td>
+      <td>
+        <button class="btn-link" onclick="viewConsultationDetails('${consultation.id}')">
+          <i class="fa-solid fa-eye"></i> Voir
+        </button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+// Charger les ordonnances
+function loadOrdonnances() {
+  const ordonnances = JSON.parse(localStorage.getItem("ordonnances")) || [];
+  const patientId = getPatientFromURL();
+  const patientOrdonnances = ordonnances.filter(o => o.patientId == patientId);
+  
+  const tbody = document.querySelector("#ordonnancesTable tbody");
+  tbody.innerHTML = "";
+  
+  if (patientOrdonnances.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align: center; color: #777;">Aucune ordonnance enregistrée</td>
+      </tr>
+    `;
+    return;
+  }
+  
+  patientOrdonnances.forEach(ordonnance => {
+    const row = document.createElement("tr");
+    
+    // Déterminer la classe CSS pour le statut
+    let statusClass = "status-active";
+    if (ordonnance.status === "delivree") statusClass = "status-delivree";
+    if (ordonnance.status === "annulee") statusClass = "status-annulee";
+    if (ordonnance.status === "envoyee") statusClass = "status-envoyee";
+    if (ordonnance.status === "en_cours") statusClass = "status-en_cours";
+    if (ordonnance.status === "pret") statusClass = "status-pret";
+    if (ordonnance.status === "recuperee") statusClass = "status-recuperee";
+    
+    // Texte du statut
+    let statusText = "Active";
+    if (ordonnance.status === "delivree") statusText = "Délivrée";
+    if (ordonnance.status === "annulee") statusText = "Annulée";
+    if (ordonnance.status === "envoyee") statusText = "Envoyée";
+    if (ordonnance.status === "en_cours") statusText = "En cours";
+    if (ordonnance.status === "pret") statusText = "Prête";
+    if (ordonnance.status === "recuperee") statusText = "Récupérée";
+    
+    row.innerHTML = `
+      <td>${ordonnance.consultationId || "N/A"}</td>
+      <td>${ordonnance.date}</td>
+      <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+      <td>
+        <button class="btn-ordonnance" onclick="viewOrdonnance('${ordonnance.id}')">
+          <i class="fa-solid fa-file-prescription"></i> Voir Ordonnance
+        </button>
+        ${ordonnance.status === "active" ? 
+          `<button class="btn-pharmacy" onclick="openPharmacyModal('${ordonnance.id}')">
+            <i class="fa-solid fa-truck-medical"></i> Envoyer Pharmacie
+          </button>` : ""
+        }
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+// Ouvrir le modal d'édition
+function openEditModal() {
+  if (!currentPatient) return;
+  
+  document.getElementById("editName").value = currentPatient.name;
+  document.getElementById("editAge").value = currentPatient.age;
+  document.getElementById("editAddress").value = currentPatient.address;
+  document.getElementById("editPhone").value = currentPatient.phone;
+  document.getElementById("editId").value = currentPatient.idNumber || "";
+  document.getElementById("editGender").value = currentPatient.gender || "Femme";
+  document.getElementById("editPayment").value = currentPatient.paymentMethod || "Wave";
+  document.getElementById("editInsurance").value = currentPatient.insurance || "Non";
+  
+  document.getElementById("editModal").style.display = "flex";
+}
+
+// Fermer le modal d'édition
+function closeEditModal() {
+  document.getElementById("editModal").style.display = "none";
+}
+
+// Sauvegarder les informations du patient
+function savePatientInfo() {
+  const patientId = getPatientFromURL();
+  const patients = JSON.parse(localStorage.getItem("patients")) || [];
+  const patientIndex = patients.findIndex(p => p.id == patientId);
+  
+  if (patientIndex === -1) {
+    showNotification("Patient introuvable", "error");
+    return;
+  }
+  
+  // Mettre à jour les informations
+  patients[patientIndex].name = document.getElementById("editName").value;
+  patients[patientIndex].age = document.getElementById("editAge").value;
+  patients[patientIndex].address = document.getElementById("editAddress").value;
+  patients[patientIndex].phone = document.getElementById("editPhone").value;
+  patients[patientIndex].idNumber = document.getElementById("editId").value;
+  patients[patientIndex].gender = document.getElementById("editGender").value;
+  patients[patientIndex].paymentMethod = document.getElementById("editPayment").value;
+  patients[patientIndex].insurance = document.getElementById("editInsurance").value;
+  
+  // Sauvegarder dans localStorage
+  localStorage.setItem("patients", JSON.stringify(patients));
+  
+  // Mettre à jour l'affichage
+  currentPatient = patients[patientIndex];
+  loadPatientData();
+  
+  // Fermer le modal
+  closeEditModal();
+  
+  // Afficher une notification
+  showNotification("Informations du patient mises à jour avec succès", "success");
+}
+
+// Nouvelle consultation
+function newConsultation() {
+  const patientId = getPatientFromURL();
+  window.location.href = `new-consultation.html?patientId=${patientId}`;
+}
+
+// Voir toutes les consultations
+function viewAllConsultations() {
+  const consultationDetails = document.getElementById("consultationDetails");
+  const patientProfile = document.querySelector(".patient-profile");
+  const ordopassSection = document.querySelector(".history-section");
+  
+  consultationDetails.style.display = "none";
+  patientProfile.style.display = "grid";
+  ordopassSection.style.display = "block";
+  
+  loadConsultations();
+}
+
+// Voir les détails d'une consultation
+function viewConsultationDetails(consultationId) {
+  const consultations = JSON.parse(localStorage.getItem("consultations")) || [];
+  const consultation = consultations.find(c => c.id == consultationId);
+  
+  if (!consultation) {
+    showNotification("Consultation introuvable", "error");
+    return;
+  }
+  
+  currentConsultation = consultation;
+  
+  // Afficher la section des détails
+  const consultationDetails = document.getElementById("consultationDetails");
+  const patientProfile = document.querySelector(".patient-profile");
+  const ordopassSection = document.querySelector(".history-section");
+  
+  patientProfile.style.display = "none";
+  ordopassSection.style.display = "none";
+  consultationDetails.style.display = "block";
+  
+  // Remplir les détails
+  const detailsContent = document.getElementById("consultationDetailsContent");
+  
+  // Récupérer les ordonnances liées à cette consultation
+  const ordonnances = JSON.parse(localStorage.getItem("ordonnances")) || [];
+  const consultationOrdonnances = ordonnances.filter(o => o.consultationId == consultationId);
+  
+  let ordonnanceHTML = "";
+  if (consultationOrdonnances.length > 0) {
+    consultationOrdonnances.forEach(ordonnance => {
+      // Texte du statut
+      let statusText = "Active";
+      if (ordonnance.status === "delivree") statusText = "Délivrée";
+      if (ordonnance.status === "annulee") statusText = "Annulée";
+      if (ordonnance.status === "envoyee") statusText = "Envoyée";
+      if (ordonnance.status === "en_cours") statusText = "En cours";
+      if (ordonnance.status === "pret") statusText = "Prête";
+      if (ordonnance.status === "recuperee") statusText = "Récupérée";
+      
+      ordonnanceHTML += `
+        <div class="medication-item">
+          <div class="medication-name">Ordonnance du ${ordonnance.date}</div>
+          <div class="medication-details">
+            <div class="medication-detail"><strong>Statut:</strong> ${statusText}</div>
+            <div class="medication-detail"><strong>Médicaments:</strong> ${ordonnance.medications ? ordonnance.medications.length : 0}</div>
+            <button class="btn-outline" onclick="viewOrdonnance('${ordonnance.id}')">Voir</button>
+          </div>
+        </div>
+      `;
+    });
+  } else {
+    ordonnanceHTML = `<p>Aucune ordonnance pour cette consultation.</p>`;
+  }
+  
+  detailsContent.innerHTML = `
+    <div class="detail-section">
+      <h3 class="detail-title"><i class="fa-solid fa-calendar"></i> Date de la consultation</h3>
+      <div class="detail-content">${consultation.date}</div>
+    </div>
+    
+    <div class="detail-section">
+      <h3 class="detail-title"><i class="fa-solid fa-stethoscope"></i> Symptômes</h3>
+      <div class="detail-content">${consultation.symptoms || "Non spécifié"}</div>
+    </div>
+    
+    <div class="detail-section">
+      <h3 class="detail-title"><i class="fa-solid fa-notes-medical"></i> Diagnostic</h3>
+      <div class="detail-content">${consultation.diagnosis || "Non spécifié"}</div>
+    </div>
+    
+    <div class="detail-section">
+      <h3 class="detail-title"><i class="fa-solid fa-prescription-bottle-medical"></i> Ordonnances</h3>
+      <div class="detail-content">
+        ${ordonnanceHTML}
+        <button class="btn-primary" onclick="createOrdonnanceForConsultation('${consultationId}')" style="margin-top: 15px;">
+          <i class="fa-solid fa-file-prescription"></i> Créer une ordonnance
+        </button>
+      </div>
+    </div>
+    
+    <div class="detail-section">
+      <h3 class="detail-title"><i class="fa-solid fa-file-medical-alt"></i> Notes supplémentaires</h3>
+      <div class="detail-content">${consultation.notes || "Aucune note"}</div>
+    </div>
+  `;
+}
+
+// Créer une ordonnance pour une consultation
+function createOrdonnanceForConsultation(consultationId) {
+  const patientId = getPatientFromURL();
+  window.location.href = `new-ordonnance.html?patientId=${patientId}&consultationId=${consultationId}`;
+}
+
+// Fermer les détails de consultation
+function closeConsultationDetails() {
+  const consultationDetails = document.getElementById("consultationDetails");
+  const patientProfile = document.querySelector(".patient-profile");
+  const ordopassSection = document.querySelector(".history-section");
+  
+  consultationDetails.style.display = "none";
+  patientProfile.style.display = "grid";
+  ordopassSection.style.display = "block";
+}
+
+// Voir une ordonnance
+function viewOrdonnance(ordonnanceId) {
+  window.location.href = `ordonnance.html?id=${ordonnanceId}`;
+}
+
+// Ouvrir le modal pharmacie
+function openPharmacyModal(ordonnanceId) {
+  // Charger la liste des pharmacies
+  loadPharmacies();
+  
+  // Stocker l'ID de l'ordonnance dans un attribut data
+  document.getElementById("pharmacyModal").setAttribute("data-ordonnance-id", ordonnanceId);
+  
+  document.getElementById("pharmacyModal").style.display = "flex";
+}
+
+// Charger les pharmacies
+function loadPharmacies() {
+  const pharmacies = JSON.parse(localStorage.getItem("pharmacies")) || [];
+  const pharmaciesList = document.getElementById("pharmaciesList");
+  
+  pharmaciesList.innerHTML = "";
+  
+  if (pharmacies.length === 0) {
+    pharmaciesList.innerHTML = `
+      <div class="pharmacy-item" style="text-align: center; padding: 20px;">
+        <p>Aucune pharmacie enregistrée</p>
+        <button class="btn-outline" onclick="window.location.href='pharmacies.html'" style="margin-top: 10px;">
+          <i class="fa-solid fa-plus"></i> Ajouter une pharmacie
+        </button>
+      </div>
+    `;
+    return;
+  }
+  
+  pharmacies.forEach((pharmacy, index) => {
+    const item = document.createElement("div");
+    item.className = "pharmacy-item";
+    item.setAttribute("data-id", pharmacy.id);
+    item.setAttribute("data-index", index);
+    
+    item.innerHTML = `
+      <div class="pharmacy-name">${pharmacy.name}</div>
+      <div class="pharmacy-address">${pharmacy.address}</div>
+      <div class="pharmacy-contact">${pharmacy.phone} • ${pharmacy.email || ""}</div>
+    `;
+    
+    item.onclick = function() {
+      // Retirer la sélection précédente
+      document.querySelectorAll(".pharmacy-item").forEach(el => {
+        el.classList.remove("selected");
+      });
+      
+      // Ajouter la sélection à l'élément cliqué
+      this.classList.add("selected");
+    };
+    
+    pharmaciesList.appendChild(item);
+  });
+}
+
+// Fermer le modal pharmacie
+function closePharmacyModal() {
+  document.getElementById("pharmacyModal").style.display = "none";
+  document.getElementById("pharmacyMessage").value = "";
+  
+  // Retirer les sélections
+  document.querySelectorAll(".pharmacy-item").forEach(el => {
+    el.classList.remove("selected");
+  });
+}
+
+// Envoyer à la pharmacie
+function sendToPharmacy() {
+  const selectedPharmacy = document.querySelector(".pharmacy-item.selected");
+  
+  if (!selectedPharmacy) {
+    showNotification("Veuillez sélectionner une pharmacie", "error");
+    return;
+  }
+  
+  const ordonnanceId = document.getElementById("pharmacyModal").getAttribute("data-ordonnance-id");
+  const message = document.getElementById("pharmacyMessage").value;
+  
+  // Récupérer les ordonnances
+  const ordonnances = JSON.parse(localStorage.getItem("ordonnances")) || [];
+  const ordonnanceIndex = ordonnances.findIndex(o => o.id == ordonnanceId);
+  
+  if (ordonnanceIndex === -1) {
+    showNotification("Ordonnance introuvable", "error");
+    return;
+  }
+  
+  // Récupérer les informations de la pharmacie
+  const pharmacies = JSON.parse(localStorage.getItem("pharmacies")) || [];
+  const pharmacyIndex = parseInt(selectedPharmacy.getAttribute("data-index"));
+  const selectedPharmacyData = pharmacies[pharmacyIndex];
+  
+  // Mettre à jour le statut de l'ordonnance
+  ordonnances[ordonnanceIndex].status = "envoyee";
+  ordonnances[ordonnanceIndex].sentToPharmacy = {
+    pharmacyId: selectedPharmacyData.id,
+    pharmacyName: selectedPharmacyData.name,
+    pharmacyAddress: selectedPharmacyData.address,
+    date: new Date().toLocaleDateString(),
+    message: message
+  };
+  
+  // Sauvegarder
+  localStorage.setItem("ordonnances", JSON.stringify(ordonnances));
+  
+  // Fermer le modal
+  closePharmacyModal();
+  
+  // Recharger les ordonnances
+  loadOrdonnances();
+  
+  // Afficher une notification
+  showNotification(`Ordonnance envoyée à ${selectedPharmacyData.name} avec succès`, "success");
+}
+
+// Afficher une notification
+function showNotification(message, type = "info") {
+  const notification = document.createElement("div");
+  notification.className = `notification ${type}`;
+  
+  // Icône selon le type
+  let icon = "fa-info-circle";
+  if (type === 'success') icon = 'fa-check-circle';
+  if (type === 'error') icon = 'fa-exclamation-circle';
+  
+  notification.innerHTML = `
+    <i class="fa-solid ${icon}"></i>
+    <span>${message}</span>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  // Supprimer la notification après 3 secondes
+  setTimeout(() => {
+    notification.style.opacity = "0";
+    notification.style.transform = "translateX(100%)";
+    setTimeout(() => {
+      if (notification.parentNode) {
+        document.body.removeChild(notification);
+      }
+    }, 300);
+  }, 3000);
+}
+
+// Retour à la liste des patients
 function goBack() {
   window.location.href = "patients.html";
 }
 
+// Initialisation au chargement de la page
 document.addEventListener("DOMContentLoaded", () => {
   loadPatientData();
+  
+  // Fermer les modals en cliquant à l'extérieur
+  window.addEventListener("click", (event) => {
+    const editModal = document.getElementById("editModal");
+    const pharmacyModal = document.getElementById("pharmacyModal");
+    
+    if (event.target === editModal) {
+      closeEditModal();
+    }
+    
+    if (event.target === pharmacyModal) {
+      closePharmacyModal();
+    }
+  });
+  
+  // Permettre d'appuyer sur Échap pour fermer les modals
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeEditModal();
+      closePharmacyModal();
+    }
+  });
 });
 </script>
-
 </body>
 </html>
