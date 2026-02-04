@@ -3,313 +3,238 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Messagerie - Médecin | OrdoPass</title>
+  <title>Contact Pharmacies - Médecin | OrdoPass</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    .messagerie-container {
-      display: grid;
-      grid-template-columns: 350px 1fr;
-      gap: 20px;
-      height: calc(100vh - 150px);
+    .pharmacies-container {
+      padding: 20px;
       background: white;
       border-radius: 12px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      overflow: hidden;
     }
 
-    /* Liste des conversations */
-    .conversations-list {
-      border-right: 1px solid #e1e5e9;
-      background: #f8f9fa;
-      overflow-y: auto;
+    .pharmacies-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
     }
 
-    .conversations-header {
-      padding: 20px;
-      border-bottom: 1px solid #e1e5e9;
-      background: white;
-    }
-
-    .search-conversations {
-      width: 100%;
-      padding: 12px 15px;
-      border: 1px solid #e1e5e9;
+    .add-pharmacie-btn {
+      background: #2a5298;
+      color: white;
+      border: none;
+      padding: 12px 24px;
       border-radius: 8px;
-      font-size: 0.9em;
-    }
-
-    .conversation-item {
+      cursor: pointer;
+      font-weight: 600;
       display: flex;
       align-items: center;
-      padding: 15px 20px;
-      border-bottom: 1px solid #e1e5e9;
-      cursor: pointer;
+      gap: 10px;
       transition: background 0.3s ease;
+    }
+
+    .add-pharmacie-btn:hover {
+      background: #1e3c72;
+    }
+
+    .pharmacies-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+
+    .pharmacie-card {
       background: white;
+      border: 1px solid #e1e5e9;
+      border-radius: 12px;
+      padding: 25px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
     }
 
-    .conversation-item:hover {
-      background: #f1f3f4;
+    .pharmacie-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
 
-    .conversation-item.active {
-      background: #e3f2fd;
-      border-right: 3px solid #1976d2;
+    .pharmacie-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 20px;
     }
 
-    .conversation-avatar {
-      width: 50px;
-      height: 50px;
+    .pharmacie-avatar {
+      width: 70px;
+      height: 70px;
       border-radius: 50%;
-      object-fit: cover;
-      margin-right: 15px;
-      background: #3498db;
+      background: linear-gradient(135deg, #2a5298, #1e3c72);
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
+      font-size: 24px;
       font-weight: bold;
+      flex-shrink: 0;
     }
 
-    .conversation-info {
+    .pharmacie-info {
       flex: 1;
-      min-width: 0;
     }
 
-    .conversation-name {
-      font-weight: 600;
+    .pharmacie-name {
+      font-size: 1.4em;
+      font-weight: 700;
       color: #2c3e50;
-      margin-bottom: 4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      margin-bottom: 5px;
     }
 
-    .conversation-preview {
+    .pharmacie-address {
       color: #7f8c8d;
-      font-size: 0.85em;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .conversation-meta {
-      text-align: right;
-      font-size: 0.8em;
-      color: #95a5a6;
-    }
-
-    .conversation-time {
-      margin-bottom: 4px;
-    }
-
-    .unread-badge {
-      background: #e74c3c;
-      color: white;
-      border-radius: 10px;
-      padding: 2px 8px;
-      font-size: 0.75em;
-      font-weight: 600;
-    }
-
-    /* Zone de chat */
-    .chat-area {
-      display: flex;
-      flex-direction: column;
-      background: white;
-    }
-
-    .chat-header {
-      padding: 20px;
-      border-bottom: 1px solid #e1e5e9;
-      background: white;
-    }
-
-    .chat-header-info {
+      font-size: 0.9em;
       display: flex;
       align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+
+    .pharmacie-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+    }
+
+    .status-open {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-closed {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .pharmacie-details {
+      margin: 25px 0;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
       gap: 15px;
     }
 
-    .chat-header-avatar {
-      width: 50px;
-      height: 50px;
+    .detail-icon {
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      object-fit: cover;
-      background: #3498db;
+      background: white;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
-      font-weight: bold;
+      color: #2a5298;
+      font-size: 1.1em;
+      border: 1px solid #e1e5e9;
+      flex-shrink: 0;
     }
 
-    .chat-recipient-name {
+    .detail-content {
+      flex: 1;
+    }
+
+    .detail-label {
+      font-size: 0.85em;
+      color: #7f8c8d;
+      margin-bottom: 3px;
+    }
+
+    .detail-value {
       font-weight: 600;
       color: #2c3e50;
-      font-size: 1.1em;
     }
 
-    .chat-recipient-status {
-      color: #27ae60;
-      font-size: 0.9em;
+    .contact-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 25px;
     }
 
-    .chat-messages {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      background: #f8f9fa;
-    }
-
-    .message {
-      max-width: 70%;
-      margin-bottom: 15px;
-      padding: 12px 16px;
-      border-radius: 18px;
-      position: relative;
-      animation: messageAppear 0.3s ease;
-    }
-
-    @keyframes messageAppear {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .message.sent {
-      background: #3498db;
-      color: white;
-      margin-left: auto;
-      border-bottom-right-radius: 4px;
-    }
-
-    .message.received {
-      background: white;
-      color: #2c3e50;
-      border: 1px solid #e1e5e9;
-      border-bottom-left-radius: 4px;
-    }
-
-    .message-content {
-      margin-bottom: 5px;
-      line-height: 1.4;
-    }
-
-    .message-time {
-      font-size: 0.75em;
-      opacity: 0.8;
-      text-align: right;
-    }
-
-    .message.received .message-time {
-      text-align: left;
-    }
-
-    .chat-input-area {
-      padding: 20px;
-      border-top: 1px solid #e1e5e9;
-      background: white;
-    }
-
-    .message-input-container {
+    .contact-btn {
       display: flex;
-      gap: 10px;
-      align-items: flex-end;
-    }
-
-    .message-input {
-      flex: 1;
-      padding: 12px 15px;
-      border: 1px solid #e1e5e9;
-      border-radius: 25px;
-      resize: none;
-      font-family: inherit;
-      font-size: 1em;
-      max-height: 120px;
-      min-height: 50px;
-      outline: none;
-    }
-
-    .message-input:focus {
-      border-color: #3498db;
-      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-    }
-
-    .send-button {
-      padding: 12px 20px;
-      background: #3498db;
-      color: white;
-      border: none;
-      border-radius: 25px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    .send-button:hover {
-      background: #2980b9;
-    }
-
-    .send-button:disabled {
-      background: #bdc3c7;
-      cursor: not-allowed;
-    }
-
-    .attachment-button {
-      padding: 12px;
-      background: transparent;
-      border: none;
-      color: #7f8c8d;
-      cursor: pointer;
-      border-radius: 50%;
-      transition: background 0.3s ease;
-    }
-
-    .attachment-button:hover {
-      background: #f1f3f4;
-    }
-
-    /* Nouvelle conversation */
-    .new-conversation-btn {
-      width: 100%;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
       padding: 15px;
-      background: #3498db;
-      color: white;
       border: none;
       border-radius: 8px;
-      cursor: pointer;
       font-weight: 600;
-      margin-bottom: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1em;
+    }
+
+    .whatsapp-btn {
+      background: #25D366;
+      color: white;
+    }
+
+    .whatsapp-btn:hover {
+      background: #128C7E;
+      transform: translateY(-2px);
+    }
+
+    .email-btn {
+      background: #EA4335;
+      color: white;
+    }
+
+    .email-btn:hover {
+      background: #D23F31;
+      transform: translateY(-2px);
+    }
+
+    .call-btn {
+      background: #4285F4;
+      color: white;
+    }
+
+    .call-btn:hover {
+      background: #3367D6;
+      transform: translateY(-2px);
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: none;
+      border: none;
+      color: #dc3545;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
       transition: background 0.3s ease;
     }
 
-    .new-conversation-btn:hover {
-      background: #2980b9;
+    .delete-btn:hover {
+      background: #f8d7da;
     }
 
-    .no-conversation {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      color: #7f8c8d;
-      text-align: center;
-    }
-
-    .no-conversation i {
-      font-size: 3em;
-      margin-bottom: 15px;
-      color: #bdc3c7;
-    }
-
-    /* Modal nouvelle conversation */
+    /* Modal styles */
     .modal {
       display: none;
       position: fixed;
@@ -325,7 +250,7 @@
 
     .modal-content {
       background: white;
-      padding: 30px;
+      padding: 40px;
       border-radius: 12px;
       width: 90%;
       max-width: 500px;
@@ -335,134 +260,179 @@
 
     .modal-header {
       display: flex;
-      justify-content: between;
+      justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
     }
 
     .close-modal {
       background: none;
       border: none;
-      font-size: 1.5em;
+      font-size: 1.8em;
       cursor: pointer;
       color: #7f8c8d;
-    }
-
-    .contact-list {
-      max-height: 300px;
-      overflow-y: auto;
-    }
-
-    .contact-item {
+      padding: 0;
+      width: 30px;
+      height: 30px;
       display: flex;
       align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background 0.3s ease;
+    }
+
+    .close-modal:hover {
+      background: #f8f9fa;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 0.95em;
+    }
+
+    .form-control {
+      width: 100%;
       padding: 12px 15px;
       border: 1px solid #e1e5e9;
       border-radius: 8px;
-      margin-bottom: 10px;
+      font-size: 1em;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #2a5298;
+      box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      padding: 15px;
+      background: #2a5298;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
       cursor: pointer;
       transition: background 0.3s ease;
     }
 
-    .contact-item:hover {
-      background: #f8f9fa;
+    .btn-primary:hover {
+      background: #1e3c72;
     }
 
-    .contact-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: #3498db;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: bold;
-      margin-right: 15px;
-    }
-
-    .contact-info {
+    .btn-secondary {
       flex: 1;
+      padding: 15px;
+      background: #f8f9fa;
+      color: #2c3e50;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
     }
 
-    .contact-name {
+    .btn-secondary:hover {
+      background: #e9ecef;
+    }
+
+    /* Hours grid */
+    .hours-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .hour-item {
+      background: white;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #e1e5e9;
+      font-size: 0.9em;
+    }
+
+    .hour-day {
       font-weight: 600;
       color: #2c3e50;
+      margin-bottom: 5px;
     }
 
-    .contact-type {
+    .hour-time {
       color: #7f8c8d;
-      font-size: 0.85em;
     }
 
     /* Responsive */
     @media (max-width: 768px) {
-      .messagerie-container {
+      .pharmacies-grid {
         grid-template-columns: 1fr;
       }
       
-      .conversations-list {
-        display: none;
+      .contact-buttons {
+        grid-template-columns: 1fr;
       }
       
-      .conversations-list.mobile-visible {
-        display: block;
+      .pharmacie-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
       }
       
-      .chat-area.mobile-hidden {
-        display: none;
+      .modal-content {
+        padding: 25px;
+        margin: 15px;
       }
     }
 
-    .typing-indicator {
-      display: flex;
-      align-items: center;
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
       color: #7f8c8d;
-      font-style: italic;
-      margin-bottom: 15px;
     }
 
-    .typing-dots {
-      display: flex;
-      margin-left: 8px;
+    .empty-state i {
+      font-size: 4em;
+      color: #bdc3c7;
+      margin-bottom: 20px;
     }
 
-    .typing-dot {
-      width: 6px;
-      height: 6px;
-      background: #7f8c8d;
-      border-radius: 50%;
-      margin: 0 2px;
-      animation: typing 1.4s infinite;
+    .empty-state h3 {
+      color: #2c3e50;
+      margin-bottom: 10px;
     }
 
-    .typing-dot:nth-child(2) {
-      animation-delay: 0.2s;
+    .search-bar {
+      width: 100%;
+      padding: 15px;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 1em;
+      margin-bottom: 25px;
+      background: #f8f9fa url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E") no-repeat 15px center;
+      padding-left: 50px;
+      background-size: 20px;
     }
 
-    .typing-dot:nth-child(3) {
-      animation-delay: 0.4s;
-    }
-
-    @keyframes typing {
-      0%, 60%, 100% {
-        transform: translateY(0);
-      }
-      30% {
-        transform: translateY(-5px);
-      }
-    }
-
-    /* CORRECTION : S'assurer que la zone de texte est accessible */
-    .message-input:focus {
-      border-color: #3498db !important;
-      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2) !important;
-    }
-
-    /* Style pour quand une conversation est sélectionnée */
-    .chat-active {
-      display: flex !important;
-      flex-direction: column;
+    .search-bar:focus {
+      outline: none;
+      border-color: #2a5298;
+      background-color: white;
     }
   </style>
 </head>
@@ -476,20 +446,19 @@
       <a class="nav-link" href="medecin_dashboard.html"><i class="fa-solid fa-file-medical"></i> Consultations</a>
       <a href="patients.html"><i class="fa-solid fa-users"></i> Patients</a>
       <a href="teleconsultations.html"><i class="fa-solid fa-video"></i> Téléconsultation</a>
-      <a href="pharmacies.html"><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies</a>
-      <a href="medecin_messagerie.html" class="active"><i class="fa-solid fa-comment-medical"></i> Messagerie</a>
+      <a href="pharmacies.html" class="active"><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies</a>
       <a href="parametres.html"><i class="fa-solid fa-gear"></i> Paramètres</a>
       <a href="medecin_facturation.html"><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</a>
       <a href="medecin_rendezvous.html"><i class="fa-solid fa-calendar-check"></i> Rendez-vous</a>
       <a href="medecin_ordonnance.html"><i class="fa-solid fa-prescription"></i> Ordonnances sécurisées</a>
-         <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+      <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
     </nav>
   </aside>
 
   <!-- Main -->
   <main class="main-area">
     <header class="topbar">
-      <h1><i class="fa-solid fa-comment-medical"></i> Messagerie</h1>
+      <h1><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies partenaires</h1>
       <div class="user-info">
         <span id="usernameDisplay">Dr. Diallo</span>
         <i class="fa-solid fa-user-md"></i>
@@ -497,85 +466,96 @@
     </header>
 
     <section class="content">
-      <div class="messagerie-container">
-        <!-- Liste des conversations -->
-        <div class="conversations-list" id="conversationsList">
-          <div class="conversations-header">
-            <button class="new-conversation-btn" onclick="openNewConversationModal()">
-              <i class="fa-solid fa-plus"></i> Nouvelle conversation
-            </button>
-            <input type="text" class="search-conversations" id="searchConversations" placeholder="🔍 Rechercher une conversation...">
+      <div class="pharmacies-container">
+        <div class="pharmacies-header">
+          <div>
+            <h2>Contacts des pharmacies</h2>
+            <p style="color: #7f8c8d; margin-top: 5px;">Contactez directement les pharmacies via WhatsApp, Email ou Téléphone</p>
           </div>
-          <div id="conversationsContainer">
-            <!-- Les conversations seront chargées ici dynamiquement -->
-          </div>
+          <button class="add-pharmacie-btn" onclick="openAddPharmacieModal()">
+            <i class="fa-solid fa-plus"></i> Ajouter une pharmacie
+          </button>
         </div>
 
-        <!-- Zone de chat -->
-        <div class="chat-area" id="chatArea">
-          <div class="no-conversation" id="noConversation">
-            <i class="fa-solid fa-comments"></i>
-            <h3>Aucune conversation sélectionnée</h3>
-            <p>Sélectionnez une conversation ou démarrez-en une nouvelle</p>
-          </div>
+        <input type="text" class="search-bar" id="searchPharmacies" placeholder="Rechercher une pharmacie par nom, adresse ou téléphone...">
 
-          <div class="chat-active" id="chatActive" style="display: none;">
-            <div class="chat-header">
-              <div class="chat-header-info">
-                <div class="chat-header-avatar" id="currentChatAvatar">P</div>
-                <div>
-                  <div class="chat-recipient-name" id="currentChatName">Pharmacie Centrale</div>
-                  <div class="chat-recipient-status" id="currentChatStatus">En ligne</div>
-                </div>
-              </div>
-            </div>
+        <div id="pharmaciesList">
+          <!-- Les pharmacies seront chargées ici dynamiquement -->
+        </div>
 
-            <div class="chat-messages" id="chatMessages">
-              <!-- Les messages seront chargés ici dynamiquement -->
-            </div>
-
-            <div class="chat-input-area">
-              <div class="message-input-container">
-                <button class="attachment-button" type="button">
-                  <i class="fa-solid fa-paperclip"></i>
-                </button>
-                <textarea 
-                  class="message-input" 
-                  id="messageInput" 
-                  placeholder="Tapez votre message..." 
-                  rows="1"
-                  style="height: 50px;"
-                ></textarea>
-                <button class="send-button" id="sendButton" type="button" onclick="sendMessage()">
-                  <i class="fa-solid fa-paper-plane"></i>
-                </button>
-              </div>
-            </div>
-          </div>
+        <div id="emptyState" class="empty-state" style="display: none;">
+          <i class="fa-solid fa-clipboard-list"></i>
+          <h3>Aucune pharmacie enregistrée</h3>
+          <p>Commencez par ajouter une pharmacie partenaire pour pouvoir la contacter</p>
+          <button class="add-pharmacie-btn" onclick="openAddPharmacieModal()" style="margin-top: 20px;">
+            <i class="fa-solid fa-plus"></i> Ajouter votre première pharmacie
+          </button>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Modal nouvelle conversation -->
-  <div class="modal" id="newConversationModal">
+  <!-- Modal Ajouter/Modifier Pharmacie -->
+  <div class="modal" id="pharmacieModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Nouvelle conversation</h2>
-        <button class="close-modal" onclick="closeNewConversationModal()">&times;</button>
+        <h2 id="modalTitle">Ajouter une pharmacie</h2>
+        <button class="close-modal" onclick="closePharmacieModal()">&times;</button>
       </div>
       
-      <input type="text" id="searchContacts" placeholder="🔍 Rechercher un contact..." style="width: 100%; padding: 12px; border: 1px solid #e1e5e9; border-radius: 8px; margin-bottom: 15px;">
-      
-      <div class="contact-list" id="contactList">
-        <!-- Liste des contacts -->
-      </div>
+      <form id="pharmacieForm">
+        <div class="form-group">
+          <label class="form-label">Nom de la pharmacie *</label>
+          <input type="text" class="form-control" id="pharmacieName" required placeholder="Ex: Pharmacie Centrale">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Adresse *</label>
+          <input type="text" class="form-control" id="pharmacieAddress" required placeholder="Ex: 123 Avenue Bourguiba, Dakar">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Téléphone *</label>
+          <input type="tel" class="form-control" id="pharmaciePhone" required placeholder="Ex: +221 77 123 45 67">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input type="email" class="form-control" id="pharmacieEmail" required placeholder="Ex: contact@pharmacie.sn">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Propriétaire/Responsable</label>
+          <input type="text" class="form-control" id="pharmacieOwner" placeholder="Ex: M. Souleymane Diallo">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Heures d'ouverture</label>
+          <div class="hours-grid">
+            <div class="hour-item">
+              <div class="hour-day">Lundi - Vendredi</div>
+              <div class="hour-time" id="weekdaysHours">08:00 - 20:00</div>
+            </div>
+            <div class="hour-item">
+              <div class="hour-day">Samedi</div>
+              <div class="hour-time" id="saturdayHours">08:00 - 18:00</div>
+            </div>
+            <div class="hour-item">
+              <div class="hour-day">Dimanche</div>
+              <div class="hour-time" id="sundayHours">09:00 - 13:00</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-buttons">
+          <button type="button" class="btn-secondary" onclick="closePharmacieModal()">Annuler</button>
+          <button type="submit" class="btn-primary" id="modalSubmitBtn">Enregistrer</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
- <script src="/socket.io/socket.io.js"></script>
-<script>
+  <script>
 /* ===== Vérification session ===== */
 const user = JSON.parse(localStorage.getItem("user"));
 
@@ -589,7 +569,7 @@ if (user.role !== "medecin") {
   window.location.href = "index.html";
 }
 
-document.getElementById("usernameDisplay").textContent = user.username;
+document.getElementById("usernameDisplay").textContent = user.username || "Dr. Diallo";
 
 /* Logout */
 document.getElementById("logout").addEventListener("click", function(e){
@@ -598,111 +578,331 @@ document.getElementById("logout").addEventListener("click", function(e){
   window.location.href = "index.html";
 });
 
-/* ===== Socket ===== */
-let socket = io();
+/* ===== Données des pharmacies ===== */
+let pharmacies = JSON.parse(localStorage.getItem('pharmacies')) || [];
 
-socket.on("connect", () => {
-  console.log("✅ Connecté à Socket.io");
-  socket.emit("join", {
-    username: user.username,
-    role: "medecin"
+// Données par défaut si vide
+if (pharmacies.length === 0) {
+  pharmacies = [
+    {
+      id: 1,
+      name: "Pharmacie Centrale",
+      address: "123 Avenue Bourguiba, Dakar",
+      phone: "+221771234567",
+      email: "pharmacie.centrale@example.com",
+      owner: "M. Souleymane Diallo",
+      status: "open",
+      hours: {
+        weekdays: "08:00 - 20:00",
+        saturday: "08:00 - 18:00",
+        sunday: "09:00 - 13:00"
+      }
+    },
+    {
+      id: 2,
+      name: "Pharmacie Mamelles",
+      address: "456 Rue des Almadies, Dakar",
+      phone: "+221772345678",
+      email: "pharmacie.mamelles@example.com",
+      owner: "Mme. Aminata Ndiaye",
+      status: "open",
+      hours: {
+        weekdays: "08:00 - 22:00",
+        saturday: "08:00 - 20:00",
+        sunday: "10:00 - 16:00"
+      }
+    },
+    {
+      id: 3,
+      name: "Pharmacie Liberté VI",
+      address: "789 Avenue Léopold Sédar Senghor",
+      phone: "+221773456789",
+      email: "pharmacie.liberte@example.com",
+      owner: "Dr. Mohamed Kane",
+      status: "closed",
+      hours: {
+        weekdays: "07:30 - 21:00",
+        saturday: "08:00 - 19:00",
+        sunday: "Fermé"
+      }
+    }
+  ];
+  localStorage.setItem('pharmacies', JSON.stringify(pharmacies));
+}
+
+/* ===== Variables globales ===== */
+let isEditing = false;
+let editingPharmacieId = null;
+
+/* ===== Charger les pharmacies ===== */
+function loadPharmacies() {
+  const container = document.getElementById('pharmaciesList');
+  const emptyState = document.getElementById('emptyState');
+  const searchTerm = document.getElementById('searchPharmacies').value.toLowerCase();
+
+  if (pharmacies.length === 0) {
+    container.style.display = 'none';
+    emptyState.style.display = 'block';
+    return;
+  }
+
+  container.style.display = 'block';
+  emptyState.style.display = 'none';
+
+  // Filtrer les pharmacies selon la recherche
+  const filteredPharmacies = pharmacies.filter(pharmacie => {
+    return (
+      pharmacie.name.toLowerCase().includes(searchTerm) ||
+      pharmacie.address.toLowerCase().includes(searchTerm) ||
+      pharmacie.phone.toLowerCase().includes(searchTerm) ||
+      pharmacie.email.toLowerCase().includes(searchTerm)
+    );
   });
-});
 
-/* ===== Données démo ===== */
-const contacts = [
-  { id: 1, name: "Pharmacie Centrale", avatar: "PC", online: true },
-  { id: 2, name: "Pharmacie Mamelles", avatar: "PM", online: false }
-];
-
-const conversations = {
-  1: [
-    { sender: "other", content: "Bonjour docteur", time: "10:30" }
-  ],
-  2: []
-};
-
-let currentConversationId = null;
-
-const conversationsContainer = document.getElementById("conversationsContainer");
-const chatMessages = document.getElementById("chatMessages");
-const messageInput = document.getElementById("messageInput");
-
-/* ===== Charger conversations ===== */
-function loadConversations(){
-  conversationsContainer.innerHTML = "";
-
-  contacts.forEach(c=>{
-    const div = document.createElement("div");
-    div.className="conversation-item";
-    div.innerHTML = `
-      <div class="conversation-avatar">${c.avatar}</div>
-      <div class="conversation-info">
-        <div class="conversation-name">${c.name}</div>
-      </div>
-      <div class="conversation-meta">
-        ${c.online ? "🟢" : "🔴"}
+  if (filteredPharmacies.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <i class="fa-solid fa-search"></i>
+        <h3>Aucune pharmacie trouvée</h3>
+        <p>Aucune pharmacie ne correspond à votre recherche</p>
       </div>
     `;
-    div.onclick=()=>selectConversation(c.id);
-    conversationsContainer.appendChild(div);
+    return;
+  }
+
+  container.innerHTML = '<div class="pharmacies-grid"></div>';
+  const grid = container.querySelector('.pharmacies-grid');
+
+  filteredPharmacies.forEach(pharmacie => {
+    const card = document.createElement('div');
+    card.className = 'pharmacie-card';
+    card.innerHTML = `
+      <button class="delete-btn" onclick="deletePharmacie(${pharmacie.id})" title="Supprimer">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+      
+      <div class="pharmacie-header">
+        <div class="pharmacie-avatar">${pharmacie.name.charAt(0)}</div>
+        <div class="pharmacie-info">
+          <div class="pharmacie-name">${pharmacie.name}</div>
+          <div class="pharmacie-address">
+            <i class="fa-solid fa-location-dot"></i> ${pharmacie.address}
+          </div>
+          <div class="pharmacie-status ${pharmacie.status === 'open' ? 'status-open' : 'status-closed'}">
+            <i class="fa-solid fa-circle"></i> ${pharmacie.status === 'open' ? 'Ouverte' : 'Fermée'}
+          </div>
+        </div>
+      </div>
+      
+      <div class="pharmacie-details">
+        <div class="detail-item">
+          <div class="detail-icon">
+            <i class="fa-solid fa-user"></i>
+          </div>
+          <div class="detail-content">
+            <div class="detail-label">Responsable</div>
+            <div class="detail-value">${pharmacie.owner || 'Non spécifié'}</div>
+          </div>
+        </div>
+        
+        <div class="detail-item">
+          <div class="detail-icon">
+            <i class="fa-solid fa-phone"></i>
+          </div>
+          <div class="detail-content">
+            <div class="detail-label">Téléphone</div>
+            <div class="detail-value">${pharmacie.phone}</div>
+          </div>
+        </div>
+        
+        <div class="detail-item">
+          <div class="detail-icon">
+            <i class="fa-solid fa-envelope"></i>
+          </div>
+          <div class="detail-content">
+            <div class="detail-label">Email</div>
+            <div class="detail-value">${pharmacie.email}</div>
+          </div>
+        </div>
+        
+        <div class="detail-item">
+          <div class="detail-icon">
+            <i class="fa-solid fa-clock"></i>
+          </div>
+          <div class="detail-content">
+            <div class="detail-label">Horaires</div>
+            <div class="detail-value">
+              Lun-Ven: ${pharmacie.hours.weekdays}<br>
+              Sam: ${pharmacie.hours.saturday}<br>
+              Dim: ${pharmacie.hours.sunday}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="contact-buttons">
+        <button class="contact-btn whatsapp-btn" onclick="contactWhatsApp('${pharmacie.phone}', '${pharmacie.name}')">
+          <i class="fa-brands fa-whatsapp"></i> WhatsApp
+        </button>
+        <button class="contact-btn email-btn" onclick="contactEmail('${pharmacie.email}', '${pharmacie.name}')">
+          <i class="fa-solid fa-envelope"></i> Email
+        </button>
+        <button class="contact-btn call-btn" onclick="contactPhone('${pharmacie.phone}', '${pharmacie.name}')">
+          <i class="fa-solid fa-phone"></i> Appeler
+        </button>
+        <button class="contact-btn" style="background: #6c757d; color: white;" onclick="editPharmacie(${pharmacie.id})">
+          <i class="fa-solid fa-edit"></i> Modifier
+        </button>
+      </div>
+    `;
+    grid.appendChild(card);
   });
 }
 
-function selectConversation(id){
-  currentConversationId = id;
-  document.getElementById("noConversation").style.display="none";
-  document.getElementById("chatActive").style.display="flex";
-
-  const contact = contacts.find(c=>c.id===id);
-  document.getElementById("currentChatName").textContent = contact.name;
-  document.getElementById("currentChatAvatar").textContent = contact.avatar;
-  document.getElementById("currentChatStatus").innerHTML = contact.online ? "🟢 En ligne" : "🔴 Hors ligne";
-
-  loadMessages();
+/* ===== Contact functions ===== */
+function contactWhatsApp(phone, name) {
+  // Nettoyer le numéro de téléphone
+  const cleanPhone = phone.replace(/\D/g, '');
+  const message = encodeURIComponent(`Bonjour ${name},\n\nJe suis ${user.username}, médecin sur OrdoPass.\nJe souhaiterais vous contacter concernant une ordonnance.`);
+  window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
 }
 
-function loadMessages(){
-  chatMessages.innerHTML="";
-  (conversations[currentConversationId]||[]).forEach(m=>{
-    addMessage(m.sender,m.content,m.time);
-  });
+function contactEmail(email, name) {
+  const subject = encodeURIComponent(`Contact OrdoPass - Dr. ${user.username}`);
+  const body = encodeURIComponent(`Bonjour ${name},\n\nJe suis ${user.username}, médecin sur OrdoPass.\n\nJe souhaiterais vous contacter concernant une ordonnance.\n\nCordialement,\nDr. ${user.username}`);
+  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
 }
 
-function addMessage(sender,text,time){
-  const div=document.createElement("div");
-  div.className="message "+(sender==="me"?"sent":"received");
-  div.innerHTML=`
-    <div class="message-content">${text}</div>
-    <div class="message-time">${time}</div>
-  `;
-  chatMessages.appendChild(div);
-  chatMessages.scrollTop=chatMessages.scrollHeight;
+function contactPhone(phone, name) {
+  if (confirm(`Appeler ${name} au ${phone} ?`)) {
+    window.location.href = `tel:${phone}`;
+  }
 }
 
-/* ===== Envoi message ===== */
-function sendMessage(){
-  const text = messageInput.value.trim();
-  if(!text || !currentConversationId) return;
+/* ===== Modal functions ===== */
+function openAddPharmacieModal() {
+  isEditing = false;
+  editingPharmacieId = null;
+  document.getElementById('modalTitle').textContent = 'Ajouter une pharmacie';
+  document.getElementById('modalSubmitBtn').textContent = 'Ajouter';
+  document.getElementById('pharmacieForm').reset();
+  document.getElementById('pharmacieModal').style.display = 'flex';
+}
 
-  const msg = {
-    sender:"me",
-    content:text,
-    time:new Date().toLocaleTimeString().slice(0,5)
+function editPharmacie(id) {
+  const pharmacie = pharmacies.find(p => p.id === id);
+  if (!pharmacie) return;
+
+  isEditing = true;
+  editingPharmacieId = id;
+  
+  document.getElementById('modalTitle').textContent = 'Modifier la pharmacie';
+  document.getElementById('modalSubmitBtn').textContent = 'Modifier';
+  
+  document.getElementById('pharmacieName').value = pharmacie.name;
+  document.getElementById('pharmacieAddress').value = pharmacie.address;
+  document.getElementById('pharmaciePhone').value = pharmacie.phone;
+  document.getElementById('pharmacieEmail').value = pharmacie.email;
+  document.getElementById('pharmacieOwner').value = pharmacie.owner || '';
+  
+  // Mettre à jour les horaires d'affichage
+  document.getElementById('weekdaysHours').textContent = pharmacie.hours.weekdays;
+  document.getElementById('saturdayHours').textContent = pharmacie.hours.saturday;
+  document.getElementById('sundayHours').textContent = pharmacie.hours.sunday;
+  
+  document.getElementById('pharmacieModal').style.display = 'flex';
+}
+
+function closePharmacieModal() {
+  document.getElementById('pharmacieModal').style.display = 'none';
+  isEditing = false;
+  editingPharmacieId = null;
+  document.getElementById('pharmacieForm').reset();
+}
+
+function deletePharmacie(id) {
+  if (confirm('Êtes-vous sûr de vouloir supprimer cette pharmacie ?')) {
+    pharmacies = pharmacies.filter(p => p.id !== id);
+    localStorage.setItem('pharmacies', JSON.stringify(pharmacies));
+    loadPharmacies();
+    showNotification('Pharmacie supprimée avec succès', 'success');
+  }
+}
+
+/* ===== Form submission ===== */
+document.getElementById('pharmacieForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  const pharmacieData = {
+    id: isEditing ? editingPharmacieId : Date.now(),
+    name: document.getElementById('pharmacieName').value,
+    address: document.getElementById('pharmacieAddress').value,
+    phone: document.getElementById('pharmaciePhone').value,
+    email: document.getElementById('pharmacieEmail').value,
+    owner: document.getElementById('pharmacieOwner').value,
+    status: 'open',
+    hours: {
+      weekdays: document.getElementById('weekdaysHours').textContent,
+      saturday: document.getElementById('saturdayHours').textContent,
+      sunday: document.getElementById('sundayHours').textContent
+    }
   };
+  
+  if (isEditing) {
+    // Modifier une pharmacie existante
+    const index = pharmacies.findIndex(p => p.id === editingPharmacieId);
+    if (index !== -1) {
+      pharmacies[index] = pharmacieData;
+    }
+  } else {
+    // Ajouter une nouvelle pharmacie
+    pharmacies.push(pharmacieData);
+  }
+  
+  localStorage.setItem('pharmacies', JSON.stringify(pharmacies));
+  closePharmacieModal();
+  loadPharmacies();
+  
+  const message = isEditing ? 'Pharmacie modifiée avec succès' : 'Pharmacie ajoutée avec succès';
+  showNotification(message, 'success');
+});
 
-  conversations[currentConversationId].push(msg);
-  addMessage("me",text,msg.time);
+/* ===== Search functionality ===== */
+document.getElementById('searchPharmacies').addEventListener('input', loadPharmacies);
 
-  socket.emit("chat:message",{
-    to: contacts.find(c=>c.id===currentConversationId).name,
-    text:text
-  });
-
-  messageInput.value="";
+/* ===== Notification function ===== */
+function showNotification(message, type) {
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <i class="fa-solid fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+      <span>${message}</span>
+    </div>
+  `;
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    background: ${type === 'success' ? '#28a745' : '#dc3545'};
+    z-index: 10000;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    animation: slideIn 0.3s ease-out;
+  `;
+  
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.remove();
+  }, 3000);
 }
 
-loadConversations();
-</script>
+/* ===== Initial load ===== */
+window.addEventListener('DOMContentLoaded', loadPharmacies);
+  </script>
 </body>
 </html>
