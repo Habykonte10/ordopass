@@ -713,6 +713,9 @@
       <button class="btn-success" onclick="newConsultation()">
         <i class="fa-solid fa-stethoscope"></i> Nouvelle consultation
       </button>
+      <button class="btn-warning" onclick="newOrdonnanceFromPatient()">
+        <i class="fa-solid fa-file-prescription"></i> Nouvelle ordonnance
+      </button>
       <button class="btn-info" onclick="viewAllConsultations()">
         <i class="fa-solid fa-clipboard-list"></i> Historique consultations
       </button>
@@ -1285,6 +1288,16 @@ function newConsultation() {
   }
 }
 
+// NOUVELLE ORDONNANCE - REDIRECTION VERS LA PAGE DE NOUVELLE ORDONNANCE
+function newOrdonnanceFromPatient() {
+  const patientId = getPatientFromURL();
+  if (patientId && currentPatient) {
+    window.location.href = `medecin_ordonnance.html?patientId=${patientId}&patientName=${encodeURIComponent(currentPatient.name)}&patientAge=${currentPatient.age}&patientGender=${currentPatient.gender}&patientAddress=${encodeURIComponent(currentPatient.address)}`;
+  } else {
+    window.location.href = "medecin_ordonnance.html";
+  }
+}
+
 // HISTORIQUE DES CONSULTATIONS - REDIRECTION VERS LE DASHBOARD
 function viewAllConsultations() {
   window.location.href = "medecin_dashboard.html";
@@ -1381,7 +1394,11 @@ function viewConsultationDetails(consultationId) {
 // Créer une ordonnance pour une consultation
 function createOrdonnanceForConsultation(consultationId) {
   const patientId = getPatientFromURL();
-  window.location.href = `new-ordonnance.html?patientId=${patientId}&consultationId=${consultationId}`;
+  if (patientId && currentPatient) {
+    window.location.href = `medecin_ordonnance.html?patientId=${patientId}&consultationId=${consultationId}&patientName=${encodeURIComponent(currentPatient.name)}&patientAge=${currentPatient.age}&patientGender=${currentPatient.gender}&patientAddress=${encodeURIComponent(currentPatient.address)}`;
+  } else {
+    window.location.href = `medecin_ordonnance.html?consultationId=${consultationId}`;
+  }
 }
 
 // Fermer les détails de consultation

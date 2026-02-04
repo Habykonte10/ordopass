@@ -734,6 +734,7 @@ let currentOrdonnance = null;
 let currentOrdonnanceId = null;
 let selectedPharmacie = null;
 let allPharmacies = [];
+let currentPatientId = null;
 
 /* ===== Initialisation ===== */
 document.addEventListener('DOMContentLoaded', function() {
@@ -744,6 +745,38 @@ document.addEventListener('DOMContentLoaded', function() {
   // Remplir le nom du médecin
   if (user.username) {
     document.getElementById('nomMedecin').value = user.username;
+  }
+  
+  // Récupérer les paramètres d'URL pour pré-remplir les infos patient
+  const urlParams = new URLSearchParams(window.location.search);
+  const patientId = urlParams.get('patientId');
+  const patientName = urlParams.get('patientName');
+  const patientAge = urlParams.get('patientAge');
+  const patientGender = urlParams.get('patientGender');
+  const patientAddress = urlParams.get('patientAddress');
+
+  // Pré-remplir les champs si des infos patient sont fournies
+  if (patientName) {
+    document.getElementById('nom').value = decodeURIComponent(patientName);
+  }
+
+  if (patientAge) {
+    document.getElementById('age').value = patientAge;
+  }
+
+  if (patientGender) {
+    // Convertir "Femme"/"Homme" en "F"/"M"
+    let genderValue = patientGender === 'Femme' ? 'F' : patientGender === 'Homme' ? 'M' : patientGender;
+    document.getElementById('genre').value = genderValue;
+  }
+
+  if (patientAddress) {
+    document.getElementById('adresse').value = decodeURIComponent(patientAddress);
+  }
+
+  // Stocker l'ID patient pour référence
+  if (patientId) {
+    currentPatientId = patientId;
   }
   
   // Initialiser les onglets
@@ -821,6 +854,11 @@ function generatePreview() {
     statut: 'active',
     createdAt: new Date().toISOString()
   };
+  
+  // Ajouter l'ID patient si disponible
+  if (currentPatientId) {
+    currentOrdonnance.patientId = currentPatientId;
+  }
   
   // Afficher l'aperçu
   displayPreview(currentOrdonnance);
@@ -928,6 +966,11 @@ function saveOrdonnance() {
   currentOrdonnance.id = Date.now();
   currentOrdonnanceId = currentOrdonnance.id;
   
+  // Ajouter l'ID patient si disponible
+  if (currentPatientId) {
+    currentOrdonnance.patientId = currentPatientId;
+  }
+  
   // Récupérer les ordonnances existantes
   let ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
   
@@ -964,6 +1007,7 @@ function saveOrdonnance() {
     document.getElementById('pdfBtn').disabled = true;
     currentOrdonnance = null;
     currentOrdonnanceId = null;
+    currentPatientId = null;
   }, 1500);
 }
 
