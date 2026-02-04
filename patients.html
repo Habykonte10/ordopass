@@ -614,6 +614,622 @@
     </div>
   </div>
 
+  <!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patients - OrdoPass</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    
+    body {
+      background-color: #f5f5f5;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    .dashboard-page {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    .sidebar {
+      width: 250px;
+      background: #2a5298;
+      color: white;
+      padding: 20px 0;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 20px;
+    }
+    
+    .logo i {
+      font-size: 24px;
+    }
+    
+    .logo span {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+    .sidebar nav {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar nav a {
+      color: white;
+      text-decoration: none;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.3s;
+    }
+    
+    .sidebar nav a:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    
+    .sidebar nav a.active {
+      background: rgba(255,255,255,0.2);
+      border-left: 4px solid white;
+    }
+    
+    .main-area {
+      flex: 1;
+      margin-left: 250px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .topbar {
+      background: white;
+      padding: 15px 30px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .topbar h1 {
+      color: #2a5298;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    
+    .content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 25px;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .card-header h2 {
+      color: #2a5298;
+      font-size: 20px;
+    }
+    
+    .btn-primary {
+      background: #2a5298;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary:hover {
+      background: #1e3c72;
+    }
+    
+    .btn-outline {
+      border: 1px solid #2a5298;
+      color: #2a5298;
+      background: white;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.3s;
+    }
+    
+    .btn-outline:hover {
+      background: #f0f5ff;
+    }
+    
+    .message-container {
+      margin-bottom: 20px;
+    }
+    
+    .message {
+      padding: 12px 15px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+    
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .message.info {
+      background: #cce7ff;
+      color: #004085;
+      border: 1px solid #b3d7ff;
+    }
+    
+    .filters-container {
+      display: flex;
+      gap: 15px;
+      align-items: end;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .filter-group label {
+      font-weight: bold;
+      color: #555;
+      font-size: 0.9rem;
+    }
+    
+    .filters-container input {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      min-width: 250px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    
+    .stat-card {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .stat-card h3 {
+      font-size: 32px;
+      color: #2a5298;
+      margin-bottom: 5px;
+    }
+    
+    .stat-card p {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    .stat-card.pending {
+      border-left: 4px solid #ffc107;
+    }
+    
+    .stat-card.completed {
+      border-left: 4px solid #28a745;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    
+    th {
+      background-color: #f8f9fa;
+      font-weight: bold;
+      color: #555;
+    }
+    
+    tr:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .loading, .no-data {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    
+    .no-data i {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      color: #ddd;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .btn-view {
+      background: #17a2b8;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .btn-view:hover {
+      background: #138496;
+    }
+    
+    .pagination-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+    }
+    
+    .pagination-info {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    .pagination-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .modal-content {
+      background: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+    }
+    
+    .modal-content h2 {
+      margin-bottom: 20px;
+      color: #2a5298;
+    }
+    
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+    
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    /* Styles pour le modal des pharmacies */
+    .pharmacie-item {
+      padding: 10px;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .pharmacie-item:hover {
+      background-color: #f5f5f5;
+    }
+    
+    .pharmacie-item.selected {
+      background-color: #e6f7ff;
+      border-color: #2a5298;
+    }
+    
+    .online-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+    
+    .online {
+      background-color: #28a745;
+    }
+    
+    .offline {
+      background-color: #dc3545;
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 70px;
+      }
+      
+      .sidebar .logo span,
+      .sidebar nav a span {
+        display: none;
+      }
+      
+      .main-area {
+        margin-left: 70px;
+      }
+      
+      .filters-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .filters-container input {
+        min-width: auto;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+      
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+
+<body class="dashboard-page">
+
+  <!-- ✅ SIDEBAR FIXE AVEC DÉFILEMENT -->
+  <aside class="sidebar">
+    <div class="logo">
+      <i class="fa-solid fa-notes-medical"></i>
+      <span>ORDOPASS</span>
+    </div>
+    <nav>
+      <a href="medecin_dashboard.html"><i class="fa-solid fa-file-medical"></i> <span>Consultations</span></a>
+      <a href="patients.html" class="active"><i class="fa-solid fa-users"></i> <span>Patients</span></a>
+      <a href="teleconsultation.html"><i class="fa-solid fa-video"></i> <span>Téléconsultation</span></a>
+      <a href="pharmacies.html"><i class="fa-solid fa-prescription-bottle-medical"></i> <span>Pharmacies</span></a>
+      <a href="medecin_messagerie.html"><i class="fa-solid fa-comment-medical"></i> <span>Messagerie</span></a>
+      <a href="parametres.html"><i class="fa-solid fa-gear"></i> <span>Paramètres</span></a>
+      <a href="medecin_facturation.html"><i class="fa-solid fa-file-invoice-dollar"></i> <span>Facturation</span></a>
+      <a href="medecin_rendezvous.html"><i class="fa-solid fa-calendar-check"></i> <span>Rendez-vous</span></a>
+      <a href="medecin_ordonnance.html"><i class="fa-solid fa-prescription"></i> <span>Ordonnances sécurisées</span></a>
+      <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> <span>Déconnexion</span></a>
+    </nav>
+  </aside>
+
+  <!-- ✅ CONTENU PRINCIPAL -->
+  <main class="main-area">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <h1><i class="fa-solid fa-users"></i> Liste des patients</h1>
+      <div class="user-info">
+        <img src="https://i.pravatar.cc/40" class="avatar" alt="profil">
+        <span id="usernameDisplay"></span>
+      </div>
+    </header>
+
+    <!-- CONTENU DÉFILANT -->
+    <section class="content">
+      <div class="card">
+        <div class="card-header">
+          <h2>Gestion des patients</h2>
+          <button class="btn-primary" onclick="showAddForm()">
+            <i class="fa-solid fa-plus"></i> Nouveau patient
+          </button>
+        </div>
+
+        <div id="messageContainer" class="message-container"></div>
+
+        <!-- Filtres et recherche -->
+        <div class="filters-container">
+          <div class="filter-group">
+            <label>Rechercher:</label>
+            <input type="text" id="searchInput" placeholder="Nom du patient..." onkeyup="filterPatients()">
+          </div>
+          <button class="btn-outline" onclick="clearSearch()">
+            <i class="fa-solid fa-times"></i> Effacer
+          </button>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3 id="totalPatients">0</h3>
+            <p>Total patients</p>
+          </div>
+          <div class="stat-card pending">
+            <h3 id="recentPatients">0</h3>
+            <p>Ajoutés ce mois</p>
+          </div>
+          <div class="stat-card completed">
+            <h3 id="adultPatients">0</h3>
+            <p>Patients adultes</p>
+          </div>
+        </div>
+
+        <!-- Table des patients -->
+        <table>
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Nom</th>
+              <th>Âge</th>
+              <th>Téléphone</th>
+              <th>Adresse</th>
+              <th>Date ajout</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="patientsBody">
+            <tr>
+              <td colspan="7" class="loading">
+                <i class="fa-solid fa-spinner fa-spin"></i> Chargement des patients...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="pagination-container">
+          <div id="paginationInfo" class="pagination-info"></div>
+          <div class="pagination-buttons">
+            <button class="btn-outline" id="prevBtn" onclick="changePage(-1)">
+              <i class="fa-solid fa-chevron-left"></i> Précédent
+            </button>
+            <button class="btn-outline" id="nextBtn" onclick="changePage(1)">
+              Suivant <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal formulaire patient -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <h2 id="modalTitle">Ajouter patient</h2>
+      <input type="text" id="name" placeholder="Nom complet" required>
+      <input type="number" id="age" placeholder="Âge" required>
+      <input type="text" id="phone" placeholder="Téléphone">
+      <input type="text" id="address" placeholder="Adresse">
+      <input type="text" id="image" placeholder="URL de l'image (optionnel)">
+      <div class="modal-actions">
+        <button id="saveBtn" class="btn-primary">Enregistrer</button>
+        <button onclick="closeForm()" class="btn-outline">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal pour sélectionner une pharmacie -->
+  <div id="pharmacieModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-map-location-dot"></i> Sélectionner une pharmacie</h3>
+        <span class="modal-close">&times;</span>
+      </div>
+      
+      <!-- Liste des pharmacies uniquement -->
+      <div style="margin-top: 15px;">
+        <h4><i class="fa-solid fa-list"></i> Liste des pharmacies disponibles</h4>
+        <div id="pharmacieList">
+          <!-- Les pharmacies seront chargées ici -->
+        </div>
+      </div>
+      
+      <div class="buttons" style="margin-top: 20px;">
+        <button id="confirmSendBtn" class="btn-primary" disabled>
+          <i class="fa-solid fa-paper-plane"></i> Envoyer
+        </button>
+        <button id="cancelSendBtn" class="btn-secondary">
+          <i class="fa-solid fa-times"></i> Annuler
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -688,5 +1304,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+</body>
+</html>
 </body>
 </html>
