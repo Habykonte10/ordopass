@@ -19,7 +19,7 @@ app.get("/api/test", (req, res) => {
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/pharmacies", require("./routes/pharmacies"));
 
-/* ===== FRONTEND ===== */
+/* ===== FRONTEND STATIC FILES ===== */
 const frontendPath = path.join(__dirname, "..");
 app.use(express.static(frontendPath));
 
@@ -27,15 +27,15 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
 
-/* ❌ PAS DE app.get("*") */
-
-/* ===== DB ===== */
-mongoose.connect(process.env.MONGO_URI)
+/* ===== DATABASE ===== */
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connecté"))
   .catch(err => console.error("❌ MongoDB erreur :", err));
 
-/* ===== START ===== */
+/* ===== START SERVER ===== */
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-  console.log("🚀 Serveur lancé sur http://localhost:" + PORT);
+  console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
 });
