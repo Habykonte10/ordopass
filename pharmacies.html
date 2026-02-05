@@ -354,368 +354,81 @@
     </section>
   </main>
 
-  <script src="/socket.io/socket.io.js"></script>
   <script>
-    /* ===== Vérification session ===== */
-    const user = JSON.parse(localStorage.getItem("user"));
+/* ===== SESSION ===== */
+const user = JSON.parse(localStorage.getItem("user"));
 
-    if (!user) {
-      alert("⚠️ Veuillez vous connecter.");
-      window.location.href = "index.html";
-    }
+if (!user || user.role !== "medecin") {
+  alert("Accès refusé");
+  window.location.href = "index.html";
+}
 
-    if (user.role !== "medecin") {
-      alert("⚠️ Accès réservé aux médecins.");
-      window.location.href = "index.html";
-    }
+document.getElementById("usernameDisplay").textContent = user.username;
 
-    document.getElementById("usernameDisplay").textContent = user.username;
+document.getElementById("logout").onclick = () => {
+  localStorage.removeItem("user");
+  location.href = "index.html";
+};
 
-    /* Logout */
-    document.getElementById("logout").addEventListener("click", function(e){
-      e.preventDefault();
-      localStorage.removeItem("user");
-      window.location.href="index.html";
-    });
+/* ===== API ===== */
+const API = "/api/pharmacies";
+let allPharmacies = [];
 
-    /* ===== Socket ===== */
-    const socket = io();
+/* ===== LOAD ===== */
+async function loadPharmacies() {
+  const container = document.getElementById("pharmaciesList");
+  container.innerHTML = `<p>Chargement...</p>`;
 
-    socket.on("connect", ()=>{
-      console.log("✅ Socket connecté (pharmacies)");
-      socket.emit("user_join",{
-        username:user.username,
-        role:"medecin"
-      });
-    });
+  try {
+    const res = await fetch(API);
+    const data = await res.json();
+    allPharmacies = data;
+    displayPharmacies(data);
+    updateStats(data);
+  } catch (e) {
+    container.innerHTML = `<p>Erreur serveur</p>`;
+  }
+}
 
-    /* ===== API Configuration ===== */
-    const API = "/api/pharmacies";
-    let allPharmacies = [];
+/* ===== DISPLAY ===== */
+function displayPharmacies(list) {
+  const c = document.getElementById("pharmaciesList");
+  if (list.length === 0) {
+    c.innerHTML = "<p>Aucune pharmacie</p>";
+    return;
+  }
 
-    /* ===== Chargement des pharmacies ===== */
-    async function loadPharmacies(){
-      const container = document.getElementById("pharmaciesList");
-      container.innerHTML = `
-        <div class="loading">
-          <i class="fa-solid fa-spinner fa-spin"></i> Chargement des pharmacies...
-        </div>
-      `;
+  c.innerHTML = list.map(p => `
+    <div class="pharmacy-card">
+      <div class="pharmacy-header">
+        <h3>${p.nom}</h3>
+        <span class="${p.online ? 'status-online' : 'status-offline'}">
+          ${p.online ? 'En ligne' : 'Hors ligne'}
+        </span>
+      </div>
+      <div class="pharmacy-details">
+        <div>${p.adresse || ""}</div>
+        <div>${p.telephone || ""}</div>
+        <div>${p.pharmacien || ""}</div>
+      </div>
+    </div>
+  `).join("");
+}
 
-      try {
-        // Essayer de charger depuis l'API
-        const res = await fetch(API);
-        if (res.ok) {
-          const data = await res.json();
-          allPharmacies = data;
-          localStorage.setItem("pharmacies", JSON.stringify(data));
-          displayPharmacies(data);
-          updateStats(data);
-          showNotification('Pharmacies chargées depuis le serveur', 'success');
-        } else {
-          throw new Error("Erreur de chargement de l'API");
-        }
-      } catch (error) {
-        console.error("Erreur API, fallback sur localStorage:", error);
-        // Fallback sur localStorage
-        const localData = JSON.parse(localStorage.getItem("pharmacies")) || [];
-        allPharmacies = localData;
-        displayPharmacies(localData);
-        updateStats(localData);
-        
-        // Si localData est vide, charger les pharmacies par défaut
-        if (localData.length === 0) {
-          const defaultPharmacies = [
-            {
-              id: '1',
-              nom: 'Pharmacie du Centre',
-              adresse: '123 Avenue de la République, Dakar',
-              telephone: '+221 33 821 45 67',
-              pharmacien: 'Dr. Marie Diop',
-              horaires: '8h-20h',
-              services: ['livraison', 'urgence', '24h'],
-              online: true,
-              active: true
-            },
-            {
-              id: '2',
-              nom: 'Pharmacie de la Paix',
-              adresse: '456 Rue des Martyrs, Dakar',
-              telephone: '+221 33 822 34 56',
-              pharmacien: 'Dr. Jean Ndiaye',
-              horaires: '24h/24',
-              services: ['24h', 'livraison'],
-              online: true,
-              active: true
-            },
-            {
-              id: '3',
-              nom: 'Pharmacie Liberté',
-              adresse: '789 Boulevard Liberté, Dakar',
-              telephone: '+221 33 823 78 90',
-              pharmacien: 'Dr. Aminata Fall',
-              horaires: '7h-22h',
-              services: ['livraison'],
-              online: false,
-              active: true
-            }
-          ];
-          
-          localStorage.setItem("pharmacies", JSON.stringify(defaultPharmacies));
-          allPharmacies = defaultPharmacies;
-          displayPharmacies(defaultPharmacies);
-          updateStats(defaultPharmacies);
-        }
-        
-        showNotification('Mode hors ligne: pharmacies chargées depuis le cache', 'info');
-      }
-    }
+/* ===== STATS ===== */
+function updateStats(p) {
+  totalPharmacies.textContent = p.length;
+  onlinePharmacies.textContent = p.filter(x => x.online).length;
+  activePharmacies.textContent = p.filter(x => x.active).length;
+}
 
-    function displayPharmacies(pharmacies){
-      const container = document.getElementById("pharmaciesList");
+refreshBtn.onclick = loadPharmacies;
+searchInput.oninput = () => {
+  const v = searchInput.value.toLowerCase();
+  displayPharmacies(allPharmacies.filter(p => p.nom.toLowerCase().includes(v)));
+};
 
-      if(pharmacies.length===0){
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fa-solid fa-prescription-bottle-medical"></i>
-            <h3>Aucune pharmacie enregistrée</h3>
-            <p>Commencez par ajouter des pharmacies partenaires</p>
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = pharmacies.map(p=>`
-        <div class="pharmacy-card">
-          <div class="pharmacy-header">
-            <div class="pharmacy-info">
-              <h3>${p.nom}</h3>
-              <div class="services-list">
-                ${p.services && p.services.length > 0 ? 
-                  p.services.map(service => `<span class="service-tag">${service}</span>`).join('') : 
-                  '<span class="service-tag">Générale</span>'
-                }
-              </div>
-            </div>
-            <div class="pharmacy-status">
-              <span class="status-dot ${p.online ? 'online' : 'offline'}"></span>
-              <span class="${p.online?'status-online':'status-offline'}">
-                ${p.online?'En ligne':'Hors ligne'}
-              </span>
-            </div>
-          </div>
-          <div class="pharmacy-details">
-            <div class="detail-item">
-              <i class="fa-solid fa-location-dot"></i>
-              <span>${p.adresse || 'Adresse non renseignée'}</span>
-            </div>
-            <div class="detail-item">
-              <i class="fa-solid fa-phone"></i>
-              <span>${p.telephone || 'Téléphone non renseigné'}</span>
-            </div>
-            <div class="detail-item">
-              <i class="fa-solid fa-clock"></i>
-              <span>${p.horaires || 'Horaires non renseignés'}</span>
-            </div>
-            <div class="detail-item">
-              <i class="fa-solid fa-user-md"></i>
-              <span>Pharmacien: ${p.pharmacien || 'Non renseigné'}</span>
-            </div>
-          </div>
-          <div class="pharmacy-actions">
-            <button class="btn-small btn-primary" onclick="sendPrescription('${p.id || p._id}')">
-              <i class="fa-solid fa-paper-plane"></i> Envoyer ordonnance
-            </button>
-            <button class="btn-small btn-outline" onclick="viewPharmacyDetails('${p.id || p._id}')">
-              <i class="fa-solid fa-eye"></i> Détails
-            </button>
-            <button class="btn-small btn-outline" onclick="messagePharmacy('${p.id || p._id}')">
-              <i class="fa-solid fa-message"></i> Message
-            </button>
-            <button class="btn-small btn-outline" onclick="checkStock('${p.id || p._id}')">
-              <i class="fa-solid fa-box"></i> Vérifier stock
-            </button>
-          </div>
-        </div>
-      `).join("");
-    }
-
-    function updateStats(pharmacies){
-      document.getElementById("totalPharmacies").textContent = pharmacies.length;
-      document.getElementById("onlinePharmacies").textContent = pharmacies.filter(p=>p.online).length;
-      document.getElementById("activePharmacies").textContent = pharmacies.filter(p=>p.active !== false).length;
-    }
-
-    /* ===== Filtres ===== */
-    document.getElementById("refreshBtn").onclick = loadPharmacies;
-    document.getElementById("searchInput").oninput = filterPharmacies;
-    document.getElementById("statusFilter").onchange = filterPharmacies;
-    document.getElementById("serviceFilter").onchange = filterPharmacies;
-
-    function filterPharmacies(){
-      const search = document.getElementById("searchInput").value.toLowerCase();
-      const status = document.getElementById("statusFilter").value;
-      const service = document.getElementById("serviceFilter").value;
-
-      const filtered = allPharmacies.filter(p=>{
-        let ok = true;
-        
-        // Filtre par recherche
-        if (search) {
-          ok = p.nom.toLowerCase().includes(search) || 
-                (p.adresse && p.adresse.toLowerCase().includes(search)) || 
-                (p.pharmacien && p.pharmacien.toLowerCase().includes(search));
-        }
-        
-        // Filtre par statut
-        if (status === "online") ok = ok && p.online;
-        if (status === "offline") ok = ok && !p.online;
-        
-        // Filtre par service
-        if (service !== "all") {
-          ok = ok && p.services && p.services.includes(service);
-        }
-        
-        return ok;
-      });
-
-      displayPharmacies(filtered);
-      updateStats(filtered);
-    }
-
-    /* ===== Fonctions d'action ===== */
-    async function sendPrescription(pharmacyId) {
-      const pharmacy = allPharmacies.find(p => p.id === pharmacyId || p._id === pharmacyId);
-      if (!pharmacy) return;
-      
-      const prescriptionData = {
-        pharmacyId: pharmacyId,
-        fromMedecin: user.username || "Dr Konte",
-        ordonnance: {
-          patient: "Awa Diop",
-          medicaments: ["Paracetamol", "Vit C"]
-        }
-      };
-
-      // Envoi à l'API si disponible
-      try {
-        await fetch("/api/pharmacies/send-prescription", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(prescriptionData)
-        });
-      } catch (error) {
-        console.error("Erreur lors de l'envoi à l'API", error);
-      }
-
-      // Émission socket
-      socket.emit('send_prescription', {
-        pharmacyId: pharmacyId,
-        pharmacyName: pharmacy.nom,
-        from: user.username,
-        timestamp: new Date().toISOString()
-      });
-
-      showNotification(`✅ Ordonnance envoyée à ${pharmacy.nom}`, 'success');
-    }
-
-    function viewPharmacyDetails(pharmacyId) {
-      const pharmacy = allPharmacies.find(p => p.id === pharmacyId || p._id === pharmacyId);
-      if (!pharmacy) return;
-      
-      const details = `
-        Nom: ${pharmacy.nom}
-        Adresse: ${pharmacy.adresse}
-        Téléphone: ${pharmacy.telephone || 'Non renseigné'}
-        Pharmacien: ${pharmacy.pharmacien || 'Non renseigné'}
-        Horaires: ${pharmacy.horaires || 'Non renseignés'}
-        Services: ${pharmacy.services ? pharmacy.services.join(', ') : 'Aucun'}
-        Statut: ${pharmacy.online ? '🟢 En ligne' : '🔴 Hors ligne'}
-      `;
-      
-      alert(details);
-    }
-
-    function messagePharmacy(pharmacyId) {
-      const pharmacy = allPharmacies.find(p => p.id === pharmacyId || p._id === pharmacyId);
-      if (!pharmacy) return;
-      
-      const message = prompt(`Envoyer un message à ${pharmacy.nom}:`);
-      if (message) {
-        showNotification(`Message envoyé à ${pharmacy.nom}`, 'success');
-        
-        socket.emit('send_message', {
-          to: pharmacyId,
-          from: user.username,
-          message: message,
-          timestamp: new Date().toISOString()
-        });
-      }
-    }
-
-    function checkStock(pharmacyId) {
-      const pharmacy = allPharmacies.find(p => p.id === pharmacyId || p._id === pharmacyId);
-      if (!pharmacy) return;
-      
-      const medication = prompt("Quel médicament souhaitez-vous vérifier?");
-      if (medication) {
-        showNotification(`Demande de stock envoyée à ${pharmacy.nom} pour: ${medication}`, 'info');
-        
-        socket.emit('check_stock', {
-          pharmacyId: pharmacyId,
-          medication: medication,
-          requester: user.username,
-          timestamp: new Date().toISOString()
-        });
-      }
-    }
-
-    /* ===== Fonctions utilitaires ===== */
-    function showNotification(message, type) {
-      const notification = document.createElement('div');
-      notification.className = `notification notification-${type}`;
-      notification.innerHTML = `
-        <span>${message}</span>
-        <button onclick="this.parentElement.remove()" style="background:none; border:none; color:white; cursor:pointer;">
-          <i class="fa-solid fa-times"></i>
-        </button>
-      `;
-      
-      document.body.appendChild(notification);
-      
-      setTimeout(() => {
-        if (notification.parentElement) {
-          notification.remove();
-        }
-      }, 5000);
-    }
-
-    /* ===== Événements Socket ===== */
-    socket.on('prescription_received', (data) => {
-      showNotification(`✅ ${data.pharmacyName} a bien reçu votre ordonnance`, 'success');
-    });
-
-    socket.on('message_received', (data) => {
-      showNotification(`📩 ${data.from}: ${data.message}`, 'info');
-    });
-
-    socket.on('stock_response', (data) => {
-      showNotification(`📦 ${data.pharmacyName}: ${data.medication} - ${data.available ? 'Disponible' : 'En rupture'}`, data.available ? 'success' : 'error');
-    });
-
-    socket.on('pharmacy_status_update', (data) => {
-      // Mettre à jour le statut d'une pharmacie
-      const pharmacyIndex = allPharmacies.findIndex(p => p.id === data.pharmacyId || p._id === data.pharmacyId);
-      if (pharmacyIndex !== -1) {
-        allPharmacies[pharmacyIndex].online = data.online;
-        filterPharmacies(); // Rafraîchir l'affichage
-      }
-    });
-
-    /* ===== Initialisation ===== */
-    document.addEventListener("DOMContentLoaded", ()=>{
-      loadPharmacies();
-    });
-  </script>
+loadPharmacies();
+</script>
 </body> 
 </html>
