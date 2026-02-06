@@ -706,878 +706,191 @@
     </div>
   </div>
 
-script>
-  const user = JSON.parse(localStorage.getItem("user"));
-
-fetch("/api/ordonnances", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    medecinId: user.id,
-    medecinNom: user.username,
-
-    pharmacieId: selectedPharmacie._id,
-    pharmacieNom: selectedPharmacie.nom,
-
-    patientNom: document.getElementById("nom").value,
-    medicaments: document.getElementById("medicaments").value
-  })
-});
-/* ===== Vérification de session ===== */
+<script>
+/* ===================== SESSION ===================== */
 const user = JSON.parse(localStorage.getItem("user"));
 
-if (!user) {
-  alert("⚠️ Veuillez vous connecter");
-  window.location.href = "index.html";
-}
-
-if (user.role !== "medecin") {
+if (!user || user.role !== "medecin") {
   alert("⚠️ Accès refusé");
   window.location.href = "index.html";
 }
 
-/* Afficher le nom du médecin */
 document.getElementById("usernameDisplay").textContent = user.username;
 
-/* ===== Logout ===== */
-document.getElementById("logout").addEventListener("click", () => {
+document.getElementById("logout").onclick = () => {
   localStorage.removeItem("user");
-  window.location.href = "index.html";
-});
+  location.href = "index.html";
+};
 
-/* ===== Variables globales ===== */
+/* ===================== VARIABLES ===================== */
 let currentOrdonnance = null;
 let currentOrdonnanceId = null;
 let selectedPharmacie = null;
 let allPharmacies = [];
-let currentPatientId = null;
 let isConsultationMode = false;
 
-/* ===== Initialisation ===== */
-document.addEventListener('DOMContentLoaded', function() {
-  // Récupérer les paramètres d'URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const patientId = urlParams.get('patientId');
-  const patientName = urlParams.get('patientName');
-  const patientAge = urlParams.get('patientAge');
-  const patientGender = urlParams.get('patientGender');
-  const patientAddress = urlParams.get('patientAddress');
-  const ordonnanceId = urlParams.get('ordonnanceId');
-  const mode = urlParams.get('mode');
-  
-  // Initialiser la date
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('dateOrd').value = today;
-  
-  // Remplir le nom du médecin
-  if (user.username) {
-    document.getElementById('nomMedecin').value = user.username;
-  }
-  
-  // Pré-remplir les champs si des infos patient sont fournies
-  if (patientName) {
-    document.getElementById('nom').value = decodeURIComponent(patientName);
-  }
+/* ===================== INIT ===================== */
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("dateOrd").value =
+    new Date().toISOString().split("T")[0];
 
-  if (patientAge) {
-    document.getElementById('age').value = patientAge;
-  }
+  document.getElementById("nomMedecin").value = user.username;
 
-  if (patientGender) {
-    // Convertir "Femme"/"Homme" en "F"/"M"
-    let genderValue = patientGender === 'Femme' ? 'F' : patientGender === 'Homme' ? 'M' : patientGender;
-    document.getElementById('genre').value = genderValue;
-  }
-
-  if (patientAddress) {
-    document.getElementById('adresse').value = decodeURIComponent(patientAddress);
-  }
-
-  // Stocker l'ID patient pour référence
-  if (patientId) {
-    currentPatientId = patientId;
-  }
-  
-  // Vérifier si on est en mode consultation d'une ordonnance
-  if (ordonnanceId && mode === 'view') {
-    isConsultationMode = true;
-    // Afficher le mode consultation et charger l'ordonnance
-    document.getElementById('consultationModeIndicator').style.display = 'block';
-    document.getElementById('backButtonContainer').style.display = 'block';
-    
-    // Désactiver les onglets
-    document.querySelectorAll('.tab').forEach(tab => {
-      tab.style.pointerEvents = 'none';
-      tab.style.opacity = '0.5';
-    });
-    
-    // Activer l'onglet création et charger l'ordonnance
-    setTimeout(() => {
-      document.querySelector('.tab[data-tab="create"]').click();
-      viewOrdonnanceFromConsultation(ordonnanceId);
-    }, 300);
-  }
-  
-  // Initialiser les onglets
   initTabs();
-  
-  // Charger les ordonnances
   loadOrdonnances();
-  
-  // Charger les pharmacies
   loadPharmaciesForModal();
-  
-  // Événements des boutons
-  document.getElementById('genBtn').addEventListener('click', generatePreview);
-  document.getElementById('saveBtn').addEventListener('click', saveOrdonnance);
-  document.getElementById('sendBtn').addEventListener('click', openPharmacieModal);
-  document.getElementById('pdfBtn').addEventListener('click', generatePDF);
-  document.getElementById('searchBtn').addEventListener('click', searchOrdonnance);
-  
-  // Modal events
-  document.querySelector('.modal-close').addEventListener('click', closeModal);
-  document.getElementById('cancelSendBtn').addEventListener('click', closeModal);
-  document.getElementById('confirmSendBtn').addEventListener('click', sendToPharmacie);
-  
-  // Vérifier si on vient d'enregistrer une ordonnance
-  checkRecentOrdonnance();
+
+  document.getElementById("genBtn").onclick = generatePreview;
+  document.getElementById("saveBtn").onclick = saveOrdonnance;
+  document.getElementById("sendBtn").onclick = openPharmacieModal;
+  document.getElementById("confirmSendBtn").onclick = sendToPharmacie;
+  document.getElementById("cancelSendBtn").onclick = closeModal;
+  document.querySelector(".modal-close").onclick = closeModal;
 });
 
-/* ===== Gestion des onglets ===== */
+/* ===================== ONGLES ===================== */
 function initTabs() {
-  const tabs = document.querySelectorAll('.tab');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', function() {
-      if (isConsultationMode) return; // Empêcher le changement d'onglet en mode consultation
-      
-      const tabId = this.getAttribute('data-tab');
-      
-      // Retirer la classe active de tous les onglets et contenus
-      tabs.forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-      });
-      
-      // Activer l'onglet et le contenu correspondant
-      this.classList.add('active');
-      document.getElementById(tabId + '-tab').classList.add('active');
-    });
+  document.querySelectorAll(".tab").forEach(tab => {
+    tab.onclick = () => {
+      if (isConsultationMode) return;
+      document.querySelectorAll(".tab,.tab-content")
+        .forEach(e => e.classList.remove("active"));
+      tab.classList.add("active");
+      document.getElementById(tab.dataset.tab + "-tab")
+        .classList.add("active");
+    };
   });
 }
 
-/* ===== Générer l'aperçu ===== */
+/* ===================== PREVIEW ===================== */
 function generatePreview() {
-  // Validation
-  const requiredFields = ['nomMedecin', 'nom', 'age', 'genre', 'adresse', 'medicaments'];
-  for (const fieldId of requiredFields) {
-    const field = document.getElementById(fieldId);
-    if (!field.value.trim()) {
-      showNotification(`Le champ "${field.previousElementSibling.textContent}" est obligatoire`, 'error');
-      field.focus();
+  const fields = ["nom","age","genre","adresse","medicaments"];
+  for (let f of fields) {
+    if (!document.getElementById(f).value.trim()) {
+      showNotification("Tous les champs obligatoires", "error");
       return;
     }
   }
-  
-  // Générer un code unique
-  const code = generateOrdonnanceCode();
-  
-  // Créer l'objet ordonnance
+
   currentOrdonnance = {
-    code: code,
-    medecin: document.getElementById('nomMedecin').value,
-    patient: document.getElementById('nom').value,
-    age: document.getElementById('age').value,
-    genre: document.getElementById('genre').value,
-    adresse: document.getElementById('adresse').value,
-    poids: document.getElementById('poids').value || 'Non spécifié',
-    medicaments: document.getElementById('medicaments').value,
-    date: document.getElementById('dateOrd').value || new Date().toISOString().split('T')[0],
-    statut: 'active',
+    id: Date.now(),
+    code: "ORD-" + Date.now(),
+    medecin: user.username,
+    patient: nom.value,
+    age: age.value,
+    genre: genre.value,
+    adresse: adresse.value,
+    medicaments: medicaments.value,
+    date: dateOrd.value,
+    statut: "active",
     createdAt: new Date().toISOString()
   };
-  
-  // Ajouter l'ID patient si disponible
-  if (currentPatientId) {
-    currentOrdonnance.patientId = currentPatientId;
-  }
-  
-  // Afficher l'aperçu
+
   displayPreview(currentOrdonnance);
-  
-  // Activer les boutons (sauf en mode consultation)
-  if (!isConsultationMode) {
-    document.getElementById('sendBtn').disabled = false;
-    document.getElementById('pdfBtn').disabled = false;
-    document.getElementById('saveBtn').disabled = false;
-  }
+  sendBtn.disabled = false;
+  pdfBtn.disabled = false;
 }
 
-function generateOrdonnanceCode() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = (now.getMonth() + 1).toString().padStart(2, '0');
-  const day = now.getDate().toString().padStart(2, '0');
-  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-  return `ORD-${year}${month}${day}-${random}`;
-}
-
-function displayPreview(ordonnance) {
-  const previewDiv = document.getElementById('preview');
-  
-  const previewHTML = `
+/* ===================== APERCU ===================== */
+function displayPreview(o) {
+  preview.innerHTML = `
     <div class="ordonnance-beautiful">
-      <div class="ordonnance-header">
-        <div class="ordonnance-title">ORDONNANCE MÉDICALE</div>
-        <div class="ordonnance-subtitle">Document sécurisé - OrdoPass</div>
-      </div>
-      
-      <div class="ordonnance-content">
-        <div class="ordonnance-section">
-          <div class="ordonnance-section-title">INFORMATIONS MÉDECIN</div>
-          <p><strong>Médecin :</strong> ${ordonnance.medecin}</p>
-          <p><strong>Date :</strong> ${ordonnance.date}</p>
-          <p><strong>Code ordonnance :</strong> ${ordonnance.code}</p>
-        </div>
-        
-        <div class="ordonnance-section">
-          <div class="ordonnance-section-title">INFORMATIONS PATIENT</div>
-          <p><strong>Patient :</strong> ${ordonnance.patient}</p>
-          <p><strong>Âge :</strong> ${ordonnance.age} ans</p>
-          <p><strong>Sexe :</strong> ${ordonnance.genre}</p>
-          <p><strong>Adresse :</strong> ${ordonnance.adresse}</p>
-          <p><strong>Poids :</strong> ${ordonnance.poids}</p>
-        </div>
-      </div>
-      
-      <div class="ordonnance-section">
-        <div class="ordonnance-section-title">PRESCRIPTION MÉDICALE</div>
-        <div class="ordonnance-medicaments">
-          ${ordonnance.medicaments.split('\n').map(line => `
-            <div class="medicament-item">
-              <div class="medicament-name">${line}</div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      
-      <div class="ordonnance-footer">
-        <div class="signature-area">
-          <div class="signature-image"></div>
-          <div class="doctor-stamp">
-            <div>${ordonnance.medecin}</div>
-            <div>Médecin traitant</div>
-          </div>
-        </div>
-        
-        <div class="qr-code-area" id="qrCodeContainer">
-          <!-- QR Code sera généré ici -->
-        </div>
-      </div>
-      
-      <div class="ordonnance-security">
-        <i class="fa-solid fa-shield-alt"></i> 
-        Cette ordonnance est sécurisée par OrdoPass. Code de vérification : ${ordonnance.code}
-      </div>
+      <h2 style="text-align:center">ORDONNANCE</h2>
+      <p><b>Médecin :</b> ${o.medecin}</p>
+      <p><b>Patient :</b> ${o.patient}</p>
+      <p><b>Médicaments :</b></p>
+      <pre>${o.medicaments}</pre>
+      <p><b>Code :</b> ${o.code}</p>
     </div>
   `;
-  
-  previewDiv.innerHTML = previewHTML;
-  previewDiv.style.display = 'block';
-  
-  // Générer le QR Code
-  const qrContainer = document.getElementById('qrCodeContainer');
-  qrContainer.innerHTML = '';
-  new QRCode(qrContainer, {
-    text: JSON.stringify({
-      code: ordonnance.code,
-      medecin: ordonnance.medecin,
-      patient: ordonnance.patient,
-      date: ordonnance.date
-    }),
-    width: 100,
-    height: 100
-  });
+  preview.style.display = "block";
 }
 
-/* ===== Sauvegarder l'ordonnance ===== */
+/* ===================== SAVE ===================== */
 function saveOrdonnance() {
-  if (isConsultationMode) {
-    showNotification('Vous ne pouvez pas modifier cette ordonnance en mode consultation', 'error');
-    return;
-  }
-  
-  if (!currentOrdonnance) {
-    showNotification('Veuillez d\'abord générer un aperçu', 'error');
-    return;
-  }
-  
-  // Ajouter un ID unique
-  currentOrdonnance.id = Date.now();
-  currentOrdonnanceId = currentOrdonnance.id;
-  
-  // Ajouter l'ID patient si disponible
-  if (currentPatientId) {
-    currentOrdonnance.patientId = currentPatientId;
-  }
-  
-  // Récupérer les ordonnances existantes
-  let ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
-  
-  // Vérifier si l'ordonnance existe déjà
-  const existingIndex = ordonnances.findIndex(o => o.id === currentOrdonnance.id);
-  if (existingIndex !== -1) {
-    ordonnances[existingIndex] = currentOrdonnance;
-  } else {
-    ordonnances.push(currentOrdonnance);
-  }
-  
-  // Sauvegarder dans le localStorage
-  localStorage.setItem('ordonnances', JSON.stringify(ordonnances));
-  
-  // Marquer comme ordonnance récente
-  localStorage.setItem('recentOrdonnance', JSON.stringify(currentOrdonnance));
-  
-  // Afficher notification et passer à l'onglet "Mes ordonnances"
-  showNotification('Ordonnance sauvegardée avec succès ! Redirection vers "Mes ordonnances"...', 'success');
-  
-  // Activer l'onglet "Mes ordonnances" après un délai
-  setTimeout(() => {
-    if (!isConsultationMode) {
-      document.querySelector('.tab[data-tab="list"]').click();
-    }
-    loadOrdonnances();
-    
-    // Réinitialiser le formulaire
-    document.getElementById('ordForm').reset();
-    if (user.username) {
-      document.getElementById('nomMedecin').value = user.username;
-    }
-    document.getElementById('dateOrd').value = new Date().toISOString().split('T')[0];
-    document.getElementById('preview').style.display = 'none';
-    document.getElementById('sendBtn').disabled = true;
-    document.getElementById('pdfBtn').disabled = true;
-    document.getElementById('saveBtn').disabled = false;
-    currentOrdonnance = null;
-    currentOrdonnanceId = null;
-    currentPatientId = null;
-  }, 1500);
-}
-
-/* ===== Charger les ordonnances ===== */
-function loadOrdonnances() {
-  const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
-  const container = document.getElementById('ordonnanceList');
-  
-  if (ordonnances.length === 0) {
-    container.innerHTML = `
-      <div style="text-align: center; padding: 40px;">
-        <i class="fa-solid fa-file-prescription" style="font-size: 48px; color: #ccc;"></i>
-        <h3>Aucune ordonnance</h3>
-        <p>Commencez par créer une ordonnance</p>
-      </div>
-    `;
-    return;
-  }
-  
-  // Trier par date (les plus récentes d'abord)
-  ordonnances.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  
-  container.innerHTML = ordonnances.map(ord => `
-    <div class="ordonnance-item">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-        <div>
-          <h4>${ord.patient}</h4>
-          <p><strong>Médecin :</strong> ${ord.medecin}</p>
-          <p><strong>Date :</strong> ${ord.date}</p>
-          <p><strong>Code :</strong> ${ord.code}</p>
-          <p><strong>Statut :</strong> ${getStatusText(ord.statut || 'active')}</p>
-        </div>
-        <div>
-          <span class="status-badge status-${ord.statut || 'active'}">
-            ${getStatusText(ord.statut || 'active')}
-          </span>
-        </div>
-      </div>
-      <div class="buttons" style="margin-top: 10px;">
-        <button class="btn-outline" onclick="viewOrdonnance('${ord.id}')">
-          <i class="fa-solid fa-eye"></i> Voir
-        </button>
-        <button class="btn-outline" onclick="editOrdonnance('${ord.id}')">
-          <i class="fa-solid fa-edit"></i> Modifier
-        </button>
-        <button class="btn-outline" onclick="sendOrdonnanceToPharmacy('${ord.id}')">
-          <i class="fa-solid fa-paper-plane"></i> Envoyer
-        </button>
-        <button class="btn-outline" onclick="deleteOrdonnance('${ord.id}')">
-          <i class="fa-solid fa-trash"></i> Supprimer
-        </button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function getStatusText(status) {
-  const statusMap = {
-    'active': 'Active',
-    'delivree': 'Délivrée',
-    'annulee': 'Annulée',
-    'envoyee': 'Envoyée',
-    'en_cours': 'En cours',
-    'pret': 'Prête',
-    'recuperee': 'Récupérée'
-  };
-  return statusMap[status] || status;
-}
-
-/* ===== Gestion des pharmacies pour le modal ===== */
-function loadPharmaciesForModal() {
-  allPharmacies = JSON.parse(localStorage.getItem('pharmacies')) || [];
-  
-  // Si pas de pharmacies, en créer quelques-unes par défaut
-  if (allPharmacies.length === 0) {
-    allPharmacies = [
-      {
-        id: 'ph1',
-        nom: 'Pharmacie du Centre',
-        adresse: '123 Avenue de la République, Dakar',
-        telephone: '+221 33 821 45 67',
-        online: true,
-        services: ['Livraison', 'Urgence', '24h/24']
-      },
-      {
-        id: 'ph2',
-        nom: 'Pharmacie de la Paix',
-        adresse: '456 Rue des Martyrs, Dakar',
-        telephone: '+221 33 822 34 56',
-        online: true,
-        services: ['24h/24', 'Livraison']
-      },
-      {
-        id: 'ph3',
-        nom: 'Pharmacie Liberté',
-        adresse: '789 Boulevard Liberté, Dakar',
-        telephone: '+221 33 823 78 90',
-        online: false,
-        services: ['Livraison']
-      }
-    ];
-    localStorage.setItem('pharmacies', JSON.stringify(allPharmacies));
-  }
-}
-
-function openPharmacieModal() {
-  if (!currentOrdonnance) {
-    showNotification('Veuillez d\'abord sauvegarder l\'ordonnance', 'error');
-    return;
-  }
-  
-  const listContainer = document.getElementById('pharmacieList');
-  
-  if (allPharmacies.length === 0) {
-    listContainer.innerHTML = '<p>Aucune pharmacie disponible</p>';
-  } else {
-    listContainer.innerHTML = allPharmacies.map(pharma => `
-      <div class="pharmacie-item" data-id="${pharma.id}" onclick="selectPharmacie('${pharma.id}')">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <h4 style="margin: 0;">${pharma.nom}</h4>
-            <p style="margin: 5px 0; color: #666;">${pharma.adresse}</p>
-            <p style="margin: 0; color: #666;">${pharma.telephone}</p>
-            <div class="services-list" style="margin-top: 5px;">
-              ${pharma.services && pharma.services.length > 0 ? 
-                pharma.services.map(service => `<span class="service-tag">${service}</span>`).join(' ') : 
-                '<span class="service-tag">Générale</span>'
-              }
-            </div>
-          </div>
-          <div>
-            <span class="online-indicator ${pharma.online ? 'online' : 'offline'}"></span>
-            <span>${pharma.online ? 'En ligne' : 'Hors ligne'}</span>
-          </div>
-        </div>
-      </div>
-    `).join('');
-  }
-  
-  selectedPharmacie = null;
-  document.getElementById('confirmSendBtn').disabled = true;
-  document.getElementById('pharmacieModal').style.display = 'block';
-}
-
-function selectPharmacie(pharmacieId) {
-  // Retirer la sélection de tous les items
-  document.querySelectorAll('.pharmacie-item').forEach(item => {
-    item.classList.remove('selected');
-  });
-  
-  // Sélectionner l'item cliqué
-  const selectedItem = document.querySelector(`.pharmacie-item[data-id="${pharmacieId}"]`);
-  if (selectedItem) {
-    selectedItem.classList.add('selected');
-    selectedPharmacie = pharmacieId;
-    document.getElementById('confirmSendBtn').disabled = false;
-  }
-}
-
-function closeModal() {
-  document.getElementById('pharmacieModal').style.display = 'none';
-  selectedPharmacie = null;
-}
-
-function sendToPharmacie() {
-  if (!selectedPharmacie || !currentOrdonnance) {
-    showNotification('Veuillez sélectionner une pharmacie', 'error');
-    return;
-  }
-  
-  // Récupérer la pharmacie
-  const pharmacie = allPharmacies.find(p => p.id === selectedPharmacie);
-  
-  if (!pharmacie) {
-    showNotification('Pharmacie non trouvée', 'error');
-    return;
-  }
-  
-  // Mettre à jour le statut de l'ordonnance
-  currentOrdonnance.statut = 'envoyee';
-  currentOrdonnance.pharmacieId = selectedPharmacie;
-  currentOrdonnance.pharmacieNom = pharmacie.nom;
-  currentOrdonnance.envoyeeLe = new Date().toISOString();
-  
-  // Sauvegarder les modifications
-  let ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
-  const index = ordonnances.findIndex(o => o.id === currentOrdonnanceId);
-  if (index !== -1) {
-    ordonnances[index] = currentOrdonnance;
-    localStorage.setItem('ordonnances', JSON.stringify(ordonnances));
-  }
-  
-  showNotification(`Ordonnance envoyée à ${pharmacie.nom}`, 'success');
-  closeModal();
+  let ords = JSON.parse(localStorage.getItem("ordonnances")) || [];
+  ords.push(currentOrdonnance);
+  localStorage.setItem("ordonnances", JSON.stringify(ords));
+  showNotification("Ordonnance sauvegardée", "success");
   loadOrdonnances();
 }
 
-/* ===== Envoyer une ordonnance existante à une pharmacie ===== */
-function sendOrdonnanceToPharmacy(ordonnanceId) {
-  const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
-  const ordonnance = ordonnances.find(o => o.id == ordonnanceId);
-  
-  if (!ordonnance) {
-    showNotification('Ordonnance non trouvée', 'error');
-    return;
-  }
-  
-  currentOrdonnance = ordonnance;
-  currentOrdonnanceId = ordonnanceId;
+/* ===================== LISTE ===================== */
+function loadOrdonnances() {
+  const list = JSON.parse(localStorage.getItem("ordonnances")) || [];
+  ordonnanceList.innerHTML = list.map(o => `
+    <div class="ordonnance-item">
+      <b>${o.patient}</b> – ${o.code}
+      <button onclick="sendOrdonnanceToPharmacy(${o.id})">Envoyer</button>
+    </div>
+  `).join("");
+}
+
+/* ===================== PHARMACIES ===================== */
+function loadPharmaciesForModal() {
+  allPharmacies = JSON.parse(localStorage.getItem("pharmacies")) || [
+    { id:"ph1", nom:"Pharmacie Centrale", online:true },
+    { id:"ph2", nom:"Pharmacie Liberté", online:true }
+  ];
+  localStorage.setItem("pharmacies", JSON.stringify(allPharmacies));
+}
+
+function openPharmacieModal() {
+  pharmacieList.innerHTML = allPharmacies.map(p => `
+    <div class="pharmacie-item" onclick="selectPharmacie('${p.id}')">
+      ${p.nom} (${p.online ? "En ligne" : "Hors ligne"})
+    </div>
+  `).join("");
+  pharmacieModal.style.display = "block";
+}
+
+function selectPharmacie(id) {
+  selectedPharmacie = allPharmacies.find(p => p.id === id);
+  confirmSendBtn.disabled = false;
+}
+
+/* ===================== ENVOI BACKEND ===================== */
+function sendToPharmacie() {
+  fetch("/api/ordonnances", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      code: currentOrdonnance.code,
+      medecinId: user.id,
+      medecinNom: user.username,
+      pharmacieId: selectedPharmacie.id,
+      pharmacieNom: selectedPharmacie.nom,
+      patientNom: currentOrdonnance.patient,
+      medicaments: currentOrdonnance.medicaments
+    })
+  })
+  .then(() => {
+    showNotification("Envoyée à " + selectedPharmacie.nom, "success");
+    closeModal();
+  })
+  .catch(() => showNotification("Erreur serveur", "error"));
+}
+
+function sendOrdonnanceToPharmacy(id) {
+  currentOrdonnance = JSON.parse(localStorage.getItem("ordonnances"))
+    .find(o => o.id === id);
   openPharmacieModal();
 }
 
-/* ===== Générer PDF ===== */
-function generatePDF() {
-  if (!currentOrdonnance) {
-    showNotification('Veuillez d\'abord générer un aperçu', 'error');
-    return;
-  }
-  
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  
-  // Titre
-  doc.setFontSize(20);
-  doc.text('ORDONNANCE MÉDICALE', 105, 20, { align: 'center' });
-  doc.setFontSize(12);
-  doc.text('Document sécurisé - OrdoPass', 105, 30, { align: 'center' });
-  
-  // Informations médecin
-  doc.setFontSize(14);
-  doc.text('Médecin : ' + currentOrdonnance.medecin, 20, 50);
-  doc.text('Date : ' + currentOrdonnance.date, 20, 60);
-  doc.text('Code : ' + currentOrdonnance.code, 20, 70);
-  
-  // Informations patient
-  doc.text('Patient : ' + currentOrdonnance.patient, 20, 90);
-  doc.text('Âge : ' + currentOrdonnance.age + ' ans', 20, 100);
-  doc.text('Sexe : ' + currentOrdonnance.genre, 20, 110);
-  doc.text('Adresse : ' + currentOrdonnance.adresse, 20, 120);
-  doc.text('Poids : ' + currentOrdonnance.poids, 20, 130);
-  
-  // Prescription
-  doc.setFontSize(16);
-  doc.text('PRESCRIPTION :', 20, 150);
-  doc.setFontSize(12);
-  
-  let y = 160;
-  const lines = currentOrdonnance.medicaments.split('\n');
-  lines.forEach(line => {
-    if (line.trim()) {
-      doc.text('• ' + line, 25, y);
-      y += 10;
-    }
-  });
-  
-  // Signature
-  doc.setFontSize(12);
-  doc.text('Signature :', 20, y + 20);
-  doc.text(currentOrdonnance.medecin, 20, y + 30);
-  doc.text('Médecin traitant', 20, y + 35);
-  
-  // Enregistrer le PDF
-  doc.save(`ordonnance-${currentOrdonnance.code}.pdf`);
-  showNotification('PDF généré avec succès !', 'success');
+/* ===================== MODAL ===================== */
+function closeModal() {
+  pharmacieModal.style.display = "none";
+  confirmSendBtn.disabled = true;
 }
 
-/* ===== Recherche d'ordonnance ===== */
-function searchOrdonnance() {
-  const code = document.getElementById('searchCode').value.trim();
-  
-  if (!code) {
-    showNotification('Veuillez entrer un code', 'error');
-    return;
-  }
-  
-  const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
-  const found = ordonnances.find(ord => ord.code === code);
-  
-  const resultDiv = document.getElementById('searchResult');
-  const contentDiv = document.getElementById('searchContent');
-  
-  if (!found) {
-    contentDiv.innerHTML = `
-      <div style="text-align: center; padding: 20px;">
-        <i class="fa-solid fa-search" style="font-size: 48px; color: #ccc;"></i>
-        <h4>Aucune ordonnance trouvée</h4>
-        <p>Vérifiez le code et réessayez</p>
-      </div>
-    `;
-  } else {
-    contentDiv.innerHTML = `
-      <div class="ordonnance-item">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-          <div>
-            <h4>${found.patient}</h4>
-            <p><strong>Médecin :</strong> ${found.medecin}</p>
-            <p><strong>Date :</strong> ${found.date}</p>
-            <p><strong>Code :</strong> ${found.code}</p>
-            <p><strong>Statut :</strong> ${getStatusText(found.statut || 'active')}</p>
-            ${found.pharmacieNom ? `<p><strong>Pharmacie :</strong> ${found.pharmacieNom}</p>` : ''}
-          </div>
-          <div>
-            <span class="status-badge status-${found.statut || 'active'}">
-              ${getStatusText(found.statut || 'active')}
-            </span>
-          </div>
-        </div>
-        <div class="buttons" style="margin-top: 10px;">
-          <button class="btn-outline" onclick="viewOrdonnance('${found.id}')">
-            <i class="fa-solid fa-eye"></i> Voir détails
-          </button>
-          <button class="btn-outline" onclick="generatePDFFromSearch('${found.id}')">
-            <i class="fa-solid fa-file-pdf"></i> PDF
-          </button>
-        </div>
-      </div>
-    `;
-  }
-  
-  resultDiv.style.display = 'block';
+/* ===================== NOTIF ===================== */
+function showNotification(msg, type) {
+  const n = document.createElement("div");
+  n.className = "notification " + type;
+  n.textContent = msg;
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), 3000);
 }
-
-function generatePDFFromSearch(ordonnanceId) {
-  const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
-  const ordonnance = ordonnances.find(o => o.id == ordonnanceId);
-  
-  if (ordonnance) {
-    currentOrdonnance = ordonnance;
-    generatePDF();
-  }
-}
-
-/* ===== Voir/Modifier une ordonnance ===== */
-function viewOrdonnanceFromConsultation(ordonnanceId) {
-  const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
-  const ordonnance = ordonnances.find(o => o.id == ordonnanceId);
-  
-  if (ordonnance) {
-    // Remplir le formulaire
-    document.getElementById('nomMedecin').value = ordonnance.medecin;
-    document.getElementById('nom').value = ordonnance.patient;
-    document.getElementById('age').value = ordonnance.age;
-    document.getElementById('genre').value = ordonnance.genre;
-    document.getElementById('adresse').value = ordonnance.adresse;
-    document.getElementById('poids').value = ordonnance.poids || '';
-    document.getElementById('medicaments').value = ordonnance.medicaments;
-    document.getElementById('dateOrd').value = ordonnance.date;
-    
-    // Désactiver les champs en mode consultation
-    const formElements = document.querySelectorAll('#ordForm input, #ordForm select, #ordForm textarea');
-    formElements.forEach(element => {
-      element.disabled = true;
-    });
-    
-    // Désactiver les boutons
-    document.getElementById('genBtn').disabled = true;
-    document.getElementById('saveBtn').disabled = true;
-    document.getElementById('sendBtn').disabled = true;
-    
-    // Générer l'aperçu
-    currentOrdonnance = ordonnance;
-    currentOrdonnanceId = ordonnanceId;
-    displayPreview(ordonnance);
-  } else {
-    showNotification('Ordonnance non trouvée', 'error');
-  }
-}
-
-function viewOrdonnance(ordonnanceId) {
-  const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
-  const ordonnance = ordonnances.find(o => o.id == ordonnanceId);
-  
-  if (ordonnance) {
-    // Activer l'onglet création
-    document.querySelector('.tab.active').classList.remove('active');
-    document.querySelector('.tab-content.active').classList.remove('active');
-    
-    document.querySelector('.tab[data-tab="create"]').classList.add('active');
-    document.getElementById('create-tab').classList.add('active');
-    
-    // Remplir le formulaire
-    document.getElementById('nomMedecin').value = ordonnance.medecin;
-    document.getElementById('nom').value = ordonnance.patient;
-    document.getElementById('age').value = ordonnance.age;
-    document.getElementById('genre').value = ordonnance.genre;
-    document.getElementById('adresse').value = ordonnance.adresse;
-    document.getElementById('poids').value = ordonnance.poids;
-    document.getElementById('medicaments').value = ordonnance.medicaments;
-    document.getElementById('dateOrd').value = ordonnance.date;
-    
-    // Générer l'aperçu
-    currentOrdonnance = ordonnance;
-    currentOrdonnanceId = ordonnanceId;
-    displayPreview(ordonnance);
-    
-    // Activer les boutons
-    document.getElementById('sendBtn').disabled = false;
-    document.getElementById('pdfBtn').disabled = false;
-    document.getElementById('saveBtn').disabled = false;
-    
-    // Afficher le mode consultation (mais avec possibilité d'édition)
-    document.getElementById('consultationModeIndicator').style.display = 'block';
-    document.getElementById('backButtonContainer').style.display = 'block';
-    isConsultationMode = true;
-  }
-}
-
-function editOrdonnance(ordonnanceId) {
-  const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
-  const ordonnance = ordonnances.find(o => o.id == ordonnanceId);
-  
-  if (ordonnance) {
-    // Activer l'onglet création
-    document.querySelector('.tab.active').classList.remove('active');
-    document.querySelector('.tab-content.active').classList.remove('active');
-    
-    document.querySelector('.tab[data-tab="create"]').classList.add('active');
-    document.getElementById('create-tab').classList.add('active');
-    
-    // Remplir le formulaire
-    document.getElementById('nomMedecin').value = ordonnance.medecin;
-    document.getElementById('nom').value = ordonnance.patient;
-    document.getElementById('age').value = ordonnance.age;
-    document.getElementById('genre').value = ordonnance.genre;
-    document.getElementById('adresse').value = ordonnance.adresse;
-    document.getElementById('poids').value = ordonnance.poids;
-    document.getElementById('medicaments').value = ordonnance.medicaments;
-    document.getElementById('dateOrd').value = ordonnance.date;
-    
-    // Générer l'aperçu
-    currentOrdonnance = ordonnance;
-    currentOrdonnanceId = ordonnanceId;
-    displayPreview(ordonnance);
-    
-    // Activer les boutons
-    document.getElementById('sendBtn').disabled = false;
-    document.getElementById('pdfBtn').disabled = false;
-    document.getElementById('saveBtn').disabled = false;
-    
-    // Masquer le mode consultation
-    document.getElementById('consultationModeIndicator').style.display = 'none';
-    document.getElementById('backButtonContainer').style.display = 'none';
-    isConsultationMode = false;
-  }
-}
-
-function deleteOrdonnance(ordonnanceId) {
-  if (confirm('Voulez-vous vraiment supprimer cette ordonnance ?')) {
-    let ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
-    ordonnances = ordonnances.filter(o => o.id != ordonnanceId);
-    localStorage.setItem('ordonnances', JSON.stringify(ordonnances));
-    
-    if (currentOrdonnanceId == ordonnanceId) {
-      currentOrdonnance = null;
-      currentOrdonnanceId = null;
-    }
-    
-    loadOrdonnances();
-    showNotification('Ordonnance supprimée', 'success');
-  }
-}
-
-function exitConsultationMode() {
-  // Réactiver les onglets
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.style.pointerEvents = 'auto';
-    tab.style.opacity = '1';
-  });
-  
-  // Masquer les indicateurs de mode consultation
-  document.getElementById('consultationModeIndicator').style.display = 'none';
-  document.getElementById('backButtonContainer').style.display = 'none';
-  isConsultationMode = false;
-  
-  // Réactiver les champs du formulaire
-  const formElements = document.querySelectorAll('#ordForm input, #ordForm select, #ordForm textarea');
-  formElements.forEach(element => {
-    element.disabled = false;
-  });
-  
-  // Réactiver les boutons
-  document.getElementById('genBtn').disabled = false;
-  document.getElementById('saveBtn').disabled = false;
-  document.getElementById('sendBtn').disabled = currentOrdonnance ? false : true;
-}
-
-/* ===== Vérifier si une ordonnance vient d'être enregistrée ===== */
-function checkRecentOrdonnance() {
-  const recentOrdonnance = localStorage.getItem('recentOrdonnance');
-  if (recentOrdonnance) {
-    try {
-      const ordonnance = JSON.parse(recentOrdonnance);
-      showNotification(`Ordonnance ${ordonnance.code} enregistrée avec succès !`, 'success');
-      
-      // Nettoyer
-      localStorage.removeItem('recentOrdonnance');
-    } catch (e) {
-      console.error('Erreur lors du parsing de l\'ordonnance:', e);
-    }
-  }
-}
-
-/* ===== Notifications ===== */
-function showNotification(message, type) {
-  const notification = document.createElement('div');
-  notification.className = `notification ${type}`;
-  notification.textContent = message;
-  document.body.appendChild(notification);
-  
-  setTimeout(() => {
-    if (notification.parentElement) {
-      notification.remove();
-    }
-  }, 3000);
-}
-
 </script>
-</body> 
-</html>
 </body> 
 </html>
