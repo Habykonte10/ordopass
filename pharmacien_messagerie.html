@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Messagerie - Pharmacien | OrdoPass</title>
+  <title>Contacts Médecins - Pharmacien | OrdoPass</title>
   <link rel="stylesheet" href="style1.css" />
-  <script src="https://kit.fontawesome.com/a2d9d5a64b.js" crossorigin="anonymous"></script>
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     /* 🔹 Style du bouton de déconnexion */
     #logout {
@@ -23,208 +22,443 @@
       background: #c0392b;
     }
 
-    /* Styles spécifiques à la messagerie */
-    .messagerie-container {
-      display: grid;
-      grid-template-columns: 350px 1fr;
-      gap: 0;
-      height: 600px;
+    /* Styles spécifiques aux contacts */
+    .contact-container {
+      padding: 20px;
       background: white;
       border-radius: 12px;
-      box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-      overflow: hidden;
-    }
-
-    .conversations-list {
-      border-right: 1px solid #e1e5e9;
-      background: #f8f9fa;
-      overflow-y: auto;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      height: calc(100vh - 200px);
       display: flex;
       flex-direction: column;
     }
 
-    .conversations-header {
-      padding: 25px;
-      border-bottom: 1px solid #e1e5e9;
-      background: white;
+    .contact-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
     }
 
-    .search-conversations {
-      width: 100%;
-      padding: 12px 15px;
-      border: 1px solid #e1e5e9;
+    .add-contact-btn {
+      background: linear-gradient(135deg, #2a5298, #1e3c72);
+      color: white;
+      border: none;
+      padding: 12px 24px;
       border-radius: 8px;
-      font-size: 0.9em;
-    }
-
-    .conversation-item {
+      cursor: pointer;
+      font-weight: 600;
       display: flex;
       align-items: center;
-      padding: 18px 20px;
-      border-bottom: 1px solid #e1e5e9;
-      cursor: pointer;
-      transition: all 0.3s ease;
+      gap: 10px;
+      transition: background 0.3s ease;
+    }
+
+    .add-contact-btn:hover {
+      background: #1e3c72;
+      transform: translateY(-2px);
+    }
+
+    .search-bar {
+      width: 100%;
+      padding: 15px 15px 15px 50px;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 1em;
+      margin-bottom: 25px;
+      background: #f8f9fa;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 15px center;
+      background-size: 20px;
+    }
+
+    .search-bar:focus {
+      outline: none;
+      border-color: #2a5298;
+      background-color: white;
+    }
+
+    .contacts-list {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      padding: 20px;
+      border: 1px solid #e1e5e9;
+      border-radius: 12px;
+      margin-bottom: 15px;
       background: white;
+      transition: all 0.3s ease;
+      cursor: pointer;
     }
 
-    .conversation-item:hover {
-      background: #f1f3f4;
+    .contact-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      border-color: #2a5298;
     }
 
-    .conversation-item.active {
+    .contact-item.active {
       background: #e8f4fd;
-      border-right: 4px solid #2a5298;
+      border-color: #2a5298;
     }
 
-    .conversation-avatar {
-      width: 50px;
-      height: 50px;
+    .contact-avatar {
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
-      margin-right: 15px;
       background: linear-gradient(135deg, #2a5298, #1e3c72);
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
+      font-size: 20px;
       font-weight: bold;
-      font-size: 16px;
+      margin-right: 20px;
+      flex-shrink: 0;
     }
 
-    .conversation-info {
+    .contact-info {
       flex: 1;
       min-width: 0;
     }
 
-    .conversation-name {
-      font-weight: 600;
-      color: #2c3e50;
-      margin-bottom: 6px;
-    }
-
-    .conversation-preview {
-      color: #7f8c8d;
-      font-size: 0.85em;
-    }
-
-    .conversation-meta {
-      text-align: right;
-      font-size: 0.8em;
-      color: #95a5a6;
-    }
-
-    .unread-badge {
-      background: #e74c3c;
-      color: white;
-      border-radius: 12px;
-      padding: 4px 8px;
-      font-size: 0.7em;
-    }
-
-    .chat-area {
-      display: flex;
-      flex-direction: column;
-      background: white;
-    }
-
-    .chat-header {
-      padding: 20px 25px;
-      border-bottom: 1px solid #e1e5e9;
-      background: white;
-    }
-
-    .chat-header-info {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .chat-header-avatar {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #2a5298, #1e3c72);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: bold;
-    }
-
-    .chat-recipient-name {
-      font-weight: 600;
-      color: #2c3e50;
+    .contact-name {
       font-size: 1.2em;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 5px;
     }
 
-    .chat-recipient-status {
-      color: #27ae60;
+    .contact-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .contact-detail {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #7f8c8d;
       font-size: 0.9em;
     }
 
-    .chat-messages {
+    .contact-detail i {
+      color: #2a5298;
+    }
+
+    .contact-actions {
+      display: flex;
+      gap: 10px;
+      margin-left: 15px;
+    }
+
+    .action-btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .whatsapp-btn {
+      background: #25D366;
+      color: white;
+    }
+
+    .whatsapp-btn:hover {
+      background: #128C7E;
+      transform: translateY(-2px);
+    }
+
+    .email-btn {
+      background: #EA4335;
+      color: white;
+    }
+
+    .email-btn:hover {
+      background: #D23F31;
+      transform: translateY(-2px);
+    }
+
+    .call-btn {
+      background: #4285F4;
+      color: white;
+    }
+
+    .call-btn:hover {
+      background: #3367D6;
+      transform: translateY(-2px);
+    }
+
+    .edit-btn {
+      background: #6c757d;
+      color: white;
+    }
+
+    .edit-btn:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+    }
+
+    .delete-btn {
+      background: #dc3545;
+      color: white;
+    }
+
+    .delete-btn:hover {
+      background: #c82333;
+      transform: translateY(-2px);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #7f8c8d;
       flex: 1;
-      padding: 25px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty-state i {
+      font-size: 4em;
+      color: #bdc3c7;
+      margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 80vh;
       overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.8em;
+      cursor: pointer;
+      color: #7f8c8d;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background 0.3s ease;
+    }
+
+    .close-modal:hover {
       background: #f8f9fa;
     }
 
-    .message {
-      max-width: 70%;
-      margin-bottom: 20px;
-      padding: 15px 20px;
-      border-radius: 18px;
+    .form-group {
+      margin-bottom: 25px;
     }
 
-    .message.sent {
-      background: linear-gradient(135deg, #2a5298, #1e3c72);
+    .form-label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 0.95em;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 1em;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #2a5298;
+      box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      padding: 15px;
+      background: #2a5298;
       color: white;
-      margin-left: auto;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
     }
 
-    .message.received {
-      background: white;
+    .btn-primary:hover {
+      background: #1e3c72;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      padding: 15px;
+      background: #f8f9fa;
       color: #2c3e50;
       border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
     }
 
-    .chat-input-area {
-      padding: 20px 25px;
-      border-top: 1px solid #e1e5e9;
-      background: white;
+    .btn-secondary:hover {
+      background: #e9ecef;
     }
 
-    .message-input-container {
-      display: flex;
-      gap: 12px;
-      align-items: flex-end;
-    }
-
-    .message-input {
-      flex: 1;
+    /* Notification */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
       padding: 15px 20px;
-      border: 1px solid #e1e5e9;
-      border-radius: 25px;
-      resize: none;
+      border-radius: 8px;
+      color: white;
+      z-index: 10000;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: slideIn 0.3s ease-out;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    .send-button {
-      padding: 15px 25px;
-      background: linear-gradient(135deg, #2a5298, #1e3c72);
-      color: white;
-      border: none;
-      border-radius: 25px;
-      cursor: pointer;
+    .notification.success {
+      background: #28a745;
     }
 
-    .new-conversation-btn {
-      width: 100%;
-      padding: 15px;
-      background: linear-gradient(135deg, #2a5298, #1e3c72);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      margin-bottom: 20px;
+    .notification.error {
+      background: #dc3545;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .contact-type {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    .type-medecin {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .type-patient {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+
+    .type-colleague {
+      background: #e2e3e5;
+      color: #383d41;
+    }
+
+    .type-laboratory {
+      background: #e8d7ff;
+      color: #4a235a;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .contact-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .contact-avatar {
+        margin-right: 0;
+        margin-bottom: 15px;
+      }
+      
+      .contact-actions {
+        margin-left: 0;
+        margin-top: 15px;
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .action-btn {
+        flex: 1;
+        justify-content: center;
+      }
+      
+      .modal-content {
+        padding: 25px;
+        margin: 15px;
+      }
     }
   </style>
 </head>
@@ -257,7 +491,7 @@
     <!-- ✅ Contenu principal -->
     <main class="main">
       <div class="topbar">
-        <div class="title">Messagerie</div>
+        <div class="title">Contacts Médecins</div>
         <div class="user-box">
           <img class="avatar" src="https://i.pravatar.cc/80?img=12" alt="avatar"/>
           <div>
@@ -268,118 +502,400 @@
       </div>
 
       <section class="card">
-        <div class="messagerie-container">
-          <!-- Liste des conversations -->
-          <div class="conversations-list">
-            <div class="conversations-header">
-              <button class="new-conversation-btn">
-                <i class="fa-solid fa-plus"></i> Nouvelle conversation
-              </button>
-              <input type="text" class="search-conversations" placeholder="🔍 Rechercher une conversation...">
+        <div class="contact-container">
+          <div class="contact-header">
+            <div>
+              <h2>Contacts directs</h2>
+              <p style="color: #7f8c8d; margin-top: 5px;">Contactez directement les médecins via WhatsApp ou Email</p>
             </div>
-            
-            <!-- Conversations -->
-            <div class="conversation-item active">
-              <div class="conversation-avatar">MD</div>
-              <div class="conversation-info">
-                <div class="conversation-name">Dr. Marie Diallo</div>
-                <div class="conversation-preview">Bonjour, nous avons bien reçu l'ordonnance...</div>
-              </div>
-              <div class="conversation-meta">
-                <div class="conversation-time">10:30</div>
-                <div class="unread-badge">2</div>
-              </div>
-            </div>
-
-            <div class="conversation-item">
-              <div class="conversation-avatar">FB</div>
-              <div class="conversation-info">
-                <div class="conversation-name">Dr. Fatoumata Ba</div>
-                <div class="conversation-preview">Avez-vous reçu l'ordonnance électronique...</div>
-              </div>
-              <div class="conversation-meta">
-                <div class="conversation-time">14:20</div>
-                <div class="unread-badge">1</div>
-              </div>
-            </div>
-
-            <div class="conversation-item">
-              <div class="conversation-avatar">MF</div>
-              <div class="conversation-info">
-                <div class="conversation-name">Mamadou Fall</div>
-                <div class="conversation-preview">Bonjour, mes médicaments sont-ils prêts ?</div>
-              </div>
-              <div class="conversation-meta">
-                <div class="conversation-time">08:45</div>
-                <div class="unread-badge">3</div>
-              </div>
-            </div>
+            <button class="add-contact-btn" onclick="openAddContactModal()">
+              <i class="fa-solid fa-plus"></i> Ajouter un contact
+            </button>
           </div>
 
-          <!-- Zone de chat -->
-          <div class="chat-area">
-            <div class="chat-header">
-              <div class="chat-header-info">
-                <div class="chat-header-avatar">MD</div>
-                <div>
-                  <div class="chat-recipient-name">Dr. Marie Diallo</div>
-                  <div class="chat-recipient-status">En ligne</div>
-                </div>
-              </div>
-            </div>
+          <input type="text" class="search-bar" id="searchContacts" placeholder="Rechercher un contact par nom, téléphone ou email...">
 
-            <div class="chat-messages">
-              <div class="message received">
-                <div class="message-content">Bonjour, nous avons bien reçu l'ordonnance pour le patient Awa Diop</div>
-                <div class="message-time">10:30</div>
-              </div>
+          <div class="contacts-list" id="contactsList">
+            <!-- Les contacts seront chargés ici dynamiquement -->
+          </div>
 
-              <div class="message sent">
-                <div class="message-content">Parfait, les médicaments sont-ils disponibles ?</div>
-                <div class="message-time">10:32</div>
-              </div>
-
-              <div class="message received">
-                <div class="message-content">Oui, tout est disponible. Le patient peut passer à tout moment</div>
-                <div class="message-time">10:35</div>
-              </div>
-
-              <div class="message received">
-                <div class="message-content">Nous avons également reçu une nouvelle livraison d'Amoxicilline</div>
-                <div class="message-time">11:20</div>
-              </div>
-            </div>
-
-            <div class="chat-input-area">
-              <div class="message-input-container">
-                <textarea class="message-input" placeholder="Tapez votre message..." rows="1"></textarea>
-                <button class="send-button">
-                  <i class="fa-solid fa-paper-plane"></i> Envoyer
-                </button>
-              </div>
-            </div>
+          <div id="emptyState" class="empty-state" style="display: none;">
+            <i class="fa-solid fa-address-book"></i>
+            <h3>Aucun contact enregistré</h3>
+            <p>Commencez par ajouter des contacts de médecins partenaires</p>
+            <button class="add-contact-btn" onclick="openAddContactModal()" style="margin-top: 20px;">
+              <i class="fa-solid fa-plus"></i> Ajouter votre premier contact
+            </button>
           </div>
         </div>
       </section>
     </main>
   </div>
 
-  <script>
-    // Déconnexion
-    document.getElementById("logout").addEventListener("click", (e) => {
-      e.preventDefault();
-      localStorage.removeItem("user");
-      sessionStorage.removeItem("user");
-      window.location.href = "index.html";
-    });
+  <!-- Modal Ajouter/Modifier Contact -->
+  <div class="modal" id="contactModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Ajouter un contact</h2>
+        <button class="close-modal" onclick="closeContactModal()">&times;</button>
+      </div>
+      
+      <form id="contactForm">
+        <div class="form-group">
+          <label class="form-label">Type de contact *</label>
+          <select class="form-control" id="contactType" required>
+            <option value="medecin">Médecin</option>
+            <option value="patient">Patient</option>
+            <option value="colleague">Collègue pharmacien</option>
+            <option value="laboratory">Laboratoire d'analyses</option>
+            <option value="supplier">Fournisseur</option>
+          </select>
+        </div>
 
-    // Navigation entre conversations
-    document.querySelectorAll('.conversation-item').forEach(item => {
-      item.addEventListener('click', function() {
-        document.querySelectorAll('.conversation-item').forEach(i => i.classList.remove('active'));
-        this.classList.add('active');
-      });
-    });
+        <div class="form-group">
+          <label class="form-label">Nom *</label>
+          <input type="text" class="form-control" id="contactName" required placeholder="Ex: Dr. Marie Diallo">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Téléphone *</label>
+          <input type="tel" class="form-control" id="contactPhone" required placeholder="Ex: +221 77 123 45 67">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input type="email" class="form-control" id="contactEmail" required placeholder="Ex: contact@medecin.sn">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Spécialité/Adresse</label>
+          <input type="text" class="form-control" id="contactAddress" placeholder="Ex: Cardiologue ou 123 Rue des Médecins, Dakar">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-control" id="contactNotes" rows="3" placeholder="Informations supplémentaires..."></textarea>
+        </div>
+
+        <div class="modal-buttons">
+          <button type="button" class="btn-secondary" onclick="closeContactModal()">Annuler</button>
+          <button type="submit" class="btn-primary" id="modalSubmitBtn">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+/* ===== Vérification session ===== */
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!user) {
+  alert("⚠️ Veuillez vous connecter.");
+  window.location.href = "index.html";
+}
+
+if (user.role !== "pharmacien") {
+  alert("⚠️ Accès réservé aux pharmaciens.");
+  window.location.href = "index.html";
+}
+
+document.getElementById("userName").textContent = user.username || "Pharmacie Centrale";
+
+/* Logout */
+document.getElementById("logout").addEventListener("click", function(e){
+  e.preventDefault();
+  localStorage.removeItem("user");
+  window.location.href = "index.html";
+});
+
+/* ===== Données des contacts ===== */
+let contacts = JSON.parse(localStorage.getItem('pharmacien_contacts')) || [];
+
+// Données par défaut si vide
+if (contacts.length === 0) {
+  contacts = [
+    {
+      id: 1,
+      type: "medecin",
+      name: "Dr. Marie Diallo",
+      phone: "+221771234567",
+      email: "marie.diallo@example.com",
+      address: "Cardiologue - Clinique du Cœur",
+      notes: "Spécialiste en cardiologie, disponible le matin",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 2,
+      type: "medecin",
+      name: "Dr. Fatoumata Ba",
+      phone: "+221772345678",
+      email: "fatou.ba@example.com",
+      address: "Pédiatre - Hôpital des Enfants",
+      notes: "Contact préféré pour les ordonnances pédiatriques",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 3,
+      type: "supplier",
+      name: "Laboratoire Biotech",
+      phone: "+221773456789",
+      email: "commande@biotech.sn",
+      address: "Fournisseur de médicaments",
+      notes: "Livraison sous 48h",
+      createdAt: new Date().toISOString()
+    }
+  ];
+  localStorage.setItem('pharmacien_contacts', JSON.stringify(contacts));
+}
+
+/* ===== Variables globales ===== */
+let isEditing = false;
+let editingContactId = null;
+
+/* ===== Fonctions utilitaires ===== */
+function showNotification(message, type) {
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.innerHTML = `
+    <i class="fa-solid fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+    <span>${message}</span>
+  `;
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.remove();
+  }, 3000);
+}
+
+function getTypeLabel(type) {
+  const types = {
+    'medecin': 'Médecin',
+    'patient': 'Patient',
+    'colleague': 'Pharmacien',
+    'laboratory': 'Laboratoire',
+    'supplier': 'Fournisseur'
+  };
+  return types[type] || 'Autre';
+}
+
+function getTypeClass(type) {
+  const classes = {
+    'medecin': 'type-medecin',
+    'patient': 'type-patient',
+    'colleague': 'type-colleague',
+    'laboratory': 'type-laboratory',
+    'supplier': 'type-colleague'
+  };
+  return classes[type] || 'type-colleague';
+}
+
+function getTypeIcon(type) {
+  const icons = {
+    'medecin': 'user-md',
+    'patient': 'user',
+    'colleague': 'user-nurse',
+    'laboratory': 'flask',
+    'supplier': 'truck-medical'
+  };
+  return icons[type] || 'user';
+}
+
+/* ===== Charger les contacts ===== */
+function loadContacts() {
+  const container = document.getElementById('contactsList');
+  const emptyState = document.getElementById('emptyState');
+  const searchTerm = document.getElementById('searchContacts').value.toLowerCase();
+
+  if (contacts.length === 0) {
+    container.style.display = 'none';
+    emptyState.style.display = 'flex';
+    return;
+  }
+
+  container.style.display = 'block';
+  emptyState.style.display = 'none';
+
+  // Filtrer les contacts selon la recherche
+  const filteredContacts = contacts.filter(contact => {
+    return (
+      contact.name.toLowerCase().includes(searchTerm) ||
+      contact.phone.toLowerCase().includes(searchTerm) ||
+      contact.email.toLowerCase().includes(searchTerm) ||
+      (contact.address && contact.address.toLowerCase().includes(searchTerm))
+    );
+  });
+
+  if (filteredContacts.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <i class="fa-solid fa-search"></i>
+        <h3>Aucun contact trouvé</h3>
+        <p>Aucun contact ne correspond à votre recherche</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = '';
+
+  filteredContacts.forEach(contact => {
+    const contactItem = document.createElement('div');
+    contactItem.className = 'contact-item';
+    contactItem.innerHTML = `
+      <div class="contact-avatar">${contact.name.charAt(0)}</div>
+      <div class="contact-info">
+        <div class="contact-name">${contact.name}</div>
+        <div class="contact-type ${getTypeClass(contact.type)}">
+          <i class="fa-solid fa-${getTypeIcon(contact.type)}"></i>
+          ${getTypeLabel(contact.type)}
+        </div>
+        <div class="contact-details">
+          <div class="contact-detail">
+            <i class="fa-solid fa-phone"></i>
+            <span>${contact.phone}</span>
+          </div>
+          <div class="contact-detail">
+            <i class="fa-solid fa-envelope"></i>
+            <span>${contact.email}</span>
+          </div>
+          ${contact.address ? `
+          <div class="contact-detail">
+            <i class="fa-solid fa-${contact.type === 'medecin' ? 'stethoscope' : 'location-dot'}"></i>
+            <span>${contact.address}</span>
+          </div>
+          ` : ''}
+        </div>
+        ${contact.notes ? `<div style="margin-top: 10px; color: #7f8c8d; font-size: 0.9em;"><i class="fa-solid fa-note"></i> ${contact.notes}</div>` : ''}
+      </div>
+      <div class="contact-actions">
+        ${contact.phone ? `
+        <button class="action-btn whatsapp-btn" onclick="contactWhatsApp('${contact.phone}', '${contact.name}')" title="WhatsApp">
+          <i class="fa-brands fa-whatsapp"></i>
+        </button>
+        <button class="action-btn call-btn" onclick="contactPhone('${contact.phone}', '${contact.name}')" title="Appeler">
+          <i class="fa-solid fa-phone"></i>
+        </button>
+        ` : ''}
+        ${contact.email ? `
+        <button class="action-btn email-btn" onclick="contactEmail('${contact.email}', '${contact.name}')" title="Email">
+          <i class="fa-solid fa-envelope"></i>
+        </button>
+        ` : ''}
+        <button class="action-btn edit-btn" onclick="editContact(${contact.id})" title="Modifier">
+          <i class="fa-solid fa-edit"></i>
+        </button>
+        <button class="action-btn delete-btn" onclick="deleteContact(${contact.id})" title="Supprimer">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+    `;
+    container.appendChild(contactItem);
+  });
+}
+
+/* ===== Fonctions de contact ===== */
+function contactWhatsApp(phone, name) {
+  const cleanPhone = phone.replace(/\D/g, '');
+  const message = encodeURIComponent(`Bonjour Dr. ${name},\n\nJe suis ${user.username} de la pharmacie sur OrdoPass.\n\nJe souhaiterais vous contacter concernant une ordonnance.\n\nCordialement,\n${user.username}`);
+  window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
+}
+
+function contactEmail(email, name) {
+  const subject = encodeURIComponent(`Contact OrdoPass - ${user.username}`);
+  const body = encodeURIComponent(`Bonjour Dr. ${name},\n\nJe suis ${user.username}, pharmacien sur OrdoPass.\n\nJe souhaiterais vous contacter concernant une ordonnance.\n\nCordialement,\n${user.username}`);
+  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+}
+
+function contactPhone(phone, name) {
+  if (confirm(`Appeler ${name} au ${phone} ?`)) {
+    window.location.href = `tel:${phone}`;
+  }
+}
+
+/* ===== Fonctions modal ===== */
+function openAddContactModal() {
+  isEditing = false;
+  editingContactId = null;
+  document.getElementById('modalTitle').textContent = 'Ajouter un contact';
+  document.getElementById('modalSubmitBtn').textContent = 'Ajouter';
+  document.getElementById('contactForm').reset();
+  document.getElementById('contactModal').style.display = 'flex';
+}
+
+function editContact(id) {
+  const contact = contacts.find(c => c.id === id);
+  if (!contact) return;
+
+  isEditing = true;
+  editingContactId = id;
+  
+  document.getElementById('modalTitle').textContent = 'Modifier le contact';
+  document.getElementById('modalSubmitBtn').textContent = 'Modifier';
+  
+  document.getElementById('contactType').value = contact.type;
+  document.getElementById('contactName').value = contact.name;
+  document.getElementById('contactPhone').value = contact.phone;
+  document.getElementById('contactEmail').value = contact.email;
+  document.getElementById('contactAddress').value = contact.address || '';
+  document.getElementById('contactNotes').value = contact.notes || '';
+  
+  document.getElementById('contactModal').style.display = 'flex';
+}
+
+function closeContactModal() {
+  document.getElementById('contactModal').style.display = 'none';
+  isEditing = false;
+  editingContactId = null;
+  document.getElementById('contactForm').reset();
+}
+
+function deleteContact(id) {
+  if (confirm('Êtes-vous sûr de vouloir supprimer ce contact ?')) {
+    contacts = contacts.filter(c => c.id !== id);
+    localStorage.setItem('pharmacien_contacts', JSON.stringify(contacts));
+    loadContacts();
+    showNotification('Contact supprimé avec succès', 'success');
+  }
+}
+
+/* ===== Soumission formulaire ===== */
+document.getElementById('contactForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  const contactData = {
+    id: isEditing ? editingContactId : Date.now(),
+    type: document.getElementById('contactType').value,
+    name: document.getElementById('contactName').value,
+    phone: document.getElementById('contactPhone').value,
+    email: document.getElementById('contactEmail').value,
+    address: document.getElementById('contactAddress').value || null,
+    notes: document.getElementById('contactNotes').value || null,
+    createdAt: isEditing ? contacts.find(c => c.id === editingContactId).createdAt : new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  
+  if (isEditing) {
+    const index = contacts.findIndex(c => c.id === editingContactId);
+    if (index !== -1) {
+      contacts[index] = contactData;
+    }
+  } else {
+    contacts.push(contactData);
+  }
+  
+  localStorage.setItem('pharmacien_contacts', JSON.stringify(contacts));
+  closeContactModal();
+  loadContacts();
+  
+  const message = isEditing ? 'Contact modifié avec succès' : 'Contact ajouté avec succès';
+  showNotification(message, 'success');
+});
+
+/* ===== Recherche ===== */
+document.getElementById('searchContacts').addEventListener('input', loadContacts);
+
+/* ===== Chargement initial ===== */
+window.addEventListener('DOMContentLoaded', loadContacts);
   </script>
 </body>
 </html>
