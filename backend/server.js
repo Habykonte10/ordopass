@@ -22,7 +22,7 @@ app.get("/api/test", (req, res) => {
 
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/pharmacies", require("./routes/pharmacies"));
-
+app.use("/api/ordonnances", require("./routes/ordonnances"));
 /* ===== FRONTEND ===== */
 const frontendPath = path.join(__dirname, "..");
 app.use(express.static(frontendPath));
