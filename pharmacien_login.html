@@ -98,52 +98,42 @@
   </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-  const form = document.getElementById("loginForm");
-  const msg = document.getElementById("messageBox");
-  const btn = document.getElementById("submitBtn");
+  const email = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value;
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    msg.style.display = "none";
-    btn.disabled = true;
+  try {
+    const res = await fetch("https://ordopass.onrender.com/api/pharmacies/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: email,
+        password: password
+      })
+    });
 
-    const email = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value;
+    const data = await res.json();
 
-    try {
-      const res = await fetch("https://ordopass.onrender.com/api/pharmacies/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password
-        })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Erreur de connexion");
-      }
-
-      // Sauvegarde session
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      // Redirection pharmacie
-      window.location.href = "pharmacien_dashboard.html";
-
-    } catch (err) {
-      msg.textContent = "❌ " + err.message;
-      msg.className = "message-box error";
-      msg.style.display = "block";
-      btn.disabled = false;
+    if (!res.ok) {
+      throw new Error(data.message || "Erreur de connexion");
     }
-  });
 
+    // Sauvegarde session
+    localStorage.setItem("user", JSON.stringify(data.user));
+
+    // Redirection
+    window.location.href = "pharmacien_dashboard.html";
+
+  } catch (err) {
+    const msg = document.getElementById("messageBox");
+    msg.textContent = "❌ " + err.message;
+    msg.className = "message-box error";
+    msg.style.display = "block";
+  }
 });
 </script>
 </body>
