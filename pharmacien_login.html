@@ -109,30 +109,31 @@ document.addEventListener("DOMContentLoaded", () => {
     msg.style.display = "none";
     btn.disabled = true;
 
-    const username = document.getElementById("username").value.trim();
+    const email = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value;
 
     try {
-      const res = await fetch("https://ordopass.onrender.com/api/auth/login", {
+      const res = await fetch("https://ordopass.onrender.com/api/pharmacies/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          username: username,
-          password: password,
-          role: "pharmacie"
+          email: email,
+          password: password
         })
       });
 
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.message || "Erreur de connexion");
+      if (!res.ok) {
+        throw new Error(data.message || "Erreur de connexion");
+      }
 
-      // Sauvegarde utilisateur
-      localStorage.setItem("user", JSON.stringify(data));
+      // Sauvegarde session
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-      // Redirection
+      // Redirection pharmacie
       window.location.href = "pharmacien_dashboard.html";
 
     } catch (err) {
@@ -145,6 +146,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 </script>
-
 </body>
 </html>
