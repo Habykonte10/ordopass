@@ -585,6 +585,593 @@
     </div>
   </div>
 
+  <ici pour lorsque je naviger dans ce cela me dit acces refuser <!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contacts Médecins - Pharmacien | OrdoPass</title>
+  <link rel="stylesheet" href="style1.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* 🔹 Style du bouton de déconnexion */
+    #logout {
+      display: flex !important;
+      align-items: center;
+      color: white !important;
+      background: #e74c3c;
+      border-radius: 8px;
+      margin-top: 10px;
+      padding: 10px;
+      transition: 0.3s ease;
+    }
+    #logout:hover {
+      background: #c0392b;
+    }
+
+    /* Styles spécifiques aux contacts */
+    .contact-container {
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      height: calc(100vh - 200px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .contact-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .add-contact-btn {
+      background: linear-gradient(135deg, #2a5298, #1e3c72);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.3s ease;
+    }
+
+    .add-contact-btn:hover {
+      background: #1e3c72;
+      transform: translateY(-2px);
+    }
+
+    .search-bar {
+      width: 100%;
+      padding: 15px 15px 15px 50px;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 1em;
+      margin-bottom: 25px;
+      background: #f8f9fa;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 15px center;
+      background-size: 20px;
+    }
+
+    .search-bar:focus {
+      outline: none;
+      border-color: #2a5298;
+      background-color: white;
+    }
+
+    .contacts-list {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      padding: 20px;
+      border: 1px solid #e1e5e9;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      background: white;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .contact-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      border-color: #2a5298;
+    }
+
+    .contact-item.active {
+      background: #e8f4fd;
+      border-color: #2a5298;
+    }
+
+    .contact-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2a5298, #1e3c72);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
+      margin-right: 20px;
+      flex-shrink: 0;
+    }
+
+    .contact-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .contact-name {
+      font-size: 1.2em;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 5px;
+    }
+
+    .contact-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .contact-detail {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #7f8c8d;
+      font-size: 0.9em;
+    }
+
+    .contact-detail i {
+      color: #2a5298;
+    }
+
+    .contact-actions {
+      display: flex;
+      gap: 10px;
+      margin-left: 15px;
+    }
+
+    .action-btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .whatsapp-btn {
+      background: #25D366;
+      color: white;
+    }
+
+    .whatsapp-btn:hover {
+      background: #128C7E;
+      transform: translateY(-2px);
+    }
+
+    .email-btn {
+      background: #EA4335;
+      color: white;
+    }
+
+    .email-btn:hover {
+      background: #D23F31;
+      transform: translateY(-2px);
+    }
+
+    .call-btn {
+      background: #4285F4;
+      color: white;
+    }
+
+    .call-btn:hover {
+      background: #3367D6;
+      transform: translateY(-2px);
+    }
+
+    .edit-btn {
+      background: #6c757d;
+      color: white;
+    }
+
+    .edit-btn:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+    }
+
+    .delete-btn {
+      background: #dc3545;
+      color: white;
+    }
+
+    .delete-btn:hover {
+      background: #c82333;
+      transform: translateY(-2px);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #7f8c8d;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty-state i {
+      font-size: 4em;
+      color: #bdc3c7;
+      margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.8em;
+      cursor: pointer;
+      color: #7f8c8d;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background 0.3s ease;
+    }
+
+    .close-modal:hover {
+      background: #f8f9fa;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 0.95em;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 1em;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #2a5298;
+      box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      padding: 15px;
+      background: #2a5298;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      background: #1e3c72;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      padding: 15px;
+      background: #f8f9fa;
+      color: #2c3e50;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+      background: #e9ecef;
+    }
+
+    /* Notification */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 8px;
+      color: white;
+      z-index: 10000;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: slideIn 0.3s ease-out;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .notification.success {
+      background: #28a745;
+    }
+
+    .notification.error {
+      background: #dc3545;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .contact-type {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    .type-medecin {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .type-patient {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+
+    .type-colleague {
+      background: #e2e3e5;
+      color: #383d41;
+    }
+
+    .type-laboratory {
+      background: #e8d7ff;
+      color: #4a235a;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .contact-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .contact-avatar {
+        margin-right: 0;
+        margin-bottom: 15px;
+      }
+      
+      .contact-actions {
+        margin-left: 0;
+        margin-top: 15px;
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .action-btn {
+        flex: 1;
+        justify-content: center;
+      }
+      
+      .modal-content {
+        padding: 25px;
+        margin: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- ✅ Barre latérale identique -->
+    <aside class="sidebar">
+      <div class="logo">ORDO<span>PASS</span></div>
+      <nav class="menu">
+        <a href="pharmacien_dashboard.html"><i class="fa-solid fa-prescription"></i> <span>Ordonnances</span></a>
+        <a href="pharmacien_medecins.html"><i class="fa-solid fa-user-md"></i> <span>Médecins</span></a>
+        <a href="pharmacien_stock.html">
+          <i class="fa-solid fa-boxes-stacked"></i> <span>Gestion Stock</span>
+        </a>
+        <a href="pharmacien_facturation.html">
+          <i class="fa-solid fa-file-invoice-dollar"></i> <span>Facturation</span>
+        </a>
+        <a href="pharmacien_messagerie.html" class="active">
+          <i class="fa-solid fa-comment-medical"></i> <span>Messagerie</span>
+        </a>
+        <a href="pharmacien_parametres.html">
+          <i class="fa-solid fa-gear"></i> <span>Paramètres</span>
+        </a>
+        <a href="#" id="logout">
+          <i class="fa-solid fa-right-from-bracket"></i> <span>Déconnexion</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- ✅ Contenu principal -->
+    <main class="main">
+      <div class="topbar">
+        <div class="title">Contacts Médecins</div>
+        <div class="user-box">
+          <img class="avatar" src="https://i.pravatar.cc/80?img=12" alt="avatar"/>
+          <div>
+            <div id="userName">Pharmacie Centrale</div>
+            <small style="color:#6b8392">Connecté</small>
+          </div>
+        </div>
+      </div>
+
+      <section class="card">
+        <div class="contact-container">
+          <div class="contact-header">
+            <div>
+              <h2>Contacts directs</h2>
+              <p style="color: #7f8c8d; margin-top: 5px;">Contactez directement les médecins via WhatsApp ou Email</p>
+            </div>
+            <button class="add-contact-btn" onclick="openAddContactModal()">
+              <i class="fa-solid fa-plus"></i> Ajouter un contact
+            </button>
+          </div>
+
+          <input type="text" class="search-bar" id="searchContacts" placeholder="Rechercher un contact par nom, téléphone ou email...">
+
+          <div class="contacts-list" id="contactsList">
+            <!-- Les contacts seront chargés ici dynamiquement -->
+          </div>
+
+          <div id="emptyState" class="empty-state" style="display: none;">
+            <i class="fa-solid fa-address-book"></i>
+            <h3>Aucun contact enregistré</h3>
+            <p>Commencez par ajouter des contacts de médecins partenaires</p>
+            <button class="add-contact-btn" onclick="openAddContactModal()" style="margin-top: 20px;">
+              <i class="fa-solid fa-plus"></i> Ajouter votre premier contact
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal Ajouter/Modifier Contact -->
+  <div class="modal" id="contactModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Ajouter un contact</h2>
+        <button class="close-modal" onclick="closeContactModal()">&times;</button>
+      </div>
+      
+      <form id="contactForm">
+        <div class="form-group">
+          <label class="form-label">Type de contact *</label>
+          <select class="form-control" id="contactType" required>
+            <option value="medecin">Médecin</option>
+            <option value="patient">Patient</option>
+            <option value="colleague">Collègue pharmacien</option>
+            <option value="laboratory">Laboratoire d'analyses</option>
+            <option value="supplier">Fournisseur</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nom *</label>
+          <input type="text" class="form-control" id="contactName" required placeholder="Ex: Dr. Marie Diallo">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Téléphone *</label>
+          <input type="tel" class="form-control" id="contactPhone" required placeholder="Ex: +221 77 123 45 67">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input type="email" class="form-control" id="contactEmail" required placeholder="Ex: contact@medecin.sn">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Spécialité/Adresse</label>
+          <input type="text" class="form-control" id="contactAddress" placeholder="Ex: Cardiologue ou 123 Rue des Médecins, Dakar">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-control" id="contactNotes" rows="3" placeholder="Informations supplémentaires..."></textarea>
+        </div>
+
+        <div class="modal-buttons">
+          <button type="button" class="btn-secondary" onclick="closeContactModal()">Annuler</button>
+          <button type="submit" class="btn-primary" id="modalSubmitBtn">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
 /* ===== Vérification session ===== */
 const user = JSON.parse(localStorage.getItem("user"));
@@ -897,5 +1484,7 @@ document.getElementById('searchContacts').addEventListener('input', loadContacts
 /* ===== Chargement initial ===== */
 window.addEventListener('DOMContentLoaded', loadContacts);
   </script>
+</body>
+</html>
 </body>
 </html>
