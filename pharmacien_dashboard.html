@@ -94,6 +94,11 @@
 </div>
 
 <script>
+  const user = JSON.parse(localStorage.getItem("user"));
+
+fetch(`/api/ordonnances/pharmacie/${user.id}`)
+  .then(res => res.json())
+  .then(data => afficher(data));
 document.addEventListener("DOMContentLoaded", () => {
 
   const API_URL = window.location.protocol + "//" + window.location.host;

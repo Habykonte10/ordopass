@@ -706,7 +706,23 @@
     </div>
   </div>
 
-<script>
+script>
+  const user = JSON.parse(localStorage.getItem("user"));
+
+fetch("/api/ordonnances", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    medecinId: user.id,
+    medecinNom: user.username,
+
+    pharmacieId: selectedPharmacie._id,
+    pharmacieNom: selectedPharmacie.nom,
+
+    patientNom: document.getElementById("nom").value,
+    medicaments: document.getElementById("medicaments").value
+  })
+});
 /* ===== Vérification de session ===== */
 const user = JSON.parse(localStorage.getItem("user"));
 
@@ -1559,6 +1575,9 @@ function showNotification(message, type) {
     }
   }, 3000);
 }
+
 </script>
+</body> 
+</html>
 </body> 
 </html>
