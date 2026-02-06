@@ -370,65 +370,216 @@ document.getElementById("logout").onclick = () => {
   location.href = "index.html";
 };
 
-/* ===== API ===== */
-const API = "/api/pharmacies";
+/* ===== DONNÉES DES PHARMACIES ===== */
 let allPharmacies = [];
+let filteredPharmacies = [];
 
-/* ===== LOAD ===== */
-async function loadPharmacies() {
+/* ===== CHARGEMENT ===== */
+function loadPharmacies() {
   const container = document.getElementById("pharmaciesList");
-  container.innerHTML = `<p>Chargement...</p>`;
+  container.innerHTML = `<div class="loading"><i class="fa-solid fa-spinner fa-spin"></i> Chargement...</div>`;
 
   try {
-    const res = await fetch(API);
-    const data = await res.json();
+    // Essayer de charger depuis localStorage d'abord
+    let data = JSON.parse(localStorage.getItem('pharmacies')) || [];
+    
+    // Si pas de données, utiliser les données par défaut (identiques à medecin_ordonnance.html)
+    if (data.length === 0) {
+      data = [
+        {
+          id: 'ph1',
+          nom: 'Pharmacie Centrale',
+          adresse: '123 Avenue Bourguiba, Dakar',
+          telephone: '+221 33 821 45 67',
+          online: true,
+          services: ['Livraison', '24h/24', 'Urgence'],
+          latitude: 14.7167,
+          longitude: -17.4677
+        },
+        {
+          id: 'ph2',
+          nom: 'Pharmacie du Plateau',
+          adresse: '456 Rue Parchappe, Dakar',
+          telephone: '+221 33 821 89 01',
+          online: true,
+          services: ['Livraison', 'Domicile'],
+          latitude: 14.7211,
+          longitude: -17.4632
+        },
+        {
+          id: 'ph3',
+          nom: 'Pharmacie Liberté 6',
+          adresse: '789 Avenue Cheikh Anta Diop, Dakar',
+          telephone: '+221 33 824 56 78',
+          online: false,
+          services: ['24h/24', 'Urgence'],
+          latitude: 14.6928,
+          longitude: -17.4467
+        },
+        {
+          id: 'ph4',
+          nom: 'Pharmacie Sacré Cœur',
+          adresse: '321 Rue Moussé Diop, Dakar',
+          telephone: '+221 33 825 67 89',
+          online: true,
+          services: ['Livraison', 'Domicile', 'Urgence'],
+          latitude: 14.7056,
+          longitude: -17.4593
+        }
+      ];
+      
+      // Sauvegarder dans localStorage
+      localStorage.setItem('pharmacies', JSON.stringify(data));
+    }
+    
     allPharmacies = data;
-    displayPharmacies(data);
+    filteredPharmacies = [...data];
+    displayPharmacies(filteredPharmacies);
     updateStats(data);
   } catch (e) {
-    container.innerHTML = `<p>Erreur serveur</p>`;
+    console.error("Erreur:", e);
+    container.innerHTML = `<div class="empty-state">
+      <i class="fa-solid fa-exclamation-triangle"></i>
+      <h3>Erreur de chargement</h3>
+      <p>Impossible de charger les pharmacies</p>
+    </div>`;
   }
 }
 
-/* ===== DISPLAY ===== */
+/* ===== AFFICHAGE ===== */
 function displayPharmacies(list) {
-  const c = document.getElementById("pharmaciesList");
+  const container = document.getElementById("pharmaciesList");
+  
   if (list.length === 0) {
-    c.innerHTML = "<p>Aucune pharmacie</p>";
+    container.innerHTML = `<div class="empty-state">
+      <i class="fa-solid fa-search"></i>
+      <h3>Aucune pharmacie trouvée</h3>
+      <p>Aucune pharmacie ne correspond à vos critères de recherche</p>
+    </div>`;
     return;
   }
 
-  c.innerHTML = list.map(p => `
+  container.innerHTML = list.map(p => `
     <div class="pharmacy-card">
       <div class="pharmacy-header">
-        <h3>${p.nom}</h3>
-        <span class="${p.online ? 'status-online' : 'status-offline'}">
-          ${p.online ? 'En ligne' : 'Hors ligne'}
-        </span>
+        <div class="pharmacy-info">
+          <h3>${p.nom}</h3>
+          <div class="pharmacy-status">
+            <span class="status-dot ${p.online ? 'online' : 'offline'}"></span>
+            <span class="${p.online ? 'status-online' : 'status-offline'}">
+              ${p.online ? 'En ligne' : 'Hors ligne'}
+            </span>
+          </div>
+        </div>
+        <div class="pharmacy-actions">
+          <button class="btn-small btn-primary" onclick="sendOrdonnanceToPharmacy('${p.id}')">
+            <i class="fa-solid fa-paper-plane"></i> Envoyer ordonnance
+          </button>
+        </div>
       </div>
+      
       <div class="pharmacy-details">
-        <div>${p.adresse || ""}</div>
-        <div>${p.telephone || ""}</div>
-        <div>${p.pharmacien || ""}</div>
+        <div class="detail-item">
+          <i class="fa-solid fa-location-dot"></i>
+          <span>${p.adresse}</span>
+        </div>
+        <div class="detail-item">
+          <i class="fa-solid fa-phone"></i>
+          <span>${p.telephone}</span>
+        </div>
       </div>
+      
+      ${p.services && p.services.length > 0 ? `
+        <div class="services-list">
+          ${p.services.map(service => `<span class="service-tag">${service}</span>`).join(' ')}
+        </div>
+      ` : ''}
     </div>
   `).join("");
 }
 
-/* ===== STATS ===== */
-function updateStats(p) {
-  totalPharmacies.textContent = p.length;
-  onlinePharmacies.textContent = p.filter(x => x.online).length;
-  activePharmacies.textContent = p.filter(x => x.active).length;
+/* ===== STATISTIQUES ===== */
+function updateStats(pharmacies) {
+  document.getElementById("totalPharmacies").textContent = pharmacies.length;
+  document.getElementById("onlinePharmacies").textContent = pharmacies.filter(p => p.online).length;
+  document.getElementById("activePharmacies").textContent = pharmacies.filter(p => p.online).length;
 }
 
-refreshBtn.onclick = loadPharmacies;
-searchInput.oninput = () => {
-  const v = searchInput.value.toLowerCase();
-  displayPharmacies(allPharmacies.filter(p => p.nom.toLowerCase().includes(v)));
-};
+/* ===== FILTRAGE ===== */
+function filterPharmacies() {
+  const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+  const statusFilter = document.getElementById("statusFilter").value;
+  const serviceFilter = document.getElementById("serviceFilter").value;
+  
+  filteredPharmacies = allPharmacies.filter(pharmacy => {
+    // Filtre par recherche
+    const matchesSearch = !searchTerm || 
+      pharmacy.nom.toLowerCase().includes(searchTerm) ||
+      pharmacy.adresse.toLowerCase().includes(searchTerm);
+    
+    // Filtre par statut
+    const matchesStatus = statusFilter === "all" || 
+      (statusFilter === "online" && pharmacy.online) ||
+      (statusFilter === "offline" && !pharmacy.online);
+    
+    // Filtre par service
+    const matchesService = serviceFilter === "all" ||
+      (pharmacy.services && pharmacy.services.includes(serviceFilter));
+    
+    return matchesSearch && matchesStatus && matchesService;
+  });
+  
+  displayPharmacies(filteredPharmacies);
+}
 
-loadPharmacies();
+/* ===== ENVOYER UNE ORDONNANCE ===== */
+function sendOrdonnanceToPharmacy(pharmacyId) {
+  const pharmacy = allPharmacies.find(p => p.id === pharmacyId);
+  if (pharmacy) {
+    // Rediriger vers la page d'ordonnances avec un indicateur pour cette pharmacie
+    localStorage.setItem('selectedPharmacyForOrdonnance', pharmacyId);
+    window.location.href = "medecin_ordonnance.html";
+  }
+}
+
+/* ===== INITIALISATION ===== */
+document.addEventListener('DOMContentLoaded', function() {
+  // Charger les pharmacies
+  loadPharmacies();
+  
+  // Écouteurs d'événements
+  document.getElementById("refreshBtn").addEventListener("click", loadPharmacies);
+  document.getElementById("searchInput").addEventListener("input", filterPharmacies);
+  document.getElementById("statusFilter").addEventListener("change", filterPharmacies);
+  document.getElementById("serviceFilter").addEventListener("change", filterPharmacies);
+  
+  // Vérifier si on vient d'être redirigé avec une pharmacie sélectionnée
+  const selectedPharmacy = localStorage.getItem('selectedPharmacyForOrdonnance');
+  if (selectedPharmacy) {
+    const pharmacy = allPharmacies.find(p => p.id === selectedPharmacy);
+    if (pharmacy) {
+      showNotification(`Prêt à envoyer une ordonnance à ${pharmacy.nom}`, 'info');
+    }
+    localStorage.removeItem('selectedPharmacyForOrdonnance');
+  }
+});
+
+/* ===== NOTIFICATIONS ===== */
+function showNotification(message, type) {
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type}`;
+  notification.innerHTML = `
+    <span>${message}</span>
+    <i class="fa-solid fa-times" onclick="this.parentElement.remove()" style="cursor: pointer;"></i>
+  `;
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    if (notification.parentElement) {
+      notification.remove();
+    }
+  }, 5000);
+}
 </script>
 </body> 
 </html>
