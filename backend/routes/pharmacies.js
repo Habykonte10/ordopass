@@ -3,34 +3,56 @@ const router = express.Router();
 const Pharmacy = require("../models/Pharmacy");
 
 /* ======================================
-   ✅ CREATE PHARMACY (POSTMAN / ADMIN)
+   ✅ CREATE PHARMACY
 ====================================== */
 router.post("/", async (req, res) => {
   try {
+    const { nom, email, password } = req.body;
+
+    if (!nom || !email || !password) {
+      return res.status(400).json({
+        message: "Nom, email et mot de passe requis"
+      });
+    }
+
+    const exists = await Pharmacy.findOne({ email });
+    if (exists) {
+      return res.status(400).json({
+        message: "Cette pharmacie existe déjà"
+      });
+    }
+
     const pharmacy = new Pharmacy(req.body);
     await pharmacy.save();
-    res.status(201).json(pharmacy);
+
+    res.status(201).json({
+      message: "✅ Pharmacie créée avec succès",
+      pharmacy: {
+        id: pharmacy._id,
+        nom: pharmacy.nom,
+        email: pharmacy.email
+      }
+    });
+
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
 /* ======================================
    ✅ LOGIN PHARMACIE
-   username = email
 ====================================== */
 router.post("/login", async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!username || !password) {
+    if (!email || !password) {
       return res.status(400).json({
         message: "Email et mot de passe requis"
       });
     }
 
-    // username = email
-    const pharmacy = await Pharmacy.findOne({ email: username });
+    const pharmacy = await Pharmacy.findOne({ email });
 
     if (!pharmacy) {
       return res.status(404).json({
