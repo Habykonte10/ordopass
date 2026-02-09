@@ -882,9 +882,6 @@
           <!-- Boutons d'action -->
           <div class="action-buttons">
             <div class="action-buttons-left">
-              <button type="button" class="btn-primary" id="enregistrerConsultationBtn" onclick="saveConsultationOnly()">
-                <i class="fa-solid fa-floppy-disk"></i> Enregistrer la consultation uniquement
-              </button>
               <button type="button" class="btn-success" onclick="savePatientAndConsultation()">
                 <i class="fa-solid fa-user-plus"></i> Ajouter patient et consultation
               </button>
@@ -1150,73 +1147,6 @@ function updateTicketPrefix() {
     // Si c'est un ticket personnalisé, juste vérifier la disponibilité
     checkTicketAvailability();
   }
-}
-
-/* ===============================
-   FONCTION POUR ENREGISTRER UNIQUEMENT LA CONSULTATION
-================================ */
-function saveConsultationOnly() {
-  // Vérifier la disponibilité du ticket
-  if (!checkTicketAvailability()) {
-    showNotification('Veuillez utiliser un ticket disponible', 'error');
-    return;
-  }
-  
-  // Validation des champs obligatoires pour la consultation
-  const requiredFields = ['ticket', 'motif', 'symptomes', 'statut', 'nom', 'prenom', 'age', 'genre'];
-  for (const fieldId of requiredFields) {
-    const field = document.getElementById(fieldId);
-    if (!field.value.trim()) {
-      showNotification(`Le champ "${fieldId}" est obligatoire`, 'error');
-      field.focus();
-      return;
-    }
-  }
-  
-  // Afficher l'indicateur de chargement
-  document.getElementById('loadingIndicator').style.display = 'block';
-  
-  // Enregistrer la consultation
-  const consultation = {
-    id: Date.now(),
-    patientNom: document.getElementById('nom').value,
-    patientPrenom: document.getElementById('prenom').value,
-    patientAge: document.getElementById('age').value,
-    patientGenre: document.getElementById('genre').value,
-    patientTelephone: document.getElementById('telephone').value,
-    patientAdresse: document.getElementById('adresse').value,
-    ticket: document.getElementById('ticket').value,
-    typeConsultation: document.getElementById('typeConsultation').value,
-    date: document.getElementById('date').value,
-    heure: document.getElementById('heure').value,
-    motif: document.getElementById('motif').value,
-    symptomes: document.getElementById('symptomes').value,
-    analyses: analysesList,
-    examens: document.getElementById('examens').value,
-    statut: document.getElementById('statut').value,
-    medecin: user.username,
-    ordonnance: medicationsList.length > 0 ? medicationsList : null,
-    facture: {
-      description: document.getElementById('factureDescription').value,
-      montant: document.getElementById('factureMontant').value
-    },
-    createdAt: new Date().toISOString()
-  };
-  
-  // Sauvegarder dans localStorage
-  let consultations = JSON.parse(localStorage.getItem('consultations')) || [];
-  consultations.push(consultation);
-  localStorage.setItem('consultations', JSON.stringify(consultations));
-  
-  // Cacher l'indicateur de chargement
-  document.getElementById('loadingIndicator').style.display = 'none';
-  
-  showNotification('Consultation enregistrée avec succès !', 'success');
-  
-  // Redirection après 2 secondes
-  setTimeout(() => {
-    window.location.href = 'medecin_dashboard.html';
-  }, 2000);
 }
 
 /* ===============================
