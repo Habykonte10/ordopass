@@ -575,41 +575,68 @@ document.getElementById("logout").addEventListener("click", function(e){
 /* ===== Données des contacts ===== */
 let contacts = JSON.parse(localStorage.getItem('medecin_contacts')) || [];
 
-// Données par défaut si vide
-if (contacts.length === 0) {
-  contacts = [
-    {
-      id: 1,
-      type: "pharmacy",
-      name: "Pharmacie Centrale",
-      phone: "+221771234567",
-      email: "pharmacie.centrale@example.com",
-      address: "123 Avenue Bourguiba, Dakar",
-      notes: "Pharmacie ouverte 24h/24",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 2,
-      type: "pharmacy",
-      name: "Pharmacie Mamelles",
-      phone: "+221772345678",
-      email: "pharmacie.mamelles@example.com",
-      address: "456 Rue des Almadies, Dakar",
-      notes: "Spécialisée en produits dermatologiques",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 3,
-      type: "laboratory",
-      name: "Laboratoire Biotech",
-      phone: "+221773456789",
-      email: "labo.biotech@example.com",
-      address: "789 Avenue Pasteur",
-      notes: "Résultats d'analyses sous 24h",
-      createdAt: new Date().toISOString()
+// Charger les 5 pharmacies depuis le backend
+async function loadPharmaciesFromBackend() {
+  try {
+    const response = await fetch('/api/pharmacies');
+    if (!response.ok) {
+      throw new Error('Erreur lors du chargement des pharmacies');
     }
-  ];
-  localStorage.setItem('medecin_contacts', JSON.stringify(contacts));
+    
+    const pharmacies = await response.json();
+    
+    // Transformer les données des pharmacies en contacts
+    const pharmacyContacts = pharmacies.map(pharma => ({
+      id: pharma._id || pharma.id,
+      type: "pharmacy",
+      name: pharma.nom,
+      phone: pharma.telephone || 'Non disponible',
+      email: pharma.email || 'contact@pharmacie.sn',
+      address: pharma.adresse || 'Non spécifié',
+      notes: `Pharmacie partenaire - ${pharma.pharmacien || 'Pharmacien principal'}`,
+      createdAt: new Date().toISOString(),
+      isFromBackend: true // Marquer comme venant du backend
+    }));
+    
+    // Filtrer pour ne garder que les pharmacies qui ne sont pas déjà dans les contacts
+    const existingPharmacyIds = contacts.filter(c => c.isFromBackend).map(c => c.id);
+    const newPharmacyContacts = pharmacyContacts.filter(pharma => 
+      !existingPharmacyIds.includes(pharma.id)
+    );
+    
+    // Ajouter les nouvelles pharmacies aux contacts
+    if (newPharmacyContacts.length > 0) {
+      contacts = [...newPharmacyContacts, ...contacts];
+      localStorage.setItem('medecin_contacts', JSON.stringify(contacts));
+    }
+    
+    return pharmacyContacts;
+  } catch (error) {
+    console.error('Erreur lors du chargement des pharmacies:', error);
+    return [];
+  }
+}
+
+// Données par défaut si vide - remplacées par les pharmacies du backend
+if (contacts.length === 0) {
+  // Charger les pharmacies du backend
+  loadPharmaciesFromBackend().then(pharmacyContacts => {
+    if (pharmacyContacts.length === 0) {
+      // Si aucune pharmacie n'est chargée, ajouter des contacts vides
+      contacts = [];
+    }
+    localStorage.setItem('medecin_contacts', JSON.stringify(contacts));
+    loadContacts();
+  });
+} else {
+  // Vérifier si on a des pharmacies du backend
+  const hasBackendPharmacies = contacts.some(c => c.isFromBackend);
+  if (!hasBackendPharmacies) {
+    // Charger les pharmacies du backend
+    loadPharmaciesFromBackend().then(() => {
+      loadContacts();
+    });
+  }
 }
 
 /* ===== Variables globales ===== */
@@ -657,6 +684,9 @@ function loadContacts() {
   const emptyState = document.getElementById('emptyState');
   const searchTerm = document.getElementById('searchContacts').value.toLowerCase();
 
+  // Recharger les contacts depuis le localStorage
+  contacts = JSON.parse(localStorage.getItem('medecin_contacts')) || [];
+
   if (contacts.length === 0) {
     container.style.display = 'none';
     emptyState.style.display = 'flex';
@@ -702,6 +732,7 @@ function loadContacts() {
                                   contact.type === 'colleague' ? 'user-md' : 
                                   'flask'}"></i>
           ${getTypeLabel(contact.type)}
+          ${contact.isFromBackend ? ' <span style="font-size:0.7em; background:#2a5298; color:white; padding:2px 6px; border-radius:10px; margin-left:5px;">Partenaire</span>' : ''}
         </div>
         <div class="contact-details">
           <div class="contact-detail">
@@ -722,7 +753,7 @@ function loadContacts() {
         ${contact.notes ? `<div style="margin-top: 10px; color: #7f8c8d; font-size: 0.9em;"><i class="fa-solid fa-note"></i> ${contact.notes}</div>` : ''}
       </div>
       <div class="contact-actions">
-        ${contact.phone ? `
+        ${contact.phone && contact.phone !== 'Non disponible' ? `
         <button class="action-btn whatsapp-btn" onclick="contactWhatsApp('${contact.phone}', '${contact.name}')" title="WhatsApp">
           <i class="fa-brands fa-whatsapp"></i>
         </button>
@@ -730,17 +761,19 @@ function loadContacts() {
           <i class="fa-solid fa-phone"></i>
         </button>
         ` : ''}
-        ${contact.email ? `
+        ${contact.email && contact.email !== 'contact@pharmacie.sn' ? `
         <button class="action-btn email-btn" onclick="contactEmail('${contact.email}', '${contact.name}')" title="Email">
           <i class="fa-solid fa-envelope"></i>
         </button>
         ` : ''}
-        <button class="action-btn edit-btn" onclick="editContact(${contact.id})" title="Modifier">
+        ${!contact.isFromBackend ? `
+        <button class="action-btn edit-btn" onclick="editContact('${contact.id}')" title="Modifier">
           <i class="fa-solid fa-edit"></i>
         </button>
-        <button class="action-btn delete-btn" onclick="deleteContact(${contact.id})" title="Supprimer">
+        <button class="action-btn delete-btn" onclick="deleteContact('${contact.id}')" title="Supprimer">
           <i class="fa-solid fa-trash"></i>
         </button>
+        ` : ''}
       </div>
     `;
     container.appendChild(contactItem);
@@ -778,7 +811,7 @@ function openAddContactModal() {
 
 function editContact(id) {
   const contact = contacts.find(c => c.id === id);
-  if (!contact) return;
+  if (!contact || contact.isFromBackend) return; // Ne pas modifier les contacts du backend
 
   isEditing = true;
   editingContactId = id;
@@ -804,6 +837,12 @@ function closeContactModal() {
 }
 
 function deleteContact(id) {
+  const contact = contacts.find(c => c.id === id);
+  if (!contact || contact.isFromBackend) {
+    showNotification('Les contacts partenaires ne peuvent pas être supprimés', 'error');
+    return;
+  }
+  
   if (confirm('Êtes-vous sûr de vouloir supprimer ce contact ?')) {
     contacts = contacts.filter(c => c.id !== id);
     localStorage.setItem('medecin_contacts', JSON.stringify(contacts));
@@ -817,7 +856,7 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
   e.preventDefault();
   
   const contactData = {
-    id: isEditing ? editingContactId : Date.now(),
+    id: isEditing ? editingContactId : Date.now().toString(),
     type: document.getElementById('contactType').value,
     name: document.getElementById('contactName').value,
     phone: document.getElementById('contactPhone').value,
@@ -825,7 +864,8 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
     address: document.getElementById('contactAddress').value || null,
     notes: document.getElementById('contactNotes').value || null,
     createdAt: isEditing ? contacts.find(c => c.id === editingContactId).createdAt : new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
+    isFromBackend: false
   };
   
   if (isEditing) {
@@ -849,7 +889,20 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
 document.getElementById('searchContacts').addEventListener('input', loadContacts);
 
 /* ===== Chargement initial ===== */
-window.addEventListener('DOMContentLoaded', loadContacts);
+window.addEventListener('DOMContentLoaded', function() {
+  // Charger d'abord les pharmacies du backend
+  loadPharmaciesFromBackend().then(() => {
+    loadContacts();
+  });
+});
+
+/* ===== Rafraîchir les contacts ===== */
+function refreshContacts() {
+  loadPharmaciesFromBackend().then(() => {
+    loadContacts();
+    showNotification('Contacts rafraîchis avec succès', 'success');
+  });
+}
   </script>
 </body>
 </html>
