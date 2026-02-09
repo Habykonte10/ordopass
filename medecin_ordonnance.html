@@ -12,7 +12,6 @@
   <script src="/socket.io/socket.io.js"></script>
 
   <style>
-    /* ... (tous vos styles CSS restent exactement les mêmes) ... */
     .preview { 
       margin-top:20px; 
       border:1px solid #ddd; 
@@ -808,8 +807,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // Charger les ordonnances
   loadOrdonnances();
   
-  // Charger les pharmacies
-  loadPharmaciesForModal();
+  // Charger les pharmacies depuis le backend
+  loadPharmaciesFromBackend();
   
   // Événements des boutons
   document.getElementById('genBtn').addEventListener('click', generatePreview);
@@ -847,6 +846,38 @@ function initTabs() {
       document.getElementById(tabId + '-tab').classList.add('active');
     });
   });
+}
+
+/* ===== Charger les pharmacies depuis le backend ===== */
+async function loadPharmaciesFromBackend() {
+  try {
+    const response = await fetch('/api/pharmacies');
+    if (!response.ok) {
+      throw new Error('Erreur lors du chargement des pharmacies');
+    }
+    
+    const pharmacies = await response.json();
+    
+    // Transformer les données pour correspondre à la structure attendue
+    allPharmacies = pharmacies.map(pharma => ({
+      id: pharma._id || pharma.id,
+      nom: pharma.nom,
+      adresse: pharma.adresse || 'Non spécifié',
+      telephone: pharma.telephone || 'Non disponible',
+      online: pharma.online || true,
+      services: ['Générale'], // Par défaut
+      pharmacien: pharma.pharmacien || 'Pharmacien principal'
+    }));
+    
+    // Stocker dans le localStorage pour une utilisation hors ligne
+    localStorage.setItem('pharmacies', JSON.stringify(allPharmacies));
+    
+    console.log('Pharmacies chargées depuis le backend:', allPharmacies);
+  } catch (error) {
+    console.error('Erreur lors du chargement des pharmacies:', error);
+    // En cas d'erreur, charger depuis le localStorage
+    allPharmacies = JSON.parse(localStorage.getItem('pharmacies')) || [];
+  }
 }
 
 /* ===== Générer l'aperçu ===== */
@@ -1113,42 +1144,7 @@ function getStatusText(status) {
   return statusMap[status] || status;
 }
 
-/* ===== Gestion des pharmacies pour le modal ===== */
-function loadPharmaciesForModal() {
-  allPharmacies = JSON.parse(localStorage.getItem('pharmacies')) || [];
-  
-  // Si pas de pharmacies, en créer quelques-unes par défaut
-  if (allPharmacies.length === 0) {
-    allPharmacies = [
-      {
-        id: 'ph1',
-        nom: 'Pharmacie du Centre',
-        adresse: '123 Avenue de la République, Dakar',
-        telephone: '+221 33 821 45 67',
-        online: true,
-        services: ['Livraison', 'Urgence', '24h/24']
-      },
-      {
-        id: 'ph2',
-        nom: 'Pharmacie de la Paix',
-        adresse: '456 Rue des Martyrs, Dakar',
-        telephone: '+221 33 822 34 56',
-        online: true,
-        services: ['24h/24', 'Livraison']
-      },
-      {
-        id: 'ph3',
-        nom: 'Pharmacie Liberté',
-        adresse: '789 Boulevard Liberté, Dakar',
-        telephone: '+221 33 823 78 90',
-        online: false,
-        services: ['Livraison']
-      }
-    ];
-    localStorage.setItem('pharmacies', JSON.stringify(allPharmacies));
-  }
-}
-
+/* ===== Ouvrir le modal des pharmacies ===== */
 function openPharmacieModal() {
   if (!currentOrdonnance) {
     showNotification('Veuillez d\'abord sauvegarder l\'ordonnance', 'error');
