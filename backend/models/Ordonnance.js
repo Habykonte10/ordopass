@@ -1,7 +1,10 @@
 const mongoose = require("mongoose");
 
 const OrdonnanceSchema = new mongoose.Schema({
-  code: { type: String, required: true },
+  code: {
+    type: String,
+    required: true
+  },
 
   medecin: {
     id: String,
@@ -13,8 +16,15 @@ const OrdonnanceSchema = new mongoose.Schema({
     nom: String
   },
 
-  patientNom: String,
-  medicaments: String,
+  patientNom: {
+    type: String,
+    required: true
+  },
+
+  medicaments: {
+    type: String,
+    required: true
+  },
 
   statut: {
     type: String,
