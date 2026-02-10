@@ -24,12 +24,12 @@ router.post("/login", async (req, res) => {
     }
 
     res.json({
-      id: user._id,
       username: user.username,
       role: user.role
     });
 
   } catch (err) {
+    console.error("LOGIN ERROR:", err);
     res.status(500).json({ message: "Erreur serveur" });
   }
 });
@@ -39,12 +39,12 @@ router.post("/register-pharmacie", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    if (!username || !password) {
+    if(!username || !password){
       return res.status(400).json({ message: "Champs manquants" });
     }
 
-    const exist = await User.findOne({ username, role: "pharmacie" });
-    if (exist) {
+    const exist = await User.findOne({ username, role:"pharmacie" });
+    if(exist){
       return res.status(400).json({ message: "Utilisateur existe déjà" });
     }
 
@@ -57,9 +57,11 @@ router.post("/register-pharmacie", async (req, res) => {
     });
 
     await user.save();
-    res.json({ message: "✅ Pharmacie créée" });
+
+    res.json({ message: "✅ Compte pharmacie créé avec succès" });
 
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Erreur création pharmacie" });
   }
 });
