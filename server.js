@@ -15,8 +15,13 @@ app.use(cors({
 
 app.use(express.json());
 
-/* ===== ROUTES API ===== */
+/* ===== API ===== */
+app.get("/api/test", (req, res) => {
+  res.json({ status: "API OK" });
+});
+
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/pharmacies", require("./routes/pharmacies"));
 app.use("/api/ordonnances", require("./routes/ordonnances"));
 
 /* ===== FRONTEND ===== */
@@ -27,13 +32,15 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
 
+/* ⚠️ PAS DE app.get("*") */
+
 /* ===== DATABASE ===== */
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connecté"))
   .catch(err => console.error("❌ MongoDB erreur:", err));
 
-/* ===== START SERVER ===== */
+/* ===== START ===== */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log("🚀 Serveur lancé sur http://localhost:" + PORT);
+  console.log("🚀 Serveur lancé sur https://ordopass.onrender.com");
 });
