@@ -1,50 +1,58 @@
-// routes/ordonnance.js
-const router = require("express").Router();
-const multer = require("multer");
+const express = require("express");
+const router = express.Router();
 const Ordonnance = require("../models/Ordonnance");
-const auth = require("../middleware/auth");
 
-// UPLOAD CONFIG
-const storage = multer.diskStorage({
-  destination: "uploads/",
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "_" + file.originalname);
-  }
-});
-const upload = multer({ storage });
-
-// AJOUT ORDONNANCE (protection auth)
-router.post("/", auth, upload.single("file"), async (req, res) => {
+/* ===== CREATE ORDONNANCE ===== */
+router.post("/", async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: "Fichier manquant" });
+    const ordonnance = new Ordonnance({
+      code: "ORD-" + Date.now(),
 
-    const ord = await Ordonnance.create({
-      patient: req.body.patient,
-      fichier: req.file.filename,
-      medecin: req.user.id
+      medecin: {
+        id: req.body.medecinId,
+        nom: req.body.medecinNom
+      },
+
+      pharmacie: {
+        id: req.body.pharmacieId,
+        nom: req.body.pharmacieNom
+      },
+
+      patientNom: req.body.patientNom,
+      medicaments: req.body.medicaments
     });
 
-    res.json(ord);
+    await ordonnance.save();
+    res.json({ message: "✅ Ordonnance envoyée" });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// LISTE (protégé)
-router.get("/", auth, async (req, res) => {
+/* ===== ORDONNANCES D’UNE PHARMACIE ===== */
+router.get("/pharmacie/:id", async (req, res) => {
   try {
-    const data = await Ordonnance.find();
-    res.json(data);
+    const ordonnances = await Ordonnance.find({
+      "pharmacie.id": req.params.id
+    }).sort({ createdAt: -1 });
+
+    res.json(ordonnances);
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// DELETE
-router.delete("/:id", auth, async (req, res) => {
+/* ===== UPDATE STATUT ===== */
+router.put("/:id/status", async (req, res) => {
   try {
-    await Ordonnance.findByIdAndDelete(req.params.id);
-    res.json({ success: true });
+    await Ordonnance.findByIdAndUpdate(req.params.id, {
+      statut: req.body.statut
+    });
+
+    res.json({ message: "Statut mis à jour" });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

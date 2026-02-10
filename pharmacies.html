@@ -377,16 +377,25 @@ let allPharmacies = [];
 /* ===== LOAD ===== */
 async function loadPharmacies() {
   const container = document.getElementById("pharmaciesList");
-  container.innerHTML = `<p>Chargement...</p>`;
+  container.innerHTML = `<div class="loading"><i class="fa-solid fa-spinner fa-spin"></i> Chargement des pharmacies...</div>`;
 
   try {
     const res = await fetch(API);
+    if (!res.ok) {
+      throw new Error('Erreur serveur');
+    }
     const data = await res.json();
     allPharmacies = data;
     displayPharmacies(data);
     updateStats(data);
   } catch (e) {
-    container.innerHTML = `<p>Erreur serveur</p>`;
+    console.error("Erreur:", e);
+    container.innerHTML = `<div class="empty-state">
+      <i class="fa-solid fa-exclamation-triangle"></i>
+      <h3>Erreur de connexion</h3>
+      <p>Impossible de charger les pharmacies. Vérifiez votre connexion.</p>
+      <button class="btn-primary" onclick="loadPharmacies()">Réessayer</button>
+    </div>`;
   }
 }
 
@@ -394,22 +403,55 @@ async function loadPharmacies() {
 function displayPharmacies(list) {
   const c = document.getElementById("pharmaciesList");
   if (list.length === 0) {
-    c.innerHTML = "<p>Aucune pharmacie</p>";
+    c.innerHTML = `<div class="empty-state">
+      <i class="fa-solid fa-prescription-bottle-medical"></i>
+      <h3>Aucune pharmacie</h3>
+      <p>Aucune pharmacie n'est actuellement enregistrée.</p>
+    </div>`;
     return;
   }
 
   c.innerHTML = list.map(p => `
     <div class="pharmacy-card">
       <div class="pharmacy-header">
-        <h3>${p.nom}</h3>
-        <span class="${p.online ? 'status-online' : 'status-offline'}">
-          ${p.online ? 'En ligne' : 'Hors ligne'}
-        </span>
+        <div class="pharmacy-info">
+          <h3>${p.nom}</h3>
+          <div class="pharmacy-status">
+            <span class="status-dot ${p.online ? 'online' : 'offline'}"></span>
+            <span class="${p.online ? 'status-online' : 'status-offline'}">
+              ${p.online ? 'En ligne' : 'Hors ligne'}
+            </span>
+          </div>
+        </div>
+        <div class="pharmacy-actions">
+          <button class="btn-small btn-primary" onclick="viewPharmacy('${p._id || p.id}')">
+            <i class="fa-solid fa-eye"></i> Voir
+          </button>
+          <button class="btn-small btn-secondary" onclick="sendOrdonnanceToPharmacy('${p._id || p.id}')">
+            <i class="fa-solid fa-paper-plane"></i> Envoyer ordonnance
+          </button>
+        </div>
       </div>
       <div class="pharmacy-details">
-        <div>${p.adresse || ""}</div>
-        <div>${p.telephone || ""}</div>
-        <div>${p.pharmacien || ""}</div>
+        <div class="detail-item">
+          <i class="fa-solid fa-location-dot"></i>
+          <span>${p.adresse || "Adresse non spécifiée"}</span>
+        </div>
+        <div class="detail-item">
+          <i class="fa-solid fa-phone"></i>
+          <span>${p.telephone || "Téléphone non disponible"}</span>
+        </div>
+        <div class="detail-item">
+          <i class="fa-solid fa-user-md"></i>
+          <span>${p.pharmacien || "Pharmacien principal"}</span>
+        </div>
+      </div>
+      <div class="services-list">
+        <span class="service-tag">Générale</span>
+        ${p.services && p.services.length > 0 ? 
+          p.services.map(service => `<span class="service-tag">${service}</span>`).join('') : 
+          ''
+        }
       </div>
     </div>
   `).join("");
@@ -417,17 +459,90 @@ function displayPharmacies(list) {
 
 /* ===== STATS ===== */
 function updateStats(p) {
-  totalPharmacies.textContent = p.length;
-  onlinePharmacies.textContent = p.filter(x => x.online).length;
-  activePharmacies.textContent = p.filter(x => x.active).length;
+  document.getElementById('totalPharmacies').textContent = p.length;
+  document.getElementById('onlinePharmacies').textContent = p.filter(x => x.online).length;
+  document.getElementById('activePharmacies').textContent = p.filter(x => x.active !== false).length;
 }
 
-refreshBtn.onclick = loadPharmacies;
-searchInput.oninput = () => {
-  const v = searchInput.value.toLowerCase();
-  displayPharmacies(allPharmacies.filter(p => p.nom.toLowerCase().includes(v)));
+/* ===== EVENTS ===== */
+document.getElementById('refreshBtn').onclick = loadPharmacies;
+
+document.getElementById('searchInput').oninput = () => {
+  const v = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = allPharmacies.filter(p => 
+    p.nom.toLowerCase().includes(v) || 
+    p.adresse.toLowerCase().includes(v) ||
+    p.pharmacien.toLowerCase().includes(v)
+  );
+  displayPharmacies(filtered);
 };
 
+document.getElementById('statusFilter').onchange = () => {
+  const status = document.getElementById('statusFilter').value;
+  const service = document.getElementById('serviceFilter').value;
+  filterPharmacies(status, service);
+};
+
+document.getElementById('serviceFilter').onchange = () => {
+  const status = document.getElementById('statusFilter').value;
+  const service = document.getElementById('serviceFilter').value;
+  filterPharmacies(status, service);
+};
+
+function filterPharmacies(status, service) {
+  let filtered = allPharmacies;
+  
+  if (status !== 'all') {
+    filtered = filtered.filter(p => 
+      status === 'online' ? p.online : !p.online
+    );
+  }
+  
+  if (service !== 'all') {
+    filtered = filtered.filter(p => 
+      p.services && p.services.includes(service)
+    );
+  }
+  
+  displayPharmacies(filtered);
+  updateStats(filtered);
+}
+
+/* ===== UTILS ===== */
+function viewPharmacy(pharmacyId) {
+  const pharmacy = allPharmacies.find(p => (p._id || p.id) === pharmacyId);
+  if (pharmacy) {
+    alert(`Détails de ${pharmacy.nom}\n\nAdresse: ${pharmacy.adresse}\nTéléphone: ${pharmacy.telephone}\nPharmacien: ${pharmacy.pharmacien}`);
+  }
+}
+
+function sendOrdonnanceToPharmacy(pharmacyId) {
+  const pharmacy = allPharmacies.find(p => (p._id || p.id) === pharmacyId);
+  if (pharmacy) {
+    // Rediriger vers la page des ordonnances avec la pharmacie présélectionnée
+    window.location.href = `medecin_ordonnance.html?pharmacyId=${pharmacyId}&pharmacyName=${encodeURIComponent(pharmacy.nom)}`;
+  }
+}
+
+function showNotification(message, type) {
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type}`;
+  notification.innerHTML = `
+    <span>${message}</span>
+    <button onclick="this.parentElement.remove()" style="background:none; border:none; color:white; cursor:pointer;">
+      <i class="fa-solid fa-times"></i>
+    </button>
+  `;
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    if (notification.parentElement) {
+      notification.remove();
+    }
+  }, 5000);
+}
+
+/* ===== INIT ===== */
 loadPharmacies();
 </script>
 </body> 

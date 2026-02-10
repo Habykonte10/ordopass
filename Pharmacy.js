@@ -1,14 +1,44 @@
 const mongoose = require("mongoose");
 
-const pharmacySchema = new mongoose.Schema({
+const PharmacySchema = new mongoose.Schema({
   nom: { type: String, required: true },
-  adresse: String,
+
+  email: {
+    type: String,
+    required: true,
+    unique: true
+  },
+
+  password: {
+    type: String,
+    required: true
+  },
+
   telephone: String,
+  adresse: String,
   pharmacien: String,
+  horaires: String,
   services: [String],
-  online: { type: Boolean, default: true },
-  active: { type: Boolean, default: true },
-  createdAt: { type: Date, default: Date.now }
+
+  role: {
+    type: String,
+    default: "pharmacie"
+  },
+
+  online: {
+    type: Boolean,
+    default: false
+  },
+
+  active: {
+    type: Boolean,z
+    default: true
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
-module.exports = mongoose.model("Pharmacy", pharmacySchema);
+module.exports = mongoose.model("Pharmacy", PharmacySchema);

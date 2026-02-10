@@ -1,11 +1,30 @@
-// models/Ordonnance.js
 const mongoose = require("mongoose");
 
-const OrdSchema = new mongoose.Schema({
-  patient: String,
-  fichier: String,
-  medecin: String,
-  createdAt: { type: Date, default: Date.now }
+const OrdonnanceSchema = new mongoose.Schema({
+  code: { type: String, required: true },
+
+  medecin: {
+    id: String,
+    nom: String
+  },
+
+  pharmacie: {
+    id: String,
+    nom: String
+  },
+
+  patientNom: String,
+  medicaments: String,
+
+  statut: {
+    type: String,
+    default: "envoyee"
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
-module.exports = mongoose.model("Ordonnance", OrdSchema);
+module.exports = mongoose.model("Ordonnance", OrdonnanceSchema);
