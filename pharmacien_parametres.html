@@ -209,125 +209,82 @@
   </div>
 
   <script>
-    // ✅ Vérifie si l'utilisateur est connecté
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser) {
-      window.location.href = 'index.html';
-    }
+/* ===========================
+   ✅ VERIFICATION SESSION
+=========================== */
 
-    // Éléments du formulaire
-    const pharmacyName = document.getElementById('pharmacyName');
-    const pharmacistId = document.getElementById('pharmacistId');
-    const managerName = document.getElementById('managerName');
-    const email = document.getElementById('email');
-    const phone = document.getElementById('phone');
-    const address = document.getElementById('address');
-    const currentPassword = document.getElementById('currentPassword');
-    const newPassword = document.getElementById('newPassword');
-    const confirmPassword = document.getElementById('confirmPassword');
-    const saveSettings = document.getElementById('saveSettings');
-    const resetSettings = document.getElementById('resetSettings');
+document.addEventListener("DOMContentLoaded", function () {
 
-    // Charger les paramètres sauvegardés
-    function loadSettings() {
-      const savedSettings = JSON.parse(localStorage.getItem('pharmacySettings'));
-      if (savedSettings) {
-        pharmacyName.value = savedSettings.pharmacyName || 'Pharmacie Centrale Liberté 6';
-        managerName.value = savedSettings.managerName || 'M. Abdoulaye Seck';
-        email.value = savedSettings.email || 'contact@pharmacie-liberte6.sn';
-        phone.value = savedSettings.phone || '+221 77 456 78 90';
-        address.value = savedSettings.address || 'Liberté 6, Dakar';
-      }
-    }
+  const currentUser = JSON.parse(localStorage.getItem("user"));
 
-    // Sauvegarder les paramètres
-    function saveSettingsToLocalStorage() {
-      const settings = {
-        pharmacyName: pharmacyName.value,
-        managerName: managerName.value,
-        email: email.value,
-        phone: phone.value,
-        address: address.value,
-        lastUpdated: new Date().toISOString()
-      };
-      localStorage.setItem('pharmacySettings', JSON.stringify(settings));
-    }
+  if (!currentUser || currentUser.role !== "pharmacie") {
+    window.location.href = "index.html";
+    return;
+  }
 
-    // Valider le formulaire
-    function validateForm() {
-      // Validation de base
-      if (!pharmacyName.value.trim()) {
-        alert('Le nom de la pharmacie est obligatoire');
-        return false;
-      }
-      if (!email.value.trim()) {
-        alert('L\'email est obligatoire');
-        return false;
-      }
-      if (!phone.value.trim()) {
-        alert('Le téléphone est obligatoire');
-        return false;
-      }
+  // Affiche le nom pharmacie
+  document.getElementById("userName").textContent =
+    currentUser.username || "Pharmacie";
 
-      // Validation du mot de passe si rempli
-      if (newPassword.value || confirmPassword.value) {
-        if (!currentPassword.value) {
-          alert('Veuillez entrer votre mot de passe actuel pour modifier le mot de passe');
-          return false;
-        }
-        if (newPassword.value !== confirmPassword.value) {
-          alert('Les nouveaux mots de passe ne correspondent pas');
-          return false;
-        }
-        if (newPassword.value.length < 6) {
-          alert('Le nouveau mot de passe doit contenir au moins 6 caractères');
-          return false;
-        }
-      }
+  loadSettings();
+});
 
-      return true;
-    }
 
-    // Événements
-    saveSettings.addEventListener('click', function() {
-      if (validateForm()) {
-        saveSettingsToLocalStorage();
-        alert('Paramètres sauvegardés avec succès !');
-        
-        // Réinitialiser les champs de mot de passe
-        currentPassword.value = '';
-        newPassword.value = '';
-        confirmPassword.value = '';
-      }
-    });
+/* ===========================
+   ✅ PARAMETRES
+=========================== */
 
-    resetSettings.addEventListener('click', function() {
-      if (confirm('Êtes-vous sûr de vouloir réinitialiser tous les champs ?')) {
-        pharmacyName.value = 'Pharmacie Centrale Liberté 6';
-        managerName.value = 'M. Abdoulaye Seck';
-        email.value = 'contact@pharmacie-liberte6.sn';
-        phone.value = '+221 77 456 78 90';
-        address.value = 'Liberté 6, Dakar';
-        currentPassword.value = '';
-        newPassword.value = '';
-        confirmPassword.value = '';
-      }
-    });
+function loadSettings() {
+  const savedSettings = JSON.parse(localStorage.getItem('pharmacySettings'));
+  if (savedSettings) {
+    document.getElementById('pharmacyName').value = savedSettings.pharmacyName;
+    document.getElementById('managerName').value = savedSettings.managerName;
+    document.getElementById('email').value = savedSettings.email;
+    document.getElementById('phone').value = savedSettings.phone;
+    document.getElementById('address').value = savedSettings.address;
+  }
+}
 
-    // Déconnexion
-    document.getElementById("logout").addEventListener("click", (e) => {
-      e.preventDefault();
-      if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
-        localStorage.removeItem("user");
-        sessionStorage.removeItem("user");
-        window.location.href = "index.html";
-      }
-    });
+function saveSettingsToLocalStorage() {
+  const settings = {
+    pharmacyName: document.getElementById('pharmacyName').value,
+    managerName: document.getElementById('managerName').value,
+    email: document.getElementById('email').value,
+    phone: document.getElementById('phone').value,
+    address: document.getElementById('address').value,
+  };
 
-    // Charger les paramètres au démarrage
-    document.addEventListener('DOMContentLoaded', function() {
-      loadSettings();
-    });
-  </script>
+  localStorage.setItem('pharmacySettings', JSON.stringify(settings));
+}
+
+
+/* ===========================
+   ✅ BOUTONS
+=========================== */
+
+document.getElementById("saveSettings").addEventListener("click", function () {
+  saveSettingsToLocalStorage();
+  alert("Paramètres sauvegardés avec succès !");
+});
+
+document.getElementById("resetSettings").addEventListener("click", function () {
+  localStorage.removeItem("pharmacySettings");
+  location.reload();
+});
+
+
+/* ===========================
+   ✅ DECONNEXION
+=========================== */
+
+document.getElementById("logout").addEventListener("click", function (e) {
+  e.preventDefault();
+  localStorage.removeItem("user");
+  sessionStorage.clear();
+  window.location.href = "index.html";
+});
+
+</script>
+
 </body>
 </html>
