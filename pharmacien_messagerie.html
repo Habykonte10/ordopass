@@ -1173,32 +1173,48 @@
   </div>
 
   <script>
-/* ===== Vérification session ===== */
-const user = JSON.parse(localStorage.getItem("user"));
 
-if (!user) {
-  alert("⚠️ Veuillez vous connecter.");
-  window.location.href = "index.html";
-}
+/* ============================
+   🔐 VERIFICATION SESSION
+============================ */
+document.addEventListener("DOMContentLoaded", function () {
 
-if (user.role !== "pharmacien") {
-  alert("⚠️ Accès réservé aux pharmaciens.");
-  window.location.href = "index.html";
-}
+  const user = JSON.parse(localStorage.getItem("user"));
 
-document.getElementById("userName").textContent = user.username || "Pharmacie Centrale";
+  if (!user) {
+    alert("⚠️ Veuillez vous connecter.");
+    window.location.href = "index.html";
+    return;
+  }
 
-/* Logout */
+  if (user.role !== "pharmacie") {
+    alert("⚠️ Accès réservé aux pharmacies.");
+    window.location.href = "index.html";
+    return;
+  }
+
+  document.getElementById("userName").textContent =
+    user.username || "Pharmacie";
+
+  loadContacts();
+});
+
+
+/* ============================
+   🚪 LOGOUT
+============================ */
 document.getElementById("logout").addEventListener("click", function(e){
   e.preventDefault();
   localStorage.removeItem("user");
   window.location.href = "index.html";
 });
 
-/* ===== Données des contacts ===== */
-let contacts = JSON.parse(localStorage.getItem('pharmacien_contacts')) || [];
 
-// Données par défaut si vide
+/* ============================
+   📦 DONNÉES CONTACTS
+============================ */
+let contacts = JSON.parse(localStorage.getItem("pharmacien_contacts")) || [];
+
 if (contacts.length === 0) {
   contacts = [
     {
@@ -1207,283 +1223,132 @@ if (contacts.length === 0) {
       name: "Dr. Marie Diallo",
       phone: "+221771234567",
       email: "marie.diallo@example.com",
-      address: "Cardiologue - Clinique du Cœur",
-      notes: "Spécialiste en cardiologie, disponible le matin",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 2,
-      type: "medecin",
-      name: "Dr. Fatoumata Ba",
-      phone: "+221772345678",
-      email: "fatou.ba@example.com",
-      address: "Pédiatre - Hôpital des Enfants",
-      notes: "Contact préféré pour les ordonnances pédiatriques",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 3,
-      type: "supplier",
-      name: "Laboratoire Biotech",
-      phone: "+221773456789",
-      email: "commande@biotech.sn",
-      address: "Fournisseur de médicaments",
-      notes: "Livraison sous 48h",
-      createdAt: new Date().toISOString()
+      address: "Cardiologue - Dakar",
+      notes: "Disponible le matin"
     }
   ];
-  localStorage.setItem('pharmacien_contacts', JSON.stringify(contacts));
+  localStorage.setItem("pharmacien_contacts", JSON.stringify(contacts));
 }
 
-/* ===== Variables globales ===== */
 let isEditing = false;
 let editingContactId = null;
 
-/* ===== Fonctions utilitaires ===== */
-function showNotification(message, type) {
-  const notification = document.createElement('div');
-  notification.className = `notification ${type}`;
-  notification.innerHTML = `
-    <i class="fa-solid fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-    <span>${message}</span>
-  `;
-  document.body.appendChild(notification);
-  
-  setTimeout(() => {
-    notification.remove();
-  }, 3000);
+
+/* ============================
+   🔔 NOTIFICATION
+============================ */
+function showNotification(message) {
+  alert(message);
 }
 
-function getTypeLabel(type) {
-  const types = {
-    'medecin': 'Médecin',
-    'patient': 'Patient',
-    'colleague': 'Pharmacien',
-    'laboratory': 'Laboratoire',
-    'supplier': 'Fournisseur'
-  };
-  return types[type] || 'Autre';
-}
 
-function getTypeClass(type) {
-  const classes = {
-    'medecin': 'type-medecin',
-    'patient': 'type-patient',
-    'colleague': 'type-colleague',
-    'laboratory': 'type-laboratory',
-    'supplier': 'type-colleague'
-  };
-  return classes[type] || 'type-colleague';
-}
-
-function getTypeIcon(type) {
-  const icons = {
-    'medecin': 'user-md',
-    'patient': 'user',
-    'colleague': 'user-nurse',
-    'laboratory': 'flask',
-    'supplier': 'truck-medical'
-  };
-  return icons[type] || 'user';
-}
-
-/* ===== Charger les contacts ===== */
+/* ============================
+   📋 CHARGER CONTACTS
+============================ */
 function loadContacts() {
-  const container = document.getElementById('contactsList');
-  const emptyState = document.getElementById('emptyState');
-  const searchTerm = document.getElementById('searchContacts').value.toLowerCase();
+
+  const container = document.getElementById("contactsList");
+  const emptyState = document.getElementById("emptyState");
 
   if (contacts.length === 0) {
-    container.style.display = 'none';
-    emptyState.style.display = 'flex';
+    container.style.display = "none";
+    emptyState.style.display = "flex";
     return;
   }
 
-  container.style.display = 'block';
-  emptyState.style.display = 'none';
+  container.innerHTML = "";
+  container.style.display = "block";
+  emptyState.style.display = "none";
 
-  // Filtrer les contacts selon la recherche
-  const filteredContacts = contacts.filter(contact => {
-    return (
-      contact.name.toLowerCase().includes(searchTerm) ||
-      contact.phone.toLowerCase().includes(searchTerm) ||
-      contact.email.toLowerCase().includes(searchTerm) ||
-      (contact.address && contact.address.toLowerCase().includes(searchTerm))
-    );
-  });
+  contacts.forEach(contact => {
 
-  if (filteredContacts.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <i class="fa-solid fa-search"></i>
-        <h3>Aucun contact trouvé</h3>
-        <p>Aucun contact ne correspond à votre recherche</p>
-      </div>
-    `;
-    return;
-  }
+    const div = document.createElement("div");
+    div.className = "contact-item";
 
-  container.innerHTML = '';
-
-  filteredContacts.forEach(contact => {
-    const contactItem = document.createElement('div');
-    contactItem.className = 'contact-item';
-    contactItem.innerHTML = `
+    div.innerHTML = `
       <div class="contact-avatar">${contact.name.charAt(0)}</div>
       <div class="contact-info">
         <div class="contact-name">${contact.name}</div>
-        <div class="contact-type ${getTypeClass(contact.type)}">
-          <i class="fa-solid fa-${getTypeIcon(contact.type)}"></i>
-          ${getTypeLabel(contact.type)}
-        </div>
         <div class="contact-details">
           <div class="contact-detail">
-            <i class="fa-solid fa-phone"></i>
-            <span>${contact.phone}</span>
+            <i class="fa-solid fa-phone"></i> ${contact.phone}
           </div>
           <div class="contact-detail">
-            <i class="fa-solid fa-envelope"></i>
-            <span>${contact.email}</span>
+            <i class="fa-solid fa-envelope"></i> ${contact.email}
           </div>
-          ${contact.address ? `
-          <div class="contact-detail">
-            <i class="fa-solid fa-${contact.type === 'medecin' ? 'stethoscope' : 'location-dot'}"></i>
-            <span>${contact.address}</span>
-          </div>
-          ` : ''}
         </div>
-        ${contact.notes ? `<div style="margin-top: 10px; color: #7f8c8d; font-size: 0.9em;"><i class="fa-solid fa-note"></i> ${contact.notes}</div>` : ''}
       </div>
       <div class="contact-actions">
-        ${contact.phone ? `
-        <button class="action-btn whatsapp-btn" onclick="contactWhatsApp('${contact.phone}', '${contact.name}')" title="WhatsApp">
+        <button class="action-btn whatsapp-btn"
+          onclick="window.open('https://wa.me/${contact.phone.replace(/\D/g,'')}','_blank')">
           <i class="fa-brands fa-whatsapp"></i>
         </button>
-        <button class="action-btn call-btn" onclick="contactPhone('${contact.phone}', '${contact.name}')" title="Appeler">
-          <i class="fa-solid fa-phone"></i>
-        </button>
-        ` : ''}
-        ${contact.email ? `
-        <button class="action-btn email-btn" onclick="contactEmail('${contact.email}', '${contact.name}')" title="Email">
-          <i class="fa-solid fa-envelope"></i>
-        </button>
-        ` : ''}
-        <button class="action-btn edit-btn" onclick="editContact(${contact.id})" title="Modifier">
-          <i class="fa-solid fa-edit"></i>
-        </button>
-        <button class="action-btn delete-btn" onclick="deleteContact(${contact.id})" title="Supprimer">
+        <button class="action-btn delete-btn"
+          onclick="deleteContact(${contact.id})">
           <i class="fa-solid fa-trash"></i>
         </button>
       </div>
     `;
-    container.appendChild(contactItem);
+
+    container.appendChild(div);
   });
 }
 
-/* ===== Fonctions de contact ===== */
-function contactWhatsApp(phone, name) {
-  const cleanPhone = phone.replace(/\D/g, '');
-  const message = encodeURIComponent(`Bonjour Dr. ${name},\n\nJe suis ${user.username} de la pharmacie sur OrdoPass.\n\nJe souhaiterais vous contacter concernant une ordonnance.\n\nCordialement,\n${user.username}`);
-  window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
-}
 
-function contactEmail(email, name) {
-  const subject = encodeURIComponent(`Contact OrdoPass - ${user.username}`);
-  const body = encodeURIComponent(`Bonjour Dr. ${name},\n\nJe suis ${user.username}, pharmacien sur OrdoPass.\n\nJe souhaiterais vous contacter concernant une ordonnance.\n\nCordialement,\n${user.username}`);
-  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-}
-
-function contactPhone(phone, name) {
-  if (confirm(`Appeler ${name} au ${phone} ?`)) {
-    window.location.href = `tel:${phone}`;
-  }
-}
-
-/* ===== Fonctions modal ===== */
+/* ============================
+   ➕ MODAL
+============================ */
 function openAddContactModal() {
   isEditing = false;
   editingContactId = null;
-  document.getElementById('modalTitle').textContent = 'Ajouter un contact';
-  document.getElementById('modalSubmitBtn').textContent = 'Ajouter';
-  document.getElementById('contactForm').reset();
-  document.getElementById('contactModal').style.display = 'flex';
-}
-
-function editContact(id) {
-  const contact = contacts.find(c => c.id === id);
-  if (!contact) return;
-
-  isEditing = true;
-  editingContactId = id;
-  
-  document.getElementById('modalTitle').textContent = 'Modifier le contact';
-  document.getElementById('modalSubmitBtn').textContent = 'Modifier';
-  
-  document.getElementById('contactType').value = contact.type;
-  document.getElementById('contactName').value = contact.name;
-  document.getElementById('contactPhone').value = contact.phone;
-  document.getElementById('contactEmail').value = contact.email;
-  document.getElementById('contactAddress').value = contact.address || '';
-  document.getElementById('contactNotes').value = contact.notes || '';
-  
-  document.getElementById('contactModal').style.display = 'flex';
+  document.getElementById("contactForm").reset();
+  document.getElementById("contactModal").style.display = "flex";
 }
 
 function closeContactModal() {
-  document.getElementById('contactModal').style.display = 'none';
-  isEditing = false;
-  editingContactId = null;
-  document.getElementById('contactForm').reset();
+  document.getElementById("contactModal").style.display = "none";
 }
 
+
+/* ============================
+   🗑 SUPPRIMER
+============================ */
 function deleteContact(id) {
-  if (confirm('Êtes-vous sûr de vouloir supprimer ce contact ?')) {
+  if (confirm("Supprimer ce contact ?")) {
     contacts = contacts.filter(c => c.id !== id);
-    localStorage.setItem('pharmacien_contacts', JSON.stringify(contacts));
+    localStorage.setItem("pharmacien_contacts", JSON.stringify(contacts));
     loadContacts();
-    showNotification('Contact supprimé avec succès', 'success');
+    showNotification("Contact supprimé");
   }
 }
 
-/* ===== Soumission formulaire ===== */
-document.getElementById('contactForm').addEventListener('submit', function(e) {
+
+/* ============================
+   💾 ENREGISTRER
+============================ */
+document.getElementById("contactForm").addEventListener("submit", function(e){
   e.preventDefault();
-  
-  const contactData = {
-    id: isEditing ? editingContactId : Date.now(),
-    type: document.getElementById('contactType').value,
-    name: document.getElementById('contactName').value,
-    phone: document.getElementById('contactPhone').value,
-    email: document.getElementById('contactEmail').value,
-    address: document.getElementById('contactAddress').value || null,
-    notes: document.getElementById('contactNotes').value || null,
-    createdAt: isEditing ? contacts.find(c => c.id === editingContactId).createdAt : new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+
+  const contact = {
+    id: Date.now(),
+    type: document.getElementById("contactType").value,
+    name: document.getElementById("contactName").value,
+    phone: document.getElementById("contactPhone").value,
+    email: document.getElementById("contactEmail").value,
+    address: document.getElementById("contactAddress").value,
+    notes: document.getElementById("contactNotes").value
   };
-  
-  if (isEditing) {
-    const index = contacts.findIndex(c => c.id === editingContactId);
-    if (index !== -1) {
-      contacts[index] = contactData;
-    }
-  } else {
-    contacts.push(contactData);
-  }
-  
-  localStorage.setItem('pharmacien_contacts', JSON.stringify(contacts));
+
+  contacts.push(contact);
+  localStorage.setItem("pharmacien_contacts", JSON.stringify(contacts));
+
   closeContactModal();
   loadContacts();
-  
-  const message = isEditing ? 'Contact modifié avec succès' : 'Contact ajouté avec succès';
-  showNotification(message, 'success');
+  showNotification("Contact ajouté avec succès");
 });
 
-/* ===== Recherche ===== */
-document.getElementById('searchContacts').addEventListener('input', loadContacts);
+</script>
 
-/* ===== Chargement initial ===== */
-window.addEventListener('DOMContentLoaded', loadContacts);
-  </script>
 </body>
 </html>
 </body>
