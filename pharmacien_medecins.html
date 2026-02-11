@@ -781,555 +781,184 @@
   <div class="notification" id="notification"></div>
 
   <script>
-    // Données des médecins pour Sénégal (Médine, Dakar)
-    let doctors = JSON.parse(localStorage.getItem("doctors")) || [
-      {
-        id: 1,
-        name: "Dr. Marie Diallo",
-        specialty: "Médecine générale",
-        rpps: "12345678901",
-        phone: "+221 77 123 45 67",
-        email: "m.diallo@clinique.sn",
-        address: "Rue 10, Médine, Dakar",
-        notes: "Spécialiste reconnu, cabinet à Médine depuis 10 ans.",
-        lastPrescription: new Date().toISOString().split('T')[0],
-        status: "active",
-        avatar: "MD",
-        image: null
-      },
-      {
-        id: 2,
-        name: "Dr. Jean Ndiaye",
-        specialty: "Cardiologie",
-        rpps: "12345678902",
-        phone: "+221 76 234 56 78",
-        email: "j.ndiaye@hopital.sn",
-        address: "Avenue Cheikh Anta Diop, Médine, Dakar",
-        notes: "Expert en cardiologie interventionnelle.",
-        lastPrescription: "2024-01-14",
-        status: "active",
-        avatar: "JN",
-        image: null
-      },
-      {
-        id: 3,
-        name: "Dr. Fatoumata Ba",
-        specialty: "Pédiatrie",
-        rpps: "12345678903",
-        phone: "+221 70 345 67 89",
-        email: "f.ba@pediatrie.sn",
-        address: "Rue El Hadj Malick Sy, Médine, Dakar",
-        notes: "Spécialiste des soins pédiatriques.",
-        lastPrescription: "2024-01-12",
-        status: "active",
-        avatar: "FB",
-        image: null
-      },
-      {
-        id: 4,
-        name: "Dr. Amadou Sow",
-        specialty: "Dermatologie",
-        rpps: "12345678904",
-        phone: "+221 77 456 78 90",
-        email: "a.sow@dermato.sn",
-        address: "Rue 12, Médine, Dakar",
-        notes: "Dermatologue esthétique et médicale.",
-        lastPrescription: "2024-01-10",
-        status: "active",
-        avatar: "AS",
-        image: null
-      },
-      {
-        id: 5,
-        name: "Dr. Aïcha Kane",
-        specialty: "Gynécologie",
-        rpps: "12345678905",
-        phone: "+221 76 567 89 01",
-        email: "a.kane@gynéco.sn",
-        address: "Avenue Blaise Diagne, Médine, Dakar",
-        notes: "Gynécologue-obstétricienne.",
-        lastPrescription: "2024-01-08",
-        status: "active",
-        avatar: "AK",
-        image: null
-      },
-      {
-        id: 6,
-        name: "Dr. Mamadou Diop",
-        specialty: "Ophtalmologie",
-        rpps: "12345678906",
-        phone: "+221 77 678 90 12",
-        email: "m.diop@ophtalmo.sn",
-        address: "Rue 14, Médine, Dakar",
-        notes: "Chirurgien ophtalmologiste.",
-        lastPrescription: "2024-01-05",
-        status: "inactive",
-        avatar: "MD",
-        image: null
-      },
-      {
-        id: 7,
-        name: "Dr. Khady Sarr",
-        specialty: "ORL",
-        rpps: "12345678907",
-        phone: "+221 76 789 01 23",
-        email: "k.sarr@orl.sn",
-        address: "Rue 16, Médine, Dakar",
-        notes: "Spécialiste ORL et chirurgie cervico-faciale.",
-        lastPrescription: "2024-01-03",
-        status: "active",
-        avatar: "KS",
-        image: null
-      },
-      {
-        id: 8,
-        name: "Dr. Ousmane Fall",
-        specialty: "Neurologie",
-        rpps: "12345678908",
-        phone: "+221 77 890 12 34",
-        email: "o.fall@neuro.sn",
-        address: "Avenue Faidherbe, Médine, Dakar",
-        notes: "Neurologue, spécialiste des maladies neuro-dégénératives.",
-        lastPrescription: "2024-01-01",
-        status: "active",
-        avatar: "OF",
-        image: null
-      }
-    ];
+/* ================================
+   ✅ VERIFICATION SESSION
+================================ */
 
-    let editDoctorId = null;
-    let currentDetailDoctor = null;
-    let currentImageFile = null;
+document.addEventListener("DOMContentLoaded", function () {
 
-    // Éléments DOM
-    const doctorsGrid = document.getElementById('doctorsGrid');
-    const searchInput = document.getElementById('searchInput');
-    const addDoctorBtn = document.getElementById('addDoctorBtn');
-    const doctorModal = document.getElementById('doctorModal');
-    const doctorDetailModal = document.getElementById('doctorDetailModal');
-    const closeModal = document.getElementById('closeModal');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const closeDetailBtn = document.getElementById('closeDetailBtn');
-    const doctorForm = document.getElementById('doctorForm');
-    const modalTitle = document.getElementById('modalTitle');
-    const imageUpload = document.getElementById('imageUpload');
-    const doctorImage = document.getElementById('doctorImage');
-    const imagePreview = document.getElementById('imagePreview');
-    const removeImage = document.getElementById('removeImage');
-    const notification = document.getElementById('notification');
+  const currentUser = JSON.parse(localStorage.getItem("user"));
 
-    // Filtres
-    const specialtyFilter = document.getElementById('specialtyFilter');
-    const statusFilter = document.getElementById('statusFilter');
-    const sortBy = document.getElementById('sortBy');
+  if (!currentUser || currentUser.role !== "pharmacie") {
+    window.location.href = "index.html";
+    return;
+  }
 
-    // Statistiques
-    const totalDoctors = document.getElementById('totalDoctors');
-    const activeDoctors = document.getElementById('activeDoctors');
-    const specialtiesCount = document.getElementById('specialtiesCount');
-    const thisMonth = document.getElementById('thisMonth');
+  // Affiche le nom pharmacie
+  document.getElementById("userName").textContent =
+    currentUser.username || "Pharmacie";
 
-    function showNotification(message, type = 'success') {
-      notification.textContent = message;
-      notification.className = `notification ${type} show`;
-      
-      setTimeout(() => {
-        notification.classList.remove('show');
-      }, 3000);
-    }
+});
 
-    function updateStats() {
-      totalDoctors.textContent = doctors.length;
-      activeDoctors.textContent = doctors.filter(d => d.status === 'active').length;
-      
-      const specialties = [...new Set(doctors.map(d => d.specialty))];
-      specialtiesCount.textContent = specialties.length;
-      
-      // Calculer les ordonnances ce mois (simulation réaliste)
-      const currentMonth = new Date().getMonth();
-      const currentYear = new Date().getFullYear();
-      const prescriptionsThisMonth = doctors.filter(d => {
-        const prescriptionDate = new Date(d.lastPrescription);
-        return prescriptionDate.getMonth() === currentMonth && 
-               prescriptionDate.getFullYear() === currentYear;
-      }).length * 3; // Multiplicateur pour simulation réaliste
-      
-      thisMonth.textContent = prescriptionsThisMonth;
-    }
 
-    function formatDate(dateString) {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('fr-FR');
-    }
+/* ================================
+   ✅ DECONNEXION CORRIGEE
+================================ */
 
-    function filterAndSortDoctors() {
-      const searchTerm = searchInput.value.toLowerCase();
-      const specialtyValue = specialtyFilter.value;
-      const statusValue = statusFilter.value;
-      const sortValue = sortBy.value;
-      
-      let filteredDoctors = doctors.filter(doctor => {
-        const matchesSearch = 
-          doctor.name.toLowerCase().includes(searchTerm) ||
-          doctor.specialty.toLowerCase().includes(searchTerm) ||
-          doctor.email.toLowerCase().includes(searchTerm) ||
-          doctor.phone.includes(searchTerm);
-        
-        const matchesSpecialty = !specialtyValue || doctor.specialty === specialtyValue;
-        const matchesStatus = !statusValue || doctor.status === statusValue;
-        
-        return matchesSearch && matchesSpecialty && matchesStatus;
-      });
+document.getElementById("logout").addEventListener("click", function (e) {
+  e.preventDefault();
 
-      // Trier les médecins
-      if (sortValue === 'name') {
-        filteredDoctors.sort((a, b) => a.name.localeCompare(b.name));
-      } else if (sortValue === 'specialty') {
-        filteredDoctors.sort((a, b) => a.specialty.localeCompare(b.specialty));
-      } else if (sortValue === 'lastPrescription') {
-        filteredDoctors.sort((a, b) => new Date(b.lastPrescription) - new Date(a.lastPrescription));
-      }
+  localStorage.removeItem("user");
+  sessionStorage.clear();
 
-      return filteredDoctors;
-    }
+  window.location.href = "index.html";
+});
 
-    function renderDoctors() {
-      doctorsGrid.innerHTML = '';
-      const filteredDoctors = filterAndSortDoctors();
 
-      if (filteredDoctors.length === 0) {
-        doctorsGrid.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align: center; color: #6b7f8e; padding: 40px;">
-            <i class="fa-solid fa-user-md" style="font-size: 3em; margin-bottom: 15px; display: block; color: #bdc3c7;"></i>
-            <h3 style="color: #234a6a; margin-bottom: 10px;">Aucun médecin trouvé</h3>
-            <p>Essayez de modifier vos critères de recherche ou ajoutez un nouveau médecin.</p>
-          </div>
-        `;
-        return;
-      }
+/* ================================
+   ✅ DONNEES MEDECINS
+================================ */
 
-      filteredDoctors.forEach(doctor => {
-        const card = document.createElement('div');
-        card.className = 'doctor-card';
-        card.innerHTML = `
-          <div class="doctor-header">
-            <div class="doctor-avatar">
-              ${doctor.image ? 
-                `<img src="${doctor.image}" alt="${doctor.name}">` : 
-                `<div class="default-avatar">${doctor.avatar}</div>`
-              }
-            </div>
-            <div class="doctor-name">${doctor.name}</div>
-            <div class="doctor-specialty">${doctor.specialty}</div>
-          </div>
-          <div class="doctor-body">
-            <div class="doctor-info-item">
-              <i class="fa-solid fa-phone"></i>
-              <span>${doctor.phone}</span>
-            </div>
-            <div class="doctor-info-item">
-              <i class="fa-solid fa-envelope"></i>
-              <span>${doctor.email}</span>
-            </div>
-            <div class="doctor-info-item">
-              <i class="fa-solid fa-calendar"></i>
-              <span>Dernière ordonnance: ${formatDate(doctor.lastPrescription)}</span>
-            </div>
-            <div class="doctor-info-item">
-              <i class="fa-solid fa-map-marker-alt"></i>
-              <span>${doctor.address.split(',')[0]}, Médine</span>
-            </div>
-            <div class="doctor-actions">
-              <button class="action-btn view" onclick="viewDoctor(${doctor.id})">
-                <i class="fa-solid fa-eye"></i> Voir
-              </button>
-              <button class="action-btn message" onclick="messageDoctor(${doctor.id})">
-                <i class="fa-solid fa-comment-medical"></i> Message
-              </button>
-              <button class="action-btn edit" onclick="editDoctor(${doctor.id})">
-                <i class="fa-solid fa-pen"></i> Modifier
-              </button>
-            </div>
-          </div>
-        `;
-        doctorsGrid.appendChild(card);
-      });
+let doctors = JSON.parse(localStorage.getItem("doctors")) || [];
 
-      localStorage.setItem("doctors", JSON.stringify(doctors));
-      updateStats();
-    }
+function saveDoctors() {
+  localStorage.setItem("doctors", JSON.stringify(doctors));
+}
 
-    function resetForm() {
-      doctorForm.reset();
-      editDoctorId = null;
-      currentImageFile = null;
-      imagePreview.innerHTML = '<div class="default-preview"><i class="fa-solid fa-user-md"></i></div>';
-      removeImage.style.display = 'none';
-    }
 
-    function openModal() {
-      doctorModal.style.display = 'flex';
-      modalTitle.textContent = editDoctorId ? 'Modifier le médecin' : 'Ajouter un médecin';
-    }
+/* ================================
+   ✅ AFFICHAGE MEDECINS
+================================ */
 
-    function closeModalFunc() {
-      doctorModal.style.display = 'none';
-      resetForm();
-    }
+function renderDoctors() {
+  const grid = document.getElementById("doctorsGrid");
+  grid.innerHTML = "";
 
-    function openDetailModal() {
-      doctorDetailModal.style.display = 'flex';
-    }
+  if (doctors.length === 0) {
+    grid.innerHTML = "<p>Aucun médecin enregistré.</p>";
+    return;
+  }
 
-    function closeDetailModal() {
-      doctorDetailModal.style.display = 'none';
-      currentDetailDoctor = null;
-    }
+  doctors.forEach(doc => {
+    const card = document.createElement("div");
+    card.className = "doctor-card";
 
-    function viewDoctor(id) {
-      const doctor = doctors.find(d => d.id === id);
-      if (doctor) {
-        currentDetailDoctor = doctor;
-        
-        // Mettre à jour les détails
-        document.getElementById('detailName').textContent = doctor.name;
-        document.getElementById('detailSpecialty').textContent = doctor.specialty;
-        document.getElementById('detailRPPS').textContent = doctor.rpps;
-        document.getElementById('detailPhone').textContent = doctor.phone;
-        document.getElementById('detailEmail').textContent = doctor.email;
-        document.getElementById('detailAddress').textContent = doctor.address;
-        document.getElementById('detailLastPrescription').textContent = formatDate(doctor.lastPrescription);
-        document.getElementById('detailNotes').textContent = doctor.notes || 'Aucune note.';
-        
-        // Mettre à jour l'avatar
-        const detailAvatar = document.getElementById('detailAvatar');
-        const detailDefaultAvatar = document.getElementById('detailDefaultAvatar');
-        if (doctor.image) {
-          detailAvatar.innerHTML = `<img src="${doctor.image}" alt="${doctor.name}">`;
-        } else {
-          detailDefaultAvatar.textContent = doctor.avatar;
-        }
-        
-        // Mettre à jour le statut
-        const detailStatus = document.getElementById('detailStatus');
-        detailStatus.textContent = doctor.status === 'active' ? 'Actif' : 'Inactif';
-        detailStatus.className = `status-badge ${doctor.status}`;
-        
-        openDetailModal();
-      }
-    }
+    card.innerHTML = `
+      <div class="doctor-header">
+        <div class="doctor-avatar">
+          <div class="default-avatar">${doc.avatar}</div>
+        </div>
+        <div class="doctor-name">${doc.name}</div>
+        <div class="doctor-specialty">${doc.specialty}</div>
+      </div>
 
-    function messageDoctor(id) {
-      const doctor = doctors.find(d => d.id === id);
-      if (doctor) {
-        window.location.href = `pharmacien_messagerie.html?doctor=${doctor.id}&name=${encodeURIComponent(doctor.name)}`;
-      }
-    }
+      <div class="doctor-body">
+        <div class="doctor-info-item">
+          <i class="fa-solid fa-phone"></i>
+          ${doc.phone}
+        </div>
 
-    function messageCurrentDoctor() {
-      if (currentDetailDoctor) {
-        messageDoctor(currentDetailDoctor.id);
-      }
-    }
+        <div class="doctor-info-item">
+          <i class="fa-solid fa-envelope"></i>
+          ${doc.email}
+        </div>
 
-    function editDoctor(id) {
-      const doctor = doctors.find(d => d.id === id);
-      if (doctor) {
-        editDoctorId = id;
-        document.getElementById('doctorName').value = doctor.name;
-        document.getElementById('doctorSpecialty').value = doctor.specialty;
-        document.getElementById('doctorRPPS').value = doctor.rpps;
-        document.getElementById('doctorPhone').value = doctor.phone;
-        document.getElementById('doctorEmail').value = doctor.email;
-        document.getElementById('doctorAddress').value = doctor.address;
-        document.getElementById('doctorNotes').value = doctor.notes || '';
-        document.getElementById('doctorStatus').value = doctor.status;
-        
-        // Mettre à jour l'aperçu de l'image
-        if (doctor.image) {
-          imagePreview.innerHTML = `<img src="${doctor.image}" alt="${doctor.name}"><button type="button" class="remove-image" id="removeImage">&times;</button>`;
-          removeImage.style.display = 'block';
-        } else {
-          imagePreview.innerHTML = '<div class="default-preview"><i class="fa-solid fa-user-md"></i></div>';
-          removeImage.style.display = 'none';
-        }
-        
-        openModal();
-      }
-    }
+        <div class="doctor-actions">
+          <button onclick="editDoctor(${doc.id})" class="action-btn edit">
+            Modifier
+          </button>
+        </div>
+      </div>
+    `;
 
-    // Gestion de l'upload d'image
-    imageUpload.addEventListener('click', () => {
-      doctorImage.click();
-    });
+    grid.appendChild(card);
+  });
+}
 
-    doctorImage.addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        // Vérifier la taille du fichier (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-          showNotification('L\'image est trop volumineuse. Maximum 5MB autorisé.', 'error');
-          return;
-        }
-        
-        // Vérifier le type de fichier
-        if (!file.type.match('image.*')) {
-          showNotification('Veuillez sélectionner une image valide.', 'error');
-          return;
-        }
-        
-        currentImageFile = file;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview"><button type="button" class="remove-image" id="removeImage">&times;</button>`;
-          removeImage.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-      }
-    });
 
-    // Supprimer l'image sélectionnée
-    removeImage.addEventListener('click', function(e) {
-      e.stopPropagation();
-      currentImageFile = null;
-      imagePreview.innerHTML = '<div class="default-preview"><i class="fa-solid fa-user-md"></i></div>';
-      removeImage.style.display = 'none';
-      doctorImage.value = '';
-    });
+/* ================================
+   ✅ AJOUT / MODIFICATION
+================================ */
 
-    // Événements
-    addDoctorBtn.addEventListener('click', () => {
-      resetForm();
-      openModal();
-    });
+let editDoctorId = null;
 
-    closeModal.addEventListener('click', closeModalFunc);
-    cancelBtn.addEventListener('click', closeModalFunc);
-    closeDetailBtn.addEventListener('click', closeDetailModal);
+document.getElementById("doctorForm").addEventListener("submit", function(e){
+  e.preventDefault();
 
-    // Filtres et tri
-    searchInput.addEventListener('input', renderDoctors);
-    specialtyFilter.addEventListener('change', renderDoctors);
-    statusFilter.addEventListener('change', renderDoctors);
-    sortBy.addEventListener('change', renderDoctors);
+  const name = document.getElementById("doctorName").value;
+  const specialty = document.getElementById("doctorSpecialty").value;
+  const phone = document.getElementById("doctorPhone").value;
+  const email = document.getElementById("doctorEmail").value;
 
-    doctorForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      const doctorData = {
-        name: document.getElementById('doctorName').value,
-        specialty: document.getElementById('doctorSpecialty').value,
-        rpps: document.getElementById('doctorRPPS').value,
-        phone: document.getElementById('doctorPhone').value,
-        email: document.getElementById('doctorEmail').value,
-        address: document.getElementById('doctorAddress').value,
-        notes: document.getElementById('doctorNotes').value,
-        status: document.getElementById('doctorStatus').value,
-        lastPrescription: new Date().toISOString().split('T')[0]
-      };
+  const avatar = name.split(" ").map(n => n[0]).join("").toUpperCase();
 
-      // Validation
-      if (!doctorData.name.startsWith('Dr. ')) {
-        doctorData.name = 'Dr. ' + doctorData.name;
-      }
+  const data = {
+    id: editDoctorId || Date.now(),
+    name,
+    specialty,
+    phone,
+    email,
+    avatar
+  };
 
-      // Validation du numéro RPPS (11 chiffres)
-      if (!/^\d{11}$/.test(doctorData.rpps)) {
-        showNotification('Le numéro RPPS doit contenir 11 chiffres', 'error');
-        return;
-      }
+  if(editDoctorId){
+    const index = doctors.findIndex(d => d.id === editDoctorId);
+    doctors[index] = data;
+  } else {
+    doctors.push(data);
+  }
 
-      // Validation du téléphone sénégalais
-      const phoneRegex = /^(\+221|00221)?[76][0-9]{8}$/;
-      const cleanPhone = doctorData.phone.replace(/\s/g, '');
-      if (!phoneRegex.test(cleanPhone)) {
-        showNotification('Numéro de téléphone invalide. Format attendu: +221 77 123 45 67', 'error');
-        return;
-      }
+  saveDoctors();
+  renderDoctors();
+  closeModal();
+});
 
-      // Générer avatar à partir des initiales
-      const names = doctorData.name.replace('Dr. ', '').split(' ');
-      doctorData.avatar = (names[1] ? names[0][0] + names[1][0] : names[0].substring(0, 2)).toUpperCase();
 
-      // Gérer l'image
-      if (currentImageFile) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          doctorData.image = e.target.result;
-          saveDoctor(doctorData);
-        };
-        reader.readAsDataURL(currentImageFile);
-      } else {
-        // Garder l'image existante si en mode édition
-        if (editDoctorId) {
-          const existingDoctor = doctors.find(d => d.id === editDoctorId);
-          doctorData.image = existingDoctor ? existingDoctor.image : null;
-          doctorData.avatar = existingDoctor ? existingDoctor.avatar : doctorData.avatar;
-        }
-        saveDoctor(doctorData);
-      }
-    });
+/* ================================
+   ✅ EDIT
+================================ */
 
-    function saveDoctor(doctorData) {
-      if (editDoctorId) {
-        // Modification
-        const index = doctors.findIndex(d => d.id === editDoctorId);
-        if (index !== -1) {
-          doctorData.id = editDoctorId;
-          doctors[index] = doctorData;
-          showNotification('Médecin modifié avec succès !');
-        }
-      } else {
-        // Ajout
-        doctorData.id = Date.now();
-        doctors.push(doctorData);
-        showNotification('Médecin ajouté avec succès !');
-      }
+function editDoctor(id){
+  const doc = doctors.find(d => d.id === id);
+  if(!doc) return;
 
-      closeModalFunc();
-      renderDoctors();
-    }
+  editDoctorId = id;
 
-    // Fermer les modals en cliquant à l'extérieur
-    window.addEventListener('click', (e) => {
-      if (e.target === doctorModal) {
-        closeModalFunc();
-      }
-      if (e.target === doctorDetailModal) {
-        closeDetailModal();
-      }
-    });
+  document.getElementById("doctorName").value = doc.name;
+  document.getElementById("doctorSpecialty").value = doc.specialty;
+  document.getElementById("doctorPhone").value = doc.phone;
+  document.getElementById("doctorEmail").value = doc.email;
 
-    // Déconnexion
-    document.getElementById("logout").addEventListener("click", (e) => {
-      e.preventDefault();
-      if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
-        localStorage.removeItem("currentUser");
-        sessionStorage.removeItem("currentUser");
-        window.location.href = "index.html";
-      }
-    });
+  openModal();
+}
 
-    // Initialisation
-    document.addEventListener('DOMContentLoaded', function() {
-      // Vérifier la connexion
-      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-      if (!currentUser || currentUser.role !== 'pharmacien') {
-        window.location.href = 'index.html';
-        return;
-      }
-      
-      // Mettre à jour le nom de la pharmacie
-      document.getElementById('userName').textContent = currentUser.nom || 'Pharmacie Centrale';
-      
-      renderDoctors();
-    });
 
-    // Rendre les fonctions accessibles globalement
-    window.viewDoctor = viewDoctor;
-    window.messageDoctor = messageDoctor;
-    window.editDoctor = editDoctor;
-    window.messageCurrentDoctor = messageCurrentDoctor;
-  </script>
+/* ================================
+   ✅ MODAL
+================================ */
+
+function openModal(){
+  document.getElementById("doctorModal").style.display = "flex";
+}
+
+function closeModal(){
+  document.getElementById("doctorModal").style.display = "none";
+  document.getElementById("doctorForm").reset();
+  editDoctorId = null;
+}
+
+document.getElementById("addDoctorBtn").addEventListener("click", openModal);
+document.getElementById("cancelBtn").addEventListener("click", closeModal);
+document.getElementById("closeModal").addEventListener("click", closeModal);
+
+
+/* ================================
+   ✅ INITIALISATION
+================================ */
+
+renderDoctors();
+
+</script>
+
 </body>
 </html>
