@@ -1112,95 +1112,104 @@
       alert(`${type.toUpperCase()}: ${message}`);
     }
 
-    // --- GESTION DES MODALES (simplifiée mais fonctionnelle) ---
+    // --- GESTION DES MODALES (version corrigée) ---
     function openModal(modalId) {
       const modal = document.getElementById(modalId);
-      if (modal) {
-        modal.style.display = 'flex';
-        // Contenu factice pour éviter les modales vides (juste pour test)
-        if (modalId === 'factureModal' && modal.querySelector('.modal-content')?.innerHTML.trim() === '') {
-          modal.innerHTML = `
-            <div class="modal">
-              <div class="modal-header">
-                <h3><i class="fas fa-file-invoice"></i> Nouvelle facture</h3>
-                <button class="modal-close" onclick="closeModal('factureModal')">&times;</button>
+      if (!modal) return;
+      
+      // Vérifier si la modale contient déjà un élément .modal (structure complète)
+      if (!modal.querySelector('.modal')) {
+        // Injecter le contenu approprié selon l'ID
+        let content = '';
+        switch (modalId) {
+          case 'factureModal':
+            content = `
+              <div class="modal">
+                <div class="modal-header">
+                  <h3><i class="fas fa-file-invoice"></i> Nouvelle facture</h3>
+                  <button class="modal-close" onclick="closeModal('factureModal')">&times;</button>
+                </div>
+                <div class="modal-content">
+                  <p>Formulaire de création de facture (simulation).</p>
+                  <p><em>Cette modale est fonctionnelle.</em></p>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary" onclick="closeModal('factureModal')">Annuler</button>
+                  <button class="btn btn-primary" onclick="saveFacture(); closeModal('factureModal'); showNotification('Facture enregistrée');">Enregistrer</button>
+                </div>
               </div>
-              <div class="modal-content">
-                <p>Formulaire de création de facture (simulation).</p>
-                <p><em>Cette modale est fonctionnelle.</em></p>
+            `;
+            break;
+          case 'ordonnanceModal':
+            content = `
+              <div class="modal">
+                <div class="modal-header">
+                  <h3><i class="fas fa-prescription"></i> Nouvelle ordonnance</h3>
+                  <button class="modal-close" onclick="closeModal('ordonnanceModal')">&times;</button>
+                </div>
+                <div class="modal-content">
+                  <p>Formulaire de création d'ordonnance (simulation).</p>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary" onclick="closeModal('ordonnanceModal')">Annuler</button>
+                  <button class="btn btn-primary" onclick="saveOrdonnance(); closeModal('ordonnanceModal'); showNotification('Ordonnance enregistrée');">Enregistrer</button>
+                </div>
               </div>
-              <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('factureModal')">Annuler</button>
-                <button class="btn btn-primary" onclick="saveFacture(); closeModal('factureModal'); showNotification('Facture enregistrée');">Enregistrer</button>
+            `;
+            break;
+          case 'importOrdonnanceModal':
+            content = `
+              <div class="modal">
+                <div class="modal-header">
+                  <h3><i class="fas fa-file-import"></i> Importer ordonnance</h3>
+                  <button class="modal-close" onclick="closeModal('importOrdonnanceModal')">&times;</button>
+                </div>
+                <div class="modal-content">
+                  <p>Importer une ordonnance depuis un QR code ou un fichier.</p>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary" onclick="closeModal('importOrdonnanceModal')">Annuler</button>
+                  <button class="btn btn-primary" onclick="closeModal('importOrdonnanceModal'); showNotification('Import simulé');">Importer</button>
+                </div>
               </div>
-            </div>
-          `;
+            `;
+            break;
+          case 'syncModal':
+            content = `
+              <div class="modal">
+                <div class="modal-header">
+                  <h3><i class="fas fa-sync-alt"></i> Synchronisation</h3>
+                  <button class="modal-close" onclick="closeModal('syncModal')">&times;</button>
+                </div>
+                <div class="modal-content">
+                  <p>Synchronisation en cours avec le serveur central...</p>
+                </div>
+              </div>
+            `;
+            break;
+          case 'confirmModal':
+            content = `
+              <div class="modal">
+                <div class="modal-header">
+                  <h3><i class="fas fa-exclamation-triangle"></i> Confirmation</h3>
+                  <button class="modal-close" onclick="closeModal('confirmModal')">&times;</button>
+                </div>
+                <div class="modal-content">
+                  <p>Êtes-vous sûr de vouloir supprimer cet élément ?</p>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary" onclick="closeModal('confirmModal')">Annuler</button>
+                  <button class="btn btn-danger" onclick="closeModal('confirmModal'); showNotification('Supprimé');">Confirmer</button>
+                </div>
+              </div>
+            `;
+            break;
         }
-        if (modalId === 'ordonnanceModal' && modal.querySelector('.modal-content')?.innerHTML.trim() === '') {
-          modal.innerHTML = `
-            <div class="modal">
-              <div class="modal-header">
-                <h3><i class="fas fa-prescription"></i> Nouvelle ordonnance</h3>
-                <button class="modal-close" onclick="closeModal('ordonnanceModal')">&times;</button>
-              </div>
-              <div class="modal-content">
-                <p>Formulaire de création d'ordonnance (simulation).</p>
-              </div>
-              <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('ordonnanceModal')">Annuler</button>
-                <button class="btn btn-primary" onclick="saveOrdonnance(); closeModal('ordonnanceModal'); showNotification('Ordonnance enregistrée');">Enregistrer</button>
-              </div>
-            </div>
-          `;
-        }
-        if (modalId === 'importOrdonnanceModal' && modal.querySelector('.modal-content')?.innerHTML.trim() === '') {
-          modal.innerHTML = `
-            <div class="modal">
-              <div class="modal-header">
-                <h3><i class="fas fa-file-import"></i> Importer ordonnance</h3>
-                <button class="modal-close" onclick="closeModal('importOrdonnanceModal')">&times;</button>
-              </div>
-              <div class="modal-content">
-                <p>Importer une ordonnance depuis un QR code ou un fichier.</p>
-              </div>
-              <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('importOrdonnanceModal')">Annuler</button>
-                <button class="btn btn-primary" onclick="closeModal('importOrdonnanceModal'); showNotification('Import simulé');">Importer</button>
-              </div>
-            </div>
-          `;
-        }
-        if (modalId === 'syncModal' && modal.querySelector('.modal-content')?.innerHTML.trim() === '') {
-          modal.innerHTML = `
-            <div class="modal">
-              <div class="modal-header">
-                <h3><i class="fas fa-sync-alt"></i> Synchronisation</h3>
-                <button class="modal-close" onclick="closeModal('syncModal')">&times;</button>
-              </div>
-              <div class="modal-content">
-                <p>Synchronisation en cours avec le serveur central...</p>
-              </div>
-            </div>
-          `;
-        }
-        if (modalId === 'confirmModal' && modal.querySelector('.modal-content')?.innerHTML.trim() === '') {
-          modal.innerHTML = `
-            <div class="modal">
-              <div class="modal-header">
-                <h3><i class="fas fa-exclamation-triangle"></i> Confirmation</h3>
-                <button class="modal-close" onclick="closeModal('confirmModal')">&times;</button>
-              </div>
-              <div class="modal-content">
-                <p>Êtes-vous sûr de vouloir supprimer cet élément ?</p>
-              </div>
-              <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('confirmModal')">Annuler</button>
-                <button class="btn btn-danger" onclick="closeModal('confirmModal'); showNotification('Supprimé');">Confirmer</button>
-              </div>
-            </div>
-          `;
+        if (content) {
+          modal.innerHTML = content;
         }
       }
+      modal.style.display = 'flex';
     }
 
     function closeModal(modalId) {
