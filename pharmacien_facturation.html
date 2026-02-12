@@ -1,46 +1,21 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Facturation Pharmacie - OrdoPass</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Pharmacien - Facturation</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="style1.css" />
+<script src="https://kit.fontawesome.com/a2d9d5a64b.js" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body{
-  font-family: Arial, sans-serif;
-  background:#f4f6f9;
-  margin:0;
+.facture-section{
+  margin-top:20px;
 }
 
-.header{
-  background:#0d6efd;
-  color:white;
-  padding:20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.header h1{
-  margin:0;
-}
-
-.container{
-  padding:30px;
-}
-
-.card{
-  background:white;
-  padding:25px;
-  border-radius:10px;
-  box-shadow:0 2px 10px rgba(0,0,0,0.1);
-}
-
-input, select{
-  padding:10px;
+input{
+  padding:8px;
   border-radius:6px;
   border:1px solid #ccc;
   width:100%;
@@ -64,155 +39,178 @@ input, select{
 }
 
 .btn{
-  padding:10px 15px;
+  padding:8px 12px;
   border:none;
   border-radius:6px;
   cursor:pointer;
-  font-weight:bold;
+  font-weight:600;
 }
 
-.btn-primary{
-  background:#0d6efd;
-  color:white;
-}
-
-.btn-success{
-  background:#28a745;
-  color:white;
-}
+.btn-primary{ background:#0d6efd;color:white; }
+.btn-success{ background:#28a745;color:white; }
 
 .total-box{
-  margin-top:20px;
   text-align:right;
-  font-size:18px;
+  margin-top:20px;
   font-weight:bold;
+  font-size:18px;
 }
 </style>
 </head>
 
 <body>
-
-<div class="header">
-  <h1><i class="fa-solid fa-prescription-bottle-medical"></i> PHARMACIE ORDOPASS</h1>
-  <span>Facture Officielle</span>
-</div>
-
 <div class="container">
-<div class="card">
 
-<h2>Informations Client</h2>
+  <!-- ✅ SIDEBAR IDENTIQUE -->
+  <aside class="sidebar">
+    <div class="logo">ORDO<span>PASS</span></div>
+    <nav class="menu">
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-prescription"></i> Ordonnances</a>
+      <a href="pharmacien_medecins.html"><i class="fa-solid fa-user-md"></i> Médecins</a>
+      <a href="pharmacien_stock.html"><i class="fa-solid fa-boxes-stacked"></i> Gestion Stock</a>
+      <a href="pharmacien_facturation.html" class="active"><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</a>
+      <a href="pharmacien_messagerie.html"><i class="fa-solid fa-comment-medical"></i> Messagerie</a>
+      <a href="pharmacien_parametres.html"><i class="fa-solid fa-gear"></i> Paramètres</a>
+      <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+    </nav>
+  </aside>
 
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-  <input type="text" id="clientNom" placeholder="Nom du client">
-  <input type="date" id="factureDate">
-  <input type="text" id="clientTel" placeholder="Téléphone">
-  <input type="text" id="factureNumero" placeholder="N° Facture">
-</div>
+  <!-- ✅ CONTENU -->
+  <main class="main">
+    <div class="topbar">
+      <div class="title">Facturation Pharmacie</div>
+      <div class="user-box">
+        <div>
+          <div id="userName">Pharmacie</div>
+          <small id="userStatus">Chargement...</small>
+        </div>
+      </div>
+    </div>
 
-<hr style="margin:25px 0;">
+    <section class="card facture-section">
 
-<h2>Médicaments</h2>
+      <h2>Créer une facture</h2>
 
-<table class="table" id="medTable">
-<thead>
-<tr>
-<th>Médicament</th>
-<th>Quantité</th>
-<th>Prix Unitaire</th>
-<th>Total</th>
-<th></th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+        <input type="text" id="clientNom" placeholder="Nom du client">
+        <input type="date" id="factureDate">
+        <input type="text" id="clientTel" placeholder="Téléphone">
+        <input type="text" id="factureNumero" placeholder="N° Facture">
+      </div>
 
-<br>
-<button class="btn btn-primary" onclick="addRow()">
-<i class="fa fa-plus"></i> Ajouter médicament
-</button>
+      <hr style="margin:20px 0;">
 
-<div class="total-box">
-TOTAL : <span id="grandTotal">0</span> FCFA
-</div>
+      <h3>Médicaments</h3>
 
-<br><br>
+      <table class="table" id="medTable">
+        <thead>
+          <tr>
+            <th>Médicament</th>
+            <th>Qté</th>
+            <th>Prix</th>
+            <th>Total</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
 
-<button class="btn btn-success" onclick="generatePDF()">
-<i class="fa fa-file-pdf"></i> Générer PDF
-</button>
+      <br>
+      <button class="btn btn-primary" onclick="addRow()">
+        <i class="fa fa-plus"></i> Ajouter médicament
+      </button>
 
-</div>
+      <div class="total-box">
+        TOTAL : <span id="grandTotal">0</span> FCFA
+      </div>
+
+      <br><br>
+
+      <button class="btn btn-success" onclick="generatePDF()">
+        <i class="fa fa-file-pdf"></i> Générer PDF
+      </button>
+
+    </section>
+  </main>
 </div>
 
 <script>
 
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!user || user.role !== "pharmacie") {
+  alert("⚠️ Accès refusé");
+  location.href = "index.html";
+}
+
+document.getElementById("userName").textContent = user.username;
+document.getElementById("userStatus").textContent = "Connecté";
+
+document.getElementById("logout").addEventListener("click",()=>{
+  localStorage.clear();
+  location.href="index.html";
+});
+
+document.getElementById("factureDate").value =
+  new Date().toISOString().split('T')[0];
+
 function addRow(){
-  const table = document.querySelector("#medTable tbody");
+  const tbody=document.querySelector("#medTable tbody");
+  const row=document.createElement("tr");
 
-  const row = document.createElement("tr");
-
-  row.innerHTML = `
-  <td><input type="text" placeholder="Nom médicament"></td>
-  <td><input type="number" value="1" min="1" onchange="calculate()"></td>
-  <td><input type="number" value="0" min="0" onchange="calculate()"></td>
-  <td class="rowTotal">0</td>
-  <td><button onclick="this.parentElement.parentElement.remove(); calculate()">X</button></td>
+  row.innerHTML=`
+    <td><input type="text"></td>
+    <td><input type="number" value="1" onchange="calculate()"></td>
+    <td><input type="number" value="0" onchange="calculate()"></td>
+    <td class="rowTotal">0</td>
+    <td><button onclick="this.parentElement.parentElement.remove();calculate()">X</button></td>
   `;
 
-  table.appendChild(row);
+  tbody.appendChild(row);
 }
 
 function calculate(){
-  let grandTotal = 0;
-
+  let total=0;
   document.querySelectorAll("#medTable tbody tr").forEach(row=>{
-    const qty = row.children[1].querySelector("input").value;
-    const price = row.children[2].querySelector("input").value;
-
-    const total = qty * price;
-    row.querySelector(".rowTotal").innerText = total;
-    grandTotal += total;
+    const q=row.children[1].querySelector("input").value;
+    const p=row.children[2].querySelector("input").value;
+    const t=q*p;
+    row.querySelector(".rowTotal").innerText=t;
+    total+=t;
   });
-
-  document.getElementById("grandTotal").innerText = grandTotal;
+  document.getElementById("grandTotal").innerText=total;
 }
 
 function generatePDF(){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
-  doc.setFontSize(18);
-  doc.text("PHARMACIE ORDOPASS", 70, 20);
+  doc.setFontSize(16);
+  doc.text("PHARMACIE ORDOPASS",70,20);
 
   doc.setFontSize(12);
-  doc.text("Client : " + document.getElementById("clientNom").value, 20, 40);
-  doc.text("Téléphone : " + document.getElementById("clientTel").value, 20, 50);
-  doc.text("Date : " + document.getElementById("factureDate").value, 150, 40);
-  doc.text("Facture N° : " + document.getElementById("factureNumero").value, 150, 50);
+  doc.text("Client: "+clientNom.value,20,40);
+  doc.text("Téléphone: "+clientTel.value,20,50);
+  doc.text("Date: "+factureDate.value,150,40);
+  doc.text("Facture N°: "+factureNumero.value,150,50);
 
-  let y = 70;
-
-  doc.text("Médicaments :", 20, y);
-  y += 10;
-
+  let y=70;
   document.querySelectorAll("#medTable tbody tr").forEach(row=>{
-    const name = row.children[0].querySelector("input").value;
-    const qty = row.children[1].querySelector("input").value;
-    const price = row.children[2].querySelector("input").value;
-    const total = row.querySelector(".rowTotal").innerText;
+    const name=row.children[0].querySelector("input").value;
+    const q=row.children[1].querySelector("input").value;
+    const p=row.children[2].querySelector("input").value;
+    const t=row.querySelector(".rowTotal").innerText;
 
-    doc.text(`${name} | Qté: ${qty} | PU: ${price} | Total: ${total}`, 20, y);
-    y += 10;
+    doc.text(`${name} | ${q} x ${p} = ${t}`,20,y);
+    y+=10;
   });
 
-  y += 10;
+  y+=10;
   doc.setFontSize(14);
-  doc.text("TOTAL : " + document.getElementById("grandTotal").innerText + " FCFA", 20, y);
+  doc.text("TOTAL: "+grandTotal.innerText+" FCFA",20,y);
 
   doc.save("facture_pharmacie.pdf");
 }
-
-document.getElementById("factureDate").value = new Date().toISOString().split('T')[0];
 
 </script>
 
