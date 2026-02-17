@@ -3,216 +3,243 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Pharmacien - Facturation</title>
+<title>Facturation Pharmacie — OrdoPass</title>
 
 <link rel="stylesheet" href="style1.css" />
-<script src="https://kit.fontawesome.com/a2d9d5a64b.js" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-.facture-section{
-  margin-top:20px;
+.facture-section{margin-top:20px;}
+input,select{
+  padding:8px;border-radius:6px;border:1px solid #ccc;width:100%;
 }
-
-input{
-  padding:8px;
-  border-radius:6px;
-  border:1px solid #ccc;
-  width:100%;
-}
-
-.table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:20px;
-}
-
-.table th, .table td{
-  border:1px solid #ddd;
-  padding:10px;
-  text-align:center;
-}
-
-.table th{
-  background:#0d6efd;
-  color:white;
-}
-
-.btn{
-  padding:8px 12px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  font-weight:600;
-}
-
-.btn-primary{ background:#0d6efd;color:white; }
-.btn-success{ background:#28a745;color:white; }
-
-.total-box{
-  text-align:right;
-  margin-top:20px;
-  font-weight:bold;
-  font-size:18px;
-}
+.table{width:100%;border-collapse:collapse;margin-top:20px;}
+.table th,.table td{border:1px solid #ddd;padding:10px;text-align:center;}
+.table th{background:#0d6efd;color:white;}
+.btn{padding:8px 12px;border:none;border-radius:6px;cursor:pointer;font-weight:600;}
+.btn-primary{background:#0d6efd;color:white;}
+.btn-success{background:#28a745;color:white;}
+.btn-danger{background:#dc3545;color:white;}
+.total-box{text-align:right;margin-top:20px;font-weight:bold;font-size:18px;}
+.history{margin-top:30px;}
+.history-item{border:1px solid #ddd;padding:10px;margin-bottom:8px;border-radius:6px;}
 </style>
 </head>
 
 <body>
 <div class="container">
 
-  <!-- ✅ SIDEBAR IDENTIQUE -->
-  <aside class="sidebar">
-    <div class="logo">ORDO<span>PASS</span></div>
-    <nav class="menu">
-      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-prescription"></i> Ordonnances</a>
-      <a href="pharmacien_medecins.html"><i class="fa-solid fa-user-md"></i> Médecins</a>
-      <a href="pharmacien_stock.html"><i class="fa-solid fa-boxes-stacked"></i> Gestion Stock</a>
-      <a href="pharmacien_facturation.html" class="active"><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</a>
-      <a href="pharmacien_messagerie.html"><i class="fa-solid fa-comment-medical"></i> Messagerie</a>
-      <a href="pharmacien_parametres.html"><i class="fa-solid fa-gear"></i> Paramètres</a>
-      <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
-    </nav>
-  </aside>
+<aside class="sidebar">
+<div class="logo">ORDO<span>PASS</span></div>
+<nav class="menu">
+<a href="pharmacien_dashboard.html">Ordonnances</a>
+<a href="pharmacien_stock.html">Stock</a>
+<a href="pharmacien_facturation.html" class="active">Facturation</a>
+<a href="#" id="logout">Déconnexion</a>
+</nav>
+</aside>
 
-  <!-- ✅ CONTENU -->
-  <main class="main">
-    <div class="topbar">
-      <div class="title">Facturation Pharmacie</div>
-      <div class="user-box">
-        <div>
-          <div id="userName">Pharmacie</div>
-          <small id="userStatus">Chargement...</small>
-        </div>
-      </div>
-    </div>
+<main class="main">
+<div class="topbar">
+<div class="title">Facturation Pharmacie</div>
+<div id="userName"></div>
+</div>
 
-    <section class="card facture-section">
+<section class="card facture-section">
 
-      <h2>Créer une facture</h2>
+<h2>Nouvelle facture</h2>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
-        <input type="text" id="clientNom" placeholder="Nom du client">
-        <input type="date" id="factureDate">
-        <input type="text" id="clientTel" placeholder="Téléphone">
-        <input type="text" id="factureNumero" placeholder="N° Facture">
-      </div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+<select id="typeDoc">
+<option value="FACTURE">FACTURE</option>
+<option value="PROFORMA">PROFORMA</option>
+</select>
 
-      <hr style="margin:20px 0;">
+<input type="text" id="factureNumero" placeholder="N° auto">
+<input type="text" id="clientNom" placeholder="Nom client">
+<input type="text" id="clientTel" placeholder="Téléphone">
+<input type="date" id="factureDate">
+</div>
 
-      <h3>Médicaments</h3>
+<hr style="margin:20px 0;">
 
-      <table class="table" id="medTable">
-        <thead>
-          <tr>
-            <th>Médicament</th>
-            <th>Qté</th>
-            <th>Prix</th>
-            <th>Total</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+<h3>Médicaments</h3>
 
-      <br>
-      <button class="btn btn-primary" onclick="addRow()">
-        <i class="fa fa-plus"></i> Ajouter médicament
-      </button>
+<table class="table" id="medTable">
+<thead>
+<tr>
+<th>Médicament</th>
+<th>Qté</th>
+<th>Prix</th>
+<th>Total</th>
+<th></th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
 
-      <div class="total-box">
-        TOTAL : <span id="grandTotal">0</span> FCFA
-      </div>
+<br>
+<button class="btn btn-primary" onclick="addRow()">Ajouter</button>
 
-      <br><br>
+<div class="total-box">
+TOTAL : <span id="grandTotal">0</span> FCFA
+</div>
 
-      <button class="btn btn-success" onclick="generatePDF()">
-        <i class="fa fa-file-pdf"></i> Générer PDF
-      </button>
+<br>
+<button class="btn btn-success" onclick="saveFacture()">Enregistrer</button>
+<button class="btn btn-primary" onclick="generatePDF()">PDF</button>
 
-    </section>
-  </main>
+</section>
+
+<section class="card history">
+<h3>Historique</h3>
+<div id="historyList"></div>
+</section>
+
+</main>
 </div>
 
 <script>
-
 const user = JSON.parse(localStorage.getItem("user"));
-
-if (!user || user.role !== "pharmacie") {
-  alert("⚠️ Accès refusé");
-  location.href = "index.html";
+if(!user || user.role!=="pharmacie"){
+alert("Accès refusé");
+location.href="index.html";
 }
 
-document.getElementById("userName").textContent = user.username;
-document.getElementById("userStatus").textContent = "Connecté";
+userName.textContent=user.username;
 
-document.getElementById("logout").addEventListener("click",()=>{
-  localStorage.clear();
-  location.href="index.html";
-});
+factureDate.value=new Date().toISOString().split('T')[0];
 
-document.getElementById("factureDate").value =
-  new Date().toISOString().split('T')[0];
+function generateNumero(){
+return "F-"+Date.now().toString().slice(-6);
+}
+
+factureNumero.value=generateNumero();
 
 function addRow(){
-  const tbody=document.querySelector("#medTable tbody");
-  const row=document.createElement("tr");
-
-  row.innerHTML=`
-    <td><input type="text"></td>
-    <td><input type="number" value="1" onchange="calculate()"></td>
-    <td><input type="number" value="0" onchange="calculate()"></td>
-    <td class="rowTotal">0</td>
-    <td><button onclick="this.parentElement.parentElement.remove();calculate()">X</button></td>
-  `;
-
-  tbody.appendChild(row);
+const tbody=document.querySelector("#medTable tbody");
+const row=document.createElement("tr");
+row.innerHTML=`
+<td><input></td>
+<td><input type="number" value="1" onchange="calc()"></td>
+<td><input type="number" value="0" onchange="calc()"></td>
+<td class="rowTotal">0</td>
+<td><button class="btn btn-danger" onclick="this.parentElement.parentElement.remove();calc()">X</button></td>
+`;
+tbody.appendChild(row);
 }
 
-function calculate(){
-  let total=0;
-  document.querySelectorAll("#medTable tbody tr").forEach(row=>{
-    const q=row.children[1].querySelector("input").value;
-    const p=row.children[2].querySelector("input").value;
-    const t=q*p;
-    row.querySelector(".rowTotal").innerText=t;
-    total+=t;
-  });
-  document.getElementById("grandTotal").innerText=total;
+function calc(){
+let total=0;
+document.querySelectorAll("#medTable tbody tr").forEach(r=>{
+const q=r.children[1].querySelector("input").value;
+const p=r.children[2].querySelector("input").value;
+const t=q*p;
+r.querySelector(".rowTotal").innerText=t;
+total+=t;
+});
+grandTotal.innerText=total;
+}
+
+function saveFacture(){
+const items=[];
+document.querySelectorAll("#medTable tbody tr").forEach(r=>{
+items.push({
+name:r.children[0].querySelector("input").value,
+q:r.children[1].querySelector("input").value,
+p:r.children[2].querySelector("input").value,
+t:r.querySelector(".rowTotal").innerText
+});
+});
+
+const facture={
+type:typeDoc.value,
+numero:factureNumero.value,
+client:clientNom.value,
+tel:clientTel.value,
+date:factureDate.value,
+total:grandTotal.innerText,
+items:items
+};
+
+let list=JSON.parse(localStorage.getItem("factures")||"[]");
+list.unshift(facture);
+localStorage.setItem("factures",JSON.stringify(list));
+
+loadHistory();
+alert("Facture enregistrée");
+}
+
+function loadHistory(){
+const list=JSON.parse(localStorage.getItem("factures")||"[]");
+historyList.innerHTML="";
+list.forEach(f=>{
+historyList.innerHTML+=`
+<div class="history-item">
+<b>${f.type}</b> ${f.numero} — ${f.client} — ${f.total} FCFA
+<button onclick='printSaved(${JSON.stringify(f)})'>PDF</button>
+</div>
+`;
+});
 }
 
 function generatePDF(){
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+const { jsPDF }=window.jspdf;
+const doc=new jsPDF();
 
-  doc.setFontSize(16);
-  doc.text("PHARMACIE ORDOPASS",70,20);
+doc.setFontSize(18);
+doc.text(typeDoc.value+" PHARMACIE",70,20);
 
-  doc.setFontSize(12);
-  doc.text("Client: "+clientNom.value,20,40);
-  doc.text("Téléphone: "+clientTel.value,20,50);
-  doc.text("Date: "+factureDate.value,150,40);
-  doc.text("Facture N°: "+factureNumero.value,150,50);
+doc.setFontSize(12);
+doc.text("Client: "+clientNom.value,20,40);
+doc.text("Tel: "+clientTel.value,20,50);
+doc.text("Date: "+factureDate.value,150,40);
+doc.text("N°: "+factureNumero.value,150,50);
 
-  let y=70;
-  document.querySelectorAll("#medTable tbody tr").forEach(row=>{
-    const name=row.children[0].querySelector("input").value;
-    const q=row.children[1].querySelector("input").value;
-    const p=row.children[2].querySelector("input").value;
-    const t=row.querySelector(".rowTotal").innerText;
+let y=70;
+document.querySelectorAll("#medTable tbody tr").forEach(r=>{
+const n=r.children[0].querySelector("input").value;
+const q=r.children[1].querySelector("input").value;
+const p=r.children[2].querySelector("input").value;
+const t=r.querySelector(".rowTotal").innerText;
+doc.text(`${n} | ${q} x ${p} = ${t}`,20,y);
+y+=10;
+});
 
-    doc.text(`${name} | ${q} x ${p} = ${t}`,20,y);
-    y+=10;
-  });
+y+=10;
+doc.setFontSize(14);
+doc.text("TOTAL: "+grandTotal.innerText+" FCFA",20,y);
 
-  y+=10;
-  doc.setFontSize(14);
-  doc.text("TOTAL: "+grandTotal.innerText+" FCFA",20,y);
-
-  doc.save("facture_pharmacie.pdf");
+doc.save(typeDoc.value+"_"+factureNumero.value+".pdf");
 }
 
-</script>
+function printSaved(f){
+const { jsPDF }=window.jspdf;
+const doc=new jsPDF();
 
+doc.setFontSize(18);
+doc.text(f.type+" PHARMACIE",70,20);
+
+doc.setFontSize(12);
+doc.text("Client: "+f.client,20,40);
+doc.text("Tel: "+f.tel,20,50);
+doc.text("Date: "+f.date,150,40);
+doc.text("N°: "+f.numero,150,50);
+
+let y=70;
+f.items.forEach(i=>{
+doc.text(`${i.name} | ${i.q} x ${i.p} = ${i.t}`,20,y);
+y+=10;
+});
+
+y+=10;
+doc.setFontSize(14);
+doc.text("TOTAL: "+f.total+" FCFA",20,y);
+
+doc.save(f.type+"_"+f.numero+".pdf");
+}
+
+loadHistory();
+</script>
 </body>
 </html>
