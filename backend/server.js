@@ -24,15 +24,18 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api/pharmacies", require("./routes/pharmacies"));
 app.use("/api/ordonnances", require("./routes/ordonnances"));
 
-/* ===== FRONTEND ===== */
+/* ===== FRONTEND RENDER FIX ===== */
 const frontendPath = path.join(__dirname, "..");
-app.use(express.static(frontendPath));
 
-app.get("/", (req, res) => {
+/* servir fichiers statiques immédiatement */
+app.use(express.static(frontendPath, {
+  index: "index.html"
+}));
+
+/* fallback pour SPA ou routes directes */
+app.get("*", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
-
-/* ⚠️ PAS DE app.get("*") */
 
 /* ===== DATABASE ===== */
 mongoose.connect(process.env.MONGO_URI)
