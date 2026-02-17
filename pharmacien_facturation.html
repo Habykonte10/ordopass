@@ -1,69 +1,80 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Facturation Pharmacie — OrdoPass</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Pharmacien - Facturation</title>
 
-<link rel="stylesheet" href="style1.css" />
+<link rel="stylesheet" href="style1.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-.facture-section{margin-top:20px;}
-input,select{
-  padding:8px;border-radius:6px;border:1px solid #ccc;width:100%;
+.statusBadge{
+  padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;
 }
-.table{width:100%;border-collapse:collapse;margin-top:20px;}
-.table th,.table td{border:1px solid #ddd;padding:10px;text-align:center;}
-.table th{background:#0d6efd;color:white;}
-.btn{padding:8px 12px;border:none;border-radius:6px;cursor:pointer;font-weight:600;}
-.btn-primary{background:#0d6efd;color:white;}
-.btn-success{background:#28a745;color:white;}
-.btn-danger{background:#dc3545;color:white;}
-.total-box{text-align:right;margin-top:20px;font-weight:bold;font-size:18px;}
-.history{margin-top:30px;}
-.history-item{border:1px solid #ddd;padding:10px;margin-bottom:8px;border-radius:6px;}
+.paid{background:#E8F5E9;color:#4CAF50;}
+.unpaid{background:#FFEBEE;color:#E53935;}
 </style>
 </head>
 
 <body>
 <div class="container">
 
+<!-- ✅ SIDEBAR IDENTIQUE ORDONNANCES -->
 <aside class="sidebar">
 <div class="logo">ORDO<span>PASS</span></div>
 <nav class="menu">
-<a href="pharmacien_dashboard.html">Ordonnances</a>
-<a href="pharmacien_stock.html">Stock</a>
-<a href="pharmacien_facturation.html" class="active">Facturation</a>
-<a href="#" id="logout">Déconnexion</a>
+<a href="pharmacien_dashboard.html"><i class="fa-solid fa-prescription"></i> Ordonnances</a>
+<a href="pharmacien_medecins.html"><i class="fa-solid fa-user-md"></i> Médecins</a>
+<a href="pharmacien_stock.html"><i class="fa-solid fa-boxes-stacked"></i> Gestion Stock</a>
+<a href="pharmacien_facturation.html" class="active"><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</a>
+<a href="pharmacien_messagerie.html"><i class="fa-solid fa-comment-medical"></i> Messagerie</a>
+<a href="pharmacien_parametres.html"><i class="fa-solid fa-gear"></i> Paramètres</a>
+<a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
 </nav>
 </aside>
 
+<!-- ✅ CONTENU -->
 <main class="main">
 <div class="topbar">
-<div class="title">Facturation Pharmacie</div>
+<div class="title">Facturation</div>
+<div class="user-box">
+<div>
 <div id="userName"></div>
+<small>Connecté</small>
+</div>
+</div>
 </div>
 
-<section class="card facture-section">
+<section class="card">
 
 <h2>Nouvelle facture</h2>
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
 <select id="typeDoc">
 <option value="FACTURE">FACTURE</option>
 <option value="PROFORMA">PROFORMA</option>
 </select>
 
-<input type="text" id="factureNumero" placeholder="N° auto">
-<input type="text" id="clientNom" placeholder="Nom client">
-<input type="text" id="clientTel" placeholder="Téléphone">
-<input type="date" id="factureDate">
+<input id="factureNumero" placeholder="N° facture"/>
+<input id="clientNom" placeholder="Nom client"/>
+<input id="clientTel" placeholder="Téléphone"/>
+<input type="date" id="factureDate"/>
+
+<select id="modePaiement">
+<option>Espèces</option>
+<option>Wave</option>
+<option>Orange Money</option>
+<option>Carte</option>
+</select>
+
+<select id="statutPaiement">
+<option value="non_payé">Non payé</option>
+<option value="payé">Payé</option>
+</select>
 </div>
 
-<hr style="margin:20px 0;">
-
-<h3>Médicaments</h3>
+<hr style="margin:20px 0">
 
 <table class="table" id="medTable">
 <thead>
@@ -81,7 +92,7 @@ input,select{
 <br>
 <button class="btn btn-primary" onclick="addRow()">Ajouter</button>
 
-<div class="total-box">
+<div style="text-align:right;margin-top:15px;font-weight:bold">
 TOTAL : <span id="grandTotal">0</span> FCFA
 </div>
 
@@ -91,8 +102,8 @@ TOTAL : <span id="grandTotal">0</span> FCFA
 
 </section>
 
-<section class="card history">
-<h3>Historique</h3>
+<section class="card">
+<h3>Historique factures</h3>
 <div id="historyList"></div>
 </section>
 
@@ -100,21 +111,14 @@ TOTAL : <span id="grandTotal">0</span> FCFA
 </div>
 
 <script>
-const user = JSON.parse(localStorage.getItem("user"));
-if(!user || user.role!=="pharmacie"){
-alert("Accès refusé");
-location.href="index.html";
+const user=JSON.parse(localStorage.getItem("user"));
+if(!user||user.role!=="pharmacie"){
+alert("Accès refusé");location.href="index.html";
 }
-
 userName.textContent=user.username;
 
 factureDate.value=new Date().toISOString().split('T')[0];
-
-function generateNumero(){
-return "F-"+Date.now().toString().slice(-6);
-}
-
-factureNumero.value=generateNumero();
+factureNumero.value="F-"+Date.now().toString().slice(-6);
 
 function addRow(){
 const tbody=document.querySelector("#medTable tbody");
@@ -124,7 +128,7 @@ row.innerHTML=`
 <td><input type="number" value="1" onchange="calc()"></td>
 <td><input type="number" value="0" onchange="calc()"></td>
 <td class="rowTotal">0</td>
-<td><button class="btn btn-danger" onclick="this.parentElement.parentElement.remove();calc()">X</button></td>
+<td><button onclick="this.parentElement.parentElement.remove();calc()">X</button></td>
 `;
 tbody.appendChild(row);
 }
@@ -158,8 +162,10 @@ numero:factureNumero.value,
 client:clientNom.value,
 tel:clientTel.value,
 date:factureDate.value,
+mode:modePaiement.value,
+statut:statutPaiement.value,
 total:grandTotal.innerText,
-items:items
+items
 };
 
 let list=JSON.parse(localStorage.getItem("factures")||"[]");
@@ -175,16 +181,18 @@ const list=JSON.parse(localStorage.getItem("factures")||"[]");
 historyList.innerHTML="";
 list.forEach(f=>{
 historyList.innerHTML+=`
-<div class="history-item">
+<div style="border:1px solid #ddd;padding:10px;margin-bottom:8px;border-radius:6px">
 <b>${f.type}</b> ${f.numero} — ${f.client} — ${f.total} FCFA
+<br>💳 ${f.mode}
+<br><span class="statusBadge ${f.statut==="payé"?"paid":"unpaid"}">${f.statut}</span>
+<br>
 <button onclick='printSaved(${JSON.stringify(f)})'>PDF</button>
-</div>
-`;
+</div>`;
 });
 }
 
 function generatePDF(){
-const { jsPDF }=window.jspdf;
+const {jsPDF}=window.jspdf;
 const doc=new jsPDF();
 
 doc.setFontSize(18);
@@ -195,8 +203,10 @@ doc.text("Client: "+clientNom.value,20,40);
 doc.text("Tel: "+clientTel.value,20,50);
 doc.text("Date: "+factureDate.value,150,40);
 doc.text("N°: "+factureNumero.value,150,50);
+doc.text("Paiement: "+modePaiement.value,20,60);
+doc.text("Statut: "+statutPaiement.value,150,60);
 
-let y=70;
+let y=80;
 document.querySelectorAll("#medTable tbody tr").forEach(r=>{
 const n=r.children[0].querySelector("input").value;
 const q=r.children[1].querySelector("input").value;
@@ -214,7 +224,7 @@ doc.save(typeDoc.value+"_"+factureNumero.value+".pdf");
 }
 
 function printSaved(f){
-const { jsPDF }=window.jspdf;
+const {jsPDF}=window.jspdf;
 const doc=new jsPDF();
 
 doc.setFontSize(18);
@@ -225,8 +235,10 @@ doc.text("Client: "+f.client,20,40);
 doc.text("Tel: "+f.tel,20,50);
 doc.text("Date: "+f.date,150,40);
 doc.text("N°: "+f.numero,150,50);
+doc.text("Paiement: "+f.mode,20,60);
+doc.text("Statut: "+f.statut,150,60);
 
-let y=70;
+let y=80;
 f.items.forEach(i=>{
 doc.text(`${i.name} | ${i.q} x ${i.p} = ${i.t}`,20,y);
 y+=10;
@@ -238,6 +250,11 @@ doc.text("TOTAL: "+f.total+" FCFA",20,y);
 
 doc.save(f.type+"_"+f.numero+".pdf");
 }
+
+document.getElementById("logout").onclick=()=>{
+localStorage.clear();
+location.href="index.html";
+};
 
 loadHistory();
 </script>
