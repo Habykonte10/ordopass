@@ -1,34 +1,21 @@
 const mongoose = require("mongoose");
 
 const OrdonnanceSchema = new mongoose.Schema({
-  code: {
-    type: String,
-    required: true
-  },
+  code: String,
+  patientNom: String,
+  age: String,
+  genre: String,
+  adresse: String,
+  medicaments: String,
+  statut: String,
 
   medecin: {
-    id: String,
     nom: String
   },
 
   pharmacie: {
     id: String,
     nom: String
-  },
-
-  patientNom: {
-    type: String,
-    required: true
-  },
-
-  medicaments: {
-    type: String,
-    required: true
-  },
-
-  statut: {
-    type: String,
-    default: "envoyee"
   },
 
   createdAt: {
