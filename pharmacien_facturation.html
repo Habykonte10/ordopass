@@ -7,14 +7,292 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
 <link rel="stylesheet" href="style1.css"/>
+<!-- Font Awesome pour les icônes (si pas déjà inclus dans style1.css) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-.statusBadge{
-  padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;
-}
-.paid{background:#E8F5E9;color:#4CAF50;}
-.unpaid{background:#FFEBEE;color:#E53935;}
+  /* ===== STYLES AMÉLIORÉS (sans toucher à l'existant) ===== */
+  body {
+    background: #f4f7fb;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+  }
+
+  .container {
+    background: transparent;
+  }
+
+  .card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    padding: 25px;
+    margin-bottom: 25px;
+    border: none;
+    transition: transform 0.2s;
+  }
+
+  .card:hover {
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  }
+
+  h2, h3 {
+    color: #1a2b4c;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  h2 i, h3 i {
+    color: #2a5298;
+    font-size: 1.5rem;
+  }
+
+  /* Grille du formulaire */
+  [style*="display:grid"] {
+    background: #f9fafc;
+    padding: 20px;
+    border-radius: 16px;
+    margin-bottom: 15px;
+  }
+
+  select, input {
+    border: 2px solid #eef2f6;
+    border-radius: 12px;
+    padding: 12px 15px;
+    font-size: 14px;
+    transition: all 0.2s;
+    background: white;
+  }
+
+  select:focus, input:focus {
+    border-color: #2a5298;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(42,82,152,0.1);
+  }
+
+  /* Tableau des médicaments */
+  .table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+  }
+
+  .table thead th {
+    background: #f0f4fa;
+    color: #1e293b;
+    font-weight: 600;
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .table tbody tr {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+  }
+
+  .table tbody td {
+    padding: 12px;
+    border: none;
+  }
+
+  .table tbody td input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+  }
+
+  .table tbody td button {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: none;
+    border-radius: 10px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+  }
+
+  .table tbody td button:hover {
+    background: #fecaca;
+    transform: scale(1.05);
+  }
+
+  .rowTotal {
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  /* Boutons */
+  .btn {
+    border: none;
+    border-radius: 40px;
+    padding: 12px 25px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  }
+
+  .btn-primary {
+    background: linear-gradient(145deg, #2a5298, #1e3a6b);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #1e3c72;
+    transform: translateY(-2px);
+  }
+
+  .btn-success {
+    background: #10b981;
+    color: white;
+  }
+
+  .btn-success:hover {
+    background: #0e9f6e;
+    transform: translateY(-2px);
+  }
+
+  #grandTotal {
+    font-size: 1.4rem;
+    color: #2a5298;
+    font-weight: 700;
+  }
+
+  /* Historique des factures */
+  #historyList > div {
+    background: white;
+    border: none !important;
+    border-radius: 20px !important;
+    padding: 18px 22px !important;
+    margin-bottom: 15px !important;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+    transition: all 0.2s;
+    border-left: 5px solid #2a5298 !important;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  #historyList > div:hover {
+    transform: translateX(5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  }
+
+  #historyList > div b {
+    font-size: 1.1rem;
+    color: #1e293b;
+  }
+
+  #historyList > div br {
+    display: none; /* on réorganise en flex */
+  }
+
+  #historyList > div > *:not(button) {
+    margin-right: 20px;
+  }
+
+  #historyList > div button {
+    background: #2a5298;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  #historyList > div button:hover {
+    background: #1e3c72;
+  }
+
+  #historyList > div button::before {
+    font-family: "Font Awesome 6 Free";
+    content: "\f1c1";
+    font-weight: 900;
+    margin-right: 5px;
+  }
+
+  /* Badges de statut améliorés */
+  .statusBadge {
+    padding: 6px 14px !important;
+    border-radius: 40px !important;
+    font-weight: 600;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .paid {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+  }
+
+  .paid::before {
+    font-family: "Font Awesome 6 Free";
+    content: "\f00c";
+    font-weight: 900;
+  }
+
+  .unpaid {
+    background: #fee2e2 !important;
+    color: #b91c1c !important;
+  }
+
+  .unpaid::before {
+    font-family: "Font Awesome 6 Free";
+    content: "\f00d";
+    font-weight: 900;
+  }
+
+  /* Ajout d'icônes dans les infos facture */
+  #historyList > div b i {
+    margin-right: 6px;
+    color: #2a5298;
+  }
+
+  #historyList > div span:first-of-type {
+    background: #eef2f6;
+    padding: 5px 12px;
+    border-radius: 30px;
+    font-size: 13px;
+  }
+
+  /* Amélioration responsive */
+  @media (max-width: 700px) {
+    [style*="grid-template-columns:1fr 1fr"] {
+      grid-template-columns: 1fr !important;
+    }
+
+    #historyList > div {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    #historyList > div button {
+      margin-left: 0;
+    }
+  }
 </style>
 </head>
 
@@ -48,8 +326,7 @@
 </div>
 
 <section class="card">
-
-<h2>Nouvelle facture</h2>
+<h2><i class="fa-solid fa-file-invoice"></i> Nouvelle facture</h2>
 
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
 <select id="typeDoc">
@@ -75,7 +352,7 @@
 </select>
 </div>
 
-<hr style="margin:20px 0">
+<hr style="margin:20px 0; border:1px solid #eef2f6;">
 
 <table class="table" id="medTable">
 <thead>
@@ -91,20 +368,19 @@
 </table>
 
 <br>
-<button class="btn btn-primary" onclick="addRow()">Ajouter</button>
+<button class="btn btn-primary" onclick="addRow()"><i class="fa-solid fa-plus"></i> Ajouter</button>
 
 <div style="text-align:right;margin-top:15px;font-weight:bold">
 TOTAL : <span id="grandTotal">0</span> FCFA
 </div>
 
 <br>
-<button class="btn btn-success" onclick="saveFacture()">Enregistrer</button>
-<button class="btn btn-primary" onclick="generatePDF()">PDF</button>
-
+<button class="btn btn-success" onclick="saveFacture()"><i class="fa-solid fa-save"></i> Enregistrer</button>
+<button class="btn btn-primary" onclick="generatePDF()"><i class="fa-solid fa-file-pdf"></i> PDF</button>
 </section>
 
 <section class="card">
-<h3>Historique factures</h3>
+<h3><i class="fa-solid fa-clock-rotate-left"></i> Historique factures</h3>
 <div id="historyList"></div>
 </section>
 
@@ -112,6 +388,7 @@ TOTAL : <span id="grandTotal">0</span> FCFA
 </div>
 
 <script>
+// (JavaScript inchangé)
 const user=JSON.parse(localStorage.getItem("user"));
 if(!user||user.role!=="pharmacie"){
 alert("Accès refusé");location.href="index.html";
@@ -187,7 +464,7 @@ historyList.innerHTML+=`
 <br>💳 ${f.mode}
 <br><span class="statusBadge ${f.statut==="payé"?"paid":"unpaid"}">${f.statut}</span>
 <br>
-<button onclick='printSaved(${JSON.stringify(f)})'>PDF</button>
+<button onclick='printSaved(${JSON.stringify(f).replace(/'/g, "\\'")})'>PDF</button>
 </div>`;
 });
 }
