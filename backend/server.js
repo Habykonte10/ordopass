@@ -22,7 +22,7 @@ app.get("/api/test", (req, res) => {
 
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/pharmacies", require("./routes/pharmacies"));
-app.use("/api/ordonnance", require("./routes/ordonnance"));
+app.use("/api/ordonnances", require("./routes/ordonnances"));
 
 /* ===== FRONTEND RENDER FIX ===== */
 const frontendPath = path.join(__dirname, "..");
