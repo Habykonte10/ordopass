@@ -96,16 +96,9 @@
 </div>
 
 <script>
-  const user = JSON.parse(localStorage.getItem("user"));
+document.addEventListener("DOMContentLoaded", async () => {
 
-fetch(`/api/ordonnances/pharmacie/${user.id}`)
-  .then(res => res.json())
-  .then(data => afficher(data));
-document.addEventListener("DOMContentLoaded", () => {
-
-  const API_URL = window.location.protocol + "//" + window.location.host;
-
-  // ✅ CORRECTION PRINCIPALE
+  const API_URL = window.location.origin;
   const user = JSON.parse(localStorage.getItem("user"));
 
   if (!user || user.role !== "pharmacie") {
@@ -127,12 +120,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function loadOrdonnances(){
     try{
-      const res = await fetch(`${API_URL}/api/pharmacien/ordonnances?nom=${user.username}`);
+      const res = await fetch(`${API_URL}/api/ordonnances/pharmacie/${user.id}`);
       const data = await res.json();
+
       afficher(data);
-      document.getElementById("ordCount").textContent=data.length+" ordonnance(s)";
-    }catch{
-      showNotification("Erreur chargement","error");
+      document.getElementById("ordCount").textContent =
+        data.length + " ordonnance(s)";
+    }catch(e){
+      showNotification("Erreur chargement ordonnances","error");
     }
   }
 
@@ -149,13 +144,12 @@ document.addEventListener("DOMContentLoaded", () => {
       body.innerHTML+=`
       <tr>
         <td>${o.code}</td>
-        <td>${o.createdAt}</td>
+        <td>${new Date(o.createdAt).toLocaleDateString()}</td>
         <td>${o.patientNom}</td>
-        <td>${o.medecinNom}</td>
+        <td>${o.medecin.nom}</td>
         <td><span class="status ${o.statut}">${o.statut}</span></td>
         <td>
-          <button onclick="updateStatus('${o.id}','en_cours')">Traiter</button>
-          <button onclick="deleteOrd('${o.id}')">Supprimer</button>
+          <button onclick="updateStatus('${o._id}','en_cours')">Traiter</button>
         </td>
       </tr>`;
     });
@@ -171,13 +165,6 @@ document.addEventListener("DOMContentLoaded", () => {
     loadOrdonnances();
   }
 
-  window.deleteOrd = async(id)=>{
-    if(!confirm("Supprimer ?")) return;
-    await fetch(`${API_URL}/api/ordonnances/${id}`,{method:"DELETE"});
-    showNotification("Supprimée","success");
-    loadOrdonnances();
-  }
-
   document.getElementById("logout").addEventListener("click",()=>{
     localStorage.clear();
     location.href="index.html";
@@ -186,6 +173,5 @@ document.addEventListener("DOMContentLoaded", () => {
   loadOrdonnances();
 });
 </script>
-
 </body>
 </html>
