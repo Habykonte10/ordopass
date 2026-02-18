@@ -96,103 +96,82 @@
 </div>
 
 <script>
-const API_URL = window.location.origin;
-const user = JSON.parse(localStorage.getItem("user"));
+document.addEventListener("DOMContentLoaded", async () => {
 
-if (!user || user.role !== "medecin") {
-  alert("⚠️ Accès refusé");
-  location.href = "index.html";
-}
+  const API_URL = window.location.origin;
+  const user = JSON.parse(localStorage.getItem("user"));
 
-document.getElementById("usernameDisplay").textContent = user.username;
+  if (!user || user.role !== "pharmacie") {
+    alert("⚠️ Accès refusé");
+    location.href = "index.html";
+    return;
+  }
 
-document.getElementById("logout").addEventListener("click", () => {
-  localStorage.removeItem("user");
-  location.href = "index.html";
-});
+  document.getElementById("userName").textContent = user.username;
+  document.getElementById("userStatus").textContent = "Connecté";
 
-let currentOrdonnance = null;
-let selectedPharmacie = null;
-let allPharmacies = [];
+  function showNotification(msg,type="info"){
+    const n=document.createElement("div");
+    n.className=`notification notification-${type}`;
+    n.textContent=msg;
+    document.body.appendChild(n);
+    setTimeout(()=>n.remove(),4000);
+  }
 
-/* ===== Charger pharmacies ===== */
-async function loadPharmaciesFromBackend(){
-  const res = await fetch("/api/pharmacies");
-  allPharmacies = await res.json();
-}
+  async function loadOrdonnances(){
+    try{
+      const res = await fetch(`${API_URL}/api/ordonnances/pharmacie/${user.id}`);
+      const data = await res.json();
 
-/* ===== PREVIEW ===== */
-function generatePreview(){
-  currentOrdonnance = {
-    patientNom: nom.value,
-    age: age.value,
-    genre: genre.value,
-    adresse: adresse.value,
-    medicaments: medicaments.value,
-    medecinNom: user.username,
-    date: dateOrd.value
-  };
+      afficher(data);
+      document.getElementById("ordCount").textContent =
+        data.length + " ordonnance(s)";
+    }catch(e){
+      showNotification("Erreur chargement ordonnances","error");
+    }
+  }
 
-  preview.style.display="block";
-  preview.innerHTML = `
-    <h3>Ordonnance</h3>
-    <p><b>Patient:</b> ${currentOrdonnance.patientNom}</p>
-    <p><b>Médecin:</b> ${currentOrdonnance.medecinNom}</p>
-    <p><b>Médicaments:</b><br>${currentOrdonnance.medicaments}</p>
-  `;
+  function afficher(list){
+    const body=document.getElementById("ordBody");
+    body.innerHTML="";
 
-  sendBtn.disabled=false;
-}
+    if(!list.length){
+      body.innerHTML="<tr><td colspan='6'>Aucune ordonnance</td></tr>";
+      return;
+    }
 
-/* ===== OUVRIR MODAL ===== */
-function openPharmacieModal(){
-  pharmacieList.innerHTML = allPharmacies.map(p=>`
-    <div class="pharmacie-item" onclick="selectPharmacie('${p._id}','${p.nom}')">
-      ${p.nom}
-    </div>
-  `).join("");
+    list.forEach(o=>{
+      body.innerHTML+=`
+      <tr>
+        <td>${o.code}</td>
+        <td>${new Date(o.createdAt).toLocaleDateString()}</td>
+        <td>${o.patientNom}</td>
+        <td>${o.medecin.nom}</td>
+        <td><span class="status ${o.statut}">${o.statut}</span></td>
+        <td>
+          <button onclick="updateStatus('${o._id}','en_cours')">Traiter</button>
+        </td>
+      </tr>`;
+    });
+  }
 
-  pharmacieModal.style.display="block";
-}
+  window.updateStatus = async(id,statut)=>{
+    await fetch(`${API_URL}/api/ordonnances/${id}/status`,{
+      method:"PUT",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({statut})
+    });
+    showNotification("Statut mis à jour","success");
+    loadOrdonnances();
+  }
 
-function selectPharmacie(id,nom){
-  selectedPharmacie={id,nom};
-  confirmSendBtn.disabled=false;
-}
-
-/* ===== ENVOI API ===== */
-async function sendToPharmacie(){
-  if(!selectedPharmacie) return;
-
-  const res = await fetch("/api/ordonnances",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      patientNom: currentOrdonnance.patientNom,
-      age: currentOrdonnance.age,
-      genre: currentOrdonnance.genre,
-      adresse: currentOrdonnance.adresse,
-      medicaments: currentOrdonnance.medicaments,
-      medecinNom: user.username,
-      pharmacieId: selectedPharmacie.id,
-      pharmacieNom: selectedPharmacie.nom
-    })
+  document.getElementById("logout").addEventListener("click",()=>{
+    localStorage.clear();
+    location.href="index.html";
   });
 
-  if(res.ok){
-    alert("✅ Ordonnance envoyée à la pharmacie");
-    pharmacieModal.style.display="none";
-  }else{
-    alert("Erreur envoi");
-  }
-}
-
-/* ===== EVENTS ===== */
-genBtn.onclick=generatePreview;
-sendBtn.onclick=openPharmacieModal;
-confirmSendBtn.onclick=sendToPharmacie;
-
-loadPharmaciesFromBackend();
+  loadOrdonnances();
+});
 </script>
 </body>
 </html>
