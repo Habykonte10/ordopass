@@ -7,22 +7,17 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
 <link rel="stylesheet" href="style1.css"/>
-<!-- Font Awesome pour les icônes (si pas déjà inclus dans style1.css) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-  /* ===== STYLES AMÉLIORÉS (sans toucher à l'existant) ===== */
+  /* Vos styles existants (inchangés) */
   body {
     background: #f4f7fb;
     font-family: 'Inter', 'Segoe UI', sans-serif;
   }
-
-  .container {
-    background: transparent;
-  }
-
+  .container { background: transparent; }
   .card {
     background: white;
     border-radius: 20px;
@@ -32,11 +27,7 @@
     border: none;
     transition: transform 0.2s;
   }
-
-  .card:hover {
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-  }
-
+  .card:hover { box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
   h2, h3 {
     color: #1a2b4c;
     font-weight: 600;
@@ -45,20 +36,13 @@
     align-items: center;
     gap: 10px;
   }
-
-  h2 i, h3 i {
-    color: #2a5298;
-    font-size: 1.5rem;
-  }
-
-  /* Grille du formulaire */
+  h2 i, h3 i { color: #2a5298; font-size: 1.5rem; }
   [style*="display:grid"] {
     background: #f9fafc;
     padding: 20px;
     border-radius: 16px;
     margin-bottom: 15px;
   }
-
   select, input {
     border: 2px solid #eef2f6;
     border-radius: 12px;
@@ -67,20 +51,16 @@
     transition: all 0.2s;
     background: white;
   }
-
   select:focus, input:focus {
     border-color: #2a5298;
     outline: none;
     box-shadow: 0 0 0 4px rgba(42,82,152,0.1);
   }
-
-  /* Tableau des médicaments */
   .table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0 10px;
   }
-
   .table thead th {
     background: #f0f4fa;
     color: #1e293b;
@@ -88,25 +68,21 @@
     padding: 12px;
     border-radius: 12px;
   }
-
   .table tbody tr {
     background: white;
     border-radius: 16px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.02);
   }
-
   .table tbody td {
     padding: 12px;
     border: none;
   }
-
   .table tbody td input {
     width: 100%;
     padding: 10px;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
   }
-
   .table tbody td button {
     background: #fee2e2;
     color: #b91c1c;
@@ -118,18 +94,11 @@
     font-weight: bold;
     transition: 0.2s;
   }
-
   .table tbody td button:hover {
     background: #fecaca;
     transform: scale(1.05);
   }
-
-  .rowTotal {
-    font-weight: 600;
-    color: #1e293b;
-  }
-
-  /* Boutons */
+  .rowTotal { font-weight: 600; color: #1e293b; }
   .btn {
     border: none;
     border-radius: 40px;
@@ -143,34 +112,29 @@
     gap: 8px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
   }
-
   .btn-primary {
     background: linear-gradient(145deg, #2a5298, #1e3a6b);
     color: white;
   }
-
   .btn-primary:hover {
     background: #1e3c72;
     transform: translateY(-2px);
   }
-
   .btn-success {
     background: #10b981;
     color: white;
   }
-
   .btn-success:hover {
     background: #0e9f6e;
     transform: translateY(-2px);
   }
-
   #grandTotal {
     font-size: 1.4rem;
     color: #2a5298;
     font-weight: 700;
   }
 
-  /* Historique des factures */
+  /* Historique des factures - avec deux boutons */
   #historyList > div {
     background: white;
     border: none !important;
@@ -185,53 +149,31 @@
     align-items: center;
     justify-content: space-between;
   }
-
   #historyList > div:hover {
     transform: translateX(5px);
     box-shadow: 0 10px 30px rgba(0,0,0,0.08);
   }
-
-  #historyList > div b {
-    font-size: 1.1rem;
-    color: #1e293b;
-  }
-
-  #historyList > div br {
-    display: none; /* on réorganise en flex */
-  }
-
-  #historyList > div > *:not(button) {
-    margin-right: 20px;
-  }
-
-  #historyList > div button {
+  #historyList > div b { font-size: 1.1rem; color: #1e293b; }
+  #historyList > div br { display: none; }
+  #historyList > div > *:not(button) { margin-right: 20px; }
+  #historyList > div .btn-icon {
     background: #2a5298;
     color: white;
     border: none;
     border-radius: 30px;
-    padding: 8px 18px;
+    padding: 8px 16px;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     transition: 0.2s;
-    margin-left: auto;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 5px;
+    margin-left: 5px;
   }
+  #historyList > div .btn-icon:hover { background: #1e3c72; }
+  #historyList > div .btn-icon i { font-size: 12px; }
 
-  #historyList > div button:hover {
-    background: #1e3c72;
-  }
-
-  #historyList > div button::before {
-    font-family: "Font Awesome 6 Free";
-    content: "\f1c1";
-    font-weight: 900;
-    margin-right: 5px;
-  }
-
-  /* Badges de statut améliorés */
   .statusBadge {
     padding: 6px 14px !important;
     border-radius: 40px !important;
@@ -241,57 +183,28 @@
     align-items: center;
     gap: 6px;
   }
-
   .paid {
     background: #d1fae5 !important;
     color: #065f46 !important;
   }
-
   .paid::before {
     font-family: "Font Awesome 6 Free";
     content: "\f00c";
     font-weight: 900;
   }
-
   .unpaid {
     background: #fee2e2 !important;
     color: #b91c1c !important;
   }
-
   .unpaid::before {
     font-family: "Font Awesome 6 Free";
     content: "\f00d";
     font-weight: 900;
   }
 
-  /* Ajout d'icônes dans les infos facture */
-  #historyList > div b i {
-    margin-right: 6px;
-    color: #2a5298;
-  }
-
-  #historyList > div span:first-of-type {
-    background: #eef2f6;
-    padding: 5px 12px;
-    border-radius: 30px;
-    font-size: 13px;
-  }
-
-  /* Amélioration responsive */
   @media (max-width: 700px) {
-    [style*="grid-template-columns:1fr 1fr"] {
-      grid-template-columns: 1fr !important;
-    }
-
-    #historyList > div {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 10px;
-    }
-
-    #historyList > div button {
-      margin-left: 0;
-    }
+    [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+    #historyList > div { flex-direction: column; align-items: flex-start; gap: 10px; }
   }
 </style>
 </head>
@@ -299,7 +212,6 @@
 <body>
 <div class="container">
 
-<!-- ✅ SIDEBAR IDENTIQUE ORDONNANCES -->
 <aside class="sidebar">
 <div class="logo">ORDO<span>PASS</span></div>
 <nav class="menu">
@@ -313,7 +225,6 @@
 </nav>
 </aside>
 
-<!-- ✅ CONTENU -->
 <main class="main">
 <div class="topbar">
 <div class="title">Facturation</div>
@@ -333,19 +244,16 @@
 <option value="FACTURE">FACTURE</option>
 <option value="PROFORMA">PROFORMA</option>
 </select>
-
 <input id="factureNumero" placeholder="N° facture"/>
 <input id="clientNom" placeholder="Nom client"/>
 <input id="clientTel" placeholder="Téléphone"/>
 <input type="date" id="factureDate"/>
-
 <select id="modePaiement">
 <option>Espèces</option>
 <option>Wave</option>
 <option>Orange Money</option>
 <option>Carte</option>
 </select>
-
 <select id="statutPaiement">
 <option value="non_payé">Non payé</option>
 <option value="payé">Payé</option>
@@ -356,13 +264,7 @@
 
 <table class="table" id="medTable">
 <thead>
-<tr>
-<th>Médicament</th>
-<th>Qté</th>
-<th>Prix</th>
-<th>Total</th>
-<th></th>
-</tr>
+<tr><th>Médicament</th><th>Qté</th><th>Prix</th><th>Total</th><th></th></tr>
 </thead>
 <tbody></tbody>
 </table>
@@ -388,152 +290,230 @@ TOTAL : <span id="grandTotal">0</span> FCFA
 </div>
 
 <script>
-// (JavaScript inchangé)
-const user=JSON.parse(localStorage.getItem("user"));
-if(!user||user.role!=="pharmacie"){
-alert("Accès refusé");location.href="index.html";
+// Données utilisateur
+const user = JSON.parse(localStorage.getItem("user"));
+if (!user || user.role !== "pharmacie") {
+  alert("Accès refusé");
+  location.href = "index.html";
 }
-userName.textContent=user.username;
+document.getElementById("userName").textContent = user.username;
 
-factureDate.value=new Date().toISOString().split('T')[0];
-factureNumero.value="F-"+Date.now().toString().slice(-6);
+// Initialisation date et numéro
+document.getElementById("factureDate").value = new Date().toISOString().split('T')[0];
+document.getElementById("factureNumero").value = "F-" + Date.now().toString().slice(-6);
 
-function addRow(){
-const tbody=document.querySelector("#medTable tbody");
-const row=document.createElement("tr");
-row.innerHTML=`
-<td><input></td>
-<td><input type="number" value="1" onchange="calc()"></td>
-<td><input type="number" value="0" onchange="calc()"></td>
-<td class="rowTotal">0</td>
-<td><button onclick="this.parentElement.parentElement.remove();calc()">X</button></td>
-`;
-tbody.appendChild(row);
-}
-
-function calc(){
-let total=0;
-document.querySelectorAll("#medTable tbody tr").forEach(r=>{
-const q=r.children[1].querySelector("input").value;
-const p=r.children[2].querySelector("input").value;
-const t=q*p;
-r.querySelector(".rowTotal").innerText=t;
-total+=t;
-});
-grandTotal.innerText=total;
+// Fonctions existantes
+function addRow() {
+  const tbody = document.querySelector("#medTable tbody");
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td><input></td>
+    <td><input type="number" value="1" onchange="calc()"></td>
+    <td><input type="number" value="0" onchange="calc()"></td>
+    <td class="rowTotal">0</td>
+    <td><button onclick="this.parentElement.parentElement.remove();calc()">X</button></td>
+  `;
+  tbody.appendChild(row);
 }
 
-function saveFacture(){
-const items=[];
-document.querySelectorAll("#medTable tbody tr").forEach(r=>{
-items.push({
-name:r.children[0].querySelector("input").value,
-q:r.children[1].querySelector("input").value,
-p:r.children[2].querySelector("input").value,
-t:r.querySelector(".rowTotal").innerText
-});
-});
+function calc() {
+  let total = 0;
+  document.querySelectorAll("#medTable tbody tr").forEach(r => {
+    const q = r.children[1].querySelector("input").value;
+    const p = r.children[2].querySelector("input").value;
+    const t = q * p;
+    r.querySelector(".rowTotal").innerText = t;
+    total += t;
+  });
+  document.getElementById("grandTotal").innerText = total;
+}
 
-const facture={
-type:typeDoc.value,
-numero:factureNumero.value,
-client:clientNom.value,
-tel:clientTel.value,
-date:factureDate.value,
-mode:modePaiement.value,
-statut:statutPaiement.value,
-total:grandTotal.innerText,
-items
+function saveFacture() {
+  const items = [];
+  document.querySelectorAll("#medTable tbody tr").forEach(r => {
+    items.push({
+      name: r.children[0].querySelector("input").value,
+      q: r.children[1].querySelector("input").value,
+      p: r.children[2].querySelector("input").value,
+      t: r.querySelector(".rowTotal").innerText
+    });
+  });
+
+  const facture = {
+    type: document.getElementById("typeDoc").value,
+    numero: document.getElementById("factureNumero").value,
+    client: document.getElementById("clientNom").value,
+    tel: document.getElementById("clientTel").value,
+    date: document.getElementById("factureDate").value,
+    mode: document.getElementById("modePaiement").value,
+    statut: document.getElementById("statutPaiement").value,
+    total: document.getElementById("grandTotal").innerText,
+    items
+  };
+
+  let list = JSON.parse(localStorage.getItem("factures") || "[]");
+  list.unshift(facture);
+  localStorage.setItem("factures", JSON.stringify(list));
+
+  loadHistory();
+  alert("Facture enregistrée");
+}
+
+function loadHistory() {
+  const list = JSON.parse(localStorage.getItem("factures") || "[]");
+  const historyDiv = document.getElementById("historyList");
+  historyDiv.innerHTML = "";
+  list.forEach(f => {
+    const escaped = JSON.stringify(f).replace(/'/g, "\\'");
+    historyDiv.innerHTML += `
+      <div>
+        <b><i class="fa-solid fa-file-invoice"></i> ${f.type}</b> ${f.numero} — ${f.client} — <strong>${f.total} FCFA</strong>
+        <span>💳 ${f.mode}</span>
+        <span class="statusBadge ${f.statut === "payé" ? "paid" : "unpaid"}">${f.statut}</span>
+        <div>
+          <button class="btn-icon" onclick='viewPDF(${escaped})'><i class="fa-solid fa-eye"></i> Voir</button>
+          <button class="btn-icon" onclick='downloadPDF(${escaped})'><i class="fa-solid fa-download"></i> PDF</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+// ========== FONCTIONS PDF AMÉLIORÉES ==========
+function generatePDF() {
+  const facture = {
+    type: document.getElementById("typeDoc").value,
+    numero: document.getElementById("factureNumero").value,
+    client: document.getElementById("clientNom").value,
+    tel: document.getElementById("clientTel").value,
+    date: document.getElementById("factureDate").value,
+    mode: document.getElementById("modePaiement").value,
+    statut: document.getElementById("statutPaiement").value,
+    total: document.getElementById("grandTotal").innerText,
+    items: []
+  };
+  document.querySelectorAll("#medTable tbody tr").forEach(r => {
+    facture.items.push({
+      name: r.children[0].querySelector("input").value,
+      q: r.children[1].querySelector("input").value,
+      p: r.children[2].querySelector("input").value,
+      t: r.querySelector(".rowTotal").innerText
+    });
+  });
+  createStyledPDF(facture, true); // true = download
+}
+
+function downloadPDF(facture) {
+  createStyledPDF(facture, true);
+}
+
+function viewPDF(facture) {
+  createStyledPDF(facture, false); // false = open in new tab
+}
+
+function createStyledPDF(f, download = true) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  // Couleurs
+  const primaryColor = [42, 82, 152]; // #2a5298
+  const lightGray = [240, 240, 240];
+  const darkGray = [80, 80, 80];
+
+  // En-tête
+  doc.setFillColor(...primaryColor);
+  doc.rect(0, 0, 210, 30, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(22);
+  doc.setFont("helvetica", "bold");
+  doc.text("ORDO PASS PHARMACIE", 105, 18, { align: 'center' });
+  
+  // Sous-titre
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "normal");
+  doc.text(f.type, 105, 26, { align: 'center' });
+
+  // Informations facture
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "bold");
+  doc.text("N° Facture :", 20, 45);
+  doc.text("Date :", 20, 52);
+  doc.text("Client :", 20, 59);
+  doc.text("Téléphone :", 20, 66);
+  doc.setFont("helvetica", "normal");
+  doc.text(f.numero, 60, 45);
+  doc.text(f.date, 60, 52);
+  doc.text(f.client, 60, 59);
+  doc.text(f.tel, 60, 66);
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Mode de paiement :", 130, 45);
+  doc.text("Statut :", 130, 52);
+  doc.setFont("helvetica", "normal");
+  doc.text(f.mode, 170, 45);
+  doc.text(f.statut, 170, 52);
+
+  // Ligne de séparation
+  doc.setDrawColor(...primaryColor);
+  doc.setLineWidth(0.5);
+  doc.line(20, 75, 190, 75);
+
+  // En-tête du tableau
+  let y = 85;
+  doc.setFillColor(...lightGray);
+  doc.rect(20, y-5, 170, 8, 'F');
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.text("Désignation", 22, y);
+  doc.text("Qté", 100, y);
+  doc.text("Prix unit.", 120, y);
+  doc.text("Total", 160, y);
+  y += 8;
+
+  // Lignes du tableau
+  doc.setFont("helvetica", "normal");
+  let total = 0;
+  f.items.forEach(item => {
+    if (item.name) {
+      doc.text(item.name.substring(0, 30), 22, y);
+      doc.text(item.q.toString(), 102, y);
+      doc.text(item.p.toString(), 122, y);
+      doc.text(item.t.toString(), 162, y);
+      y += 7;
+      total += parseFloat(item.t) || 0;
+    }
+  });
+
+  // Total
+  y += 5;
+  doc.setDrawColor(...primaryColor);
+  doc.setLineWidth(0.3);
+  doc.line(120, y-2, 190, y-2);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text("TOTAL : " + total + " FCFA", 150, y+5);
+
+  // Pied de page
+  doc.setFontSize(9);
+  doc.setTextColor(...darkGray);
+  doc.text("Merci de votre confiance !", 105, 280, { align: 'center' });
+  doc.text("ORDO PASS - Votre santé, notre priorité", 105, 285, { align: 'center' });
+
+  if (download) {
+    doc.save(f.type + "_" + f.numero + ".pdf");
+  } else {
+    doc.output('dataurlnewwindow'); // Ouvre dans un nouvel onglet
+  }
+}
+
+// Déconnexion
+document.getElementById("logout").onclick = () => {
+  localStorage.clear();
+  location.href = "index.html";
 };
 
-let list=JSON.parse(localStorage.getItem("factures")||"[]");
-list.unshift(facture);
-localStorage.setItem("factures",JSON.stringify(list));
-
-loadHistory();
-alert("Facture enregistrée");
-}
-
-function loadHistory(){
-const list=JSON.parse(localStorage.getItem("factures")||"[]");
-historyList.innerHTML="";
-list.forEach(f=>{
-historyList.innerHTML+=`
-<div style="border:1px solid #ddd;padding:10px;margin-bottom:8px;border-radius:6px">
-<b>${f.type}</b> ${f.numero} — ${f.client} — ${f.total} FCFA
-<br>💳 ${f.mode}
-<br><span class="statusBadge ${f.statut==="payé"?"paid":"unpaid"}">${f.statut}</span>
-<br>
-<button onclick='printSaved(${JSON.stringify(f).replace(/'/g, "\\'")})'>PDF</button>
-</div>`;
-});
-}
-
-function generatePDF(){
-const {jsPDF}=window.jspdf;
-const doc=new jsPDF();
-
-doc.setFontSize(18);
-doc.text(typeDoc.value+" PHARMACIE",70,20);
-
-doc.setFontSize(12);
-doc.text("Client: "+clientNom.value,20,40);
-doc.text("Tel: "+clientTel.value,20,50);
-doc.text("Date: "+factureDate.value,150,40);
-doc.text("N°: "+factureNumero.value,150,50);
-doc.text("Paiement: "+modePaiement.value,20,60);
-doc.text("Statut: "+statutPaiement.value,150,60);
-
-let y=80;
-document.querySelectorAll("#medTable tbody tr").forEach(r=>{
-const n=r.children[0].querySelector("input").value;
-const q=r.children[1].querySelector("input").value;
-const p=r.children[2].querySelector("input").value;
-const t=r.querySelector(".rowTotal").innerText;
-doc.text(`${n} | ${q} x ${p} = ${t}`,20,y);
-y+=10;
-});
-
-y+=10;
-doc.setFontSize(14);
-doc.text("TOTAL: "+grandTotal.innerText+" FCFA",20,y);
-
-doc.save(typeDoc.value+"_"+factureNumero.value+".pdf");
-}
-
-function printSaved(f){
-const {jsPDF}=window.jspdf;
-const doc=new jsPDF();
-
-doc.setFontSize(18);
-doc.text(f.type+" PHARMACIE",70,20);
-
-doc.setFontSize(12);
-doc.text("Client: "+f.client,20,40);
-doc.text("Tel: "+f.tel,20,50);
-doc.text("Date: "+f.date,150,40);
-doc.text("N°: "+f.numero,150,50);
-doc.text("Paiement: "+f.mode,20,60);
-doc.text("Statut: "+f.statut,150,60);
-
-let y=80;
-f.items.forEach(i=>{
-doc.text(`${i.name} | ${i.q} x ${i.p} = ${i.t}`,20,y);
-y+=10;
-});
-
-y+=10;
-doc.setFontSize(14);
-doc.text("TOTAL: "+f.total+" FCFA",20,y);
-
-doc.save(f.type+"_"+f.numero+".pdf");
-}
-
-document.getElementById("logout").onclick=()=>{
-localStorage.clear();
-location.href="index.html";
-};
-
+// Charger l'historique au démarrage
 loadHistory();
 </script>
 </body>
