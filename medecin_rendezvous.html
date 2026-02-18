@@ -763,6 +763,13 @@
 
   // ================= MODALS =================
   function openAddModal() {
+    // Réinitialiser les champs nouveau patient
+    document.getElementById('newPatientName').value = '';
+    document.getElementById('newPatientAge').value = '';
+    document.getElementById('newPatientPhone').value = '';
+    document.getElementById('newPatientFields').style.display = 'none';
+    document.getElementById('patientSelect').value = '';
+
     document.getElementById("addModal").style.display = "flex";
   }
 
@@ -787,33 +794,100 @@
     document.getElementById("editModal").style.display = "none";
   }
 
-  // ================= SAVE =================
-  function saveAppointment() {
-    const patientId = document.getElementById("patientSelect").value;
-    const date = document.getElementById("selectedDateInput").value;
-    const type = document.getElementById("consultationType").value;
+  // ================= NOUVEAU : Afficher/masquer les champs nouveau patient =================
+  function toggleNewPatientFields() {
+    const select = document.getElementById('patientSelect');
+    const newPatientDiv = document.getElementById('newPatientFields');
+    
+    if (select.value === 'new') {
+      newPatientDiv.style.display = 'block';
+      // Rendre les champs requis (optionnel mais conseillé)
+      document.getElementById('newPatientName').required = true;
+      document.getElementById('newPatientAge').required = true;
+    } else {
+      newPatientDiv.style.display = 'none';
+      document.getElementById('newPatientName').required = false;
+      document.getElementById('newPatientAge').required = false;
+    }
+  }
 
-    if (!patientId || !date) {
-      alert("Veuillez remplir tous les champs");
+  // ================= NOUVEAU : Fonction saveAppointment complète avec création patient =================
+  function saveAppointment() {
+    const patientSelect = document.getElementById('patientSelect');
+    const patientId = patientSelect.value;
+    const date = document.getElementById('selectedDateInput').value;
+    const type = document.getElementById('consultationType').value;
+    const notes = document.getElementById('appointmentNotes').value;
+
+    if (!date) {
+      alert('Veuillez sélectionner une date.');
       return;
     }
 
-    const patient = patients.find(p => p.id == patientId);
+    // ===== GESTION NOUVEAU PATIENT =====
+    let selectedPatient = null;
+
+    if (patientId === 'new') {
+      // Récupérer les valeurs du nouveau patient
+      const newName = document.getElementById('newPatientName').value.trim();
+      const newAge = document.getElementById('newPatientAge').value.trim();
+      const newPhone = document.getElementById('newPatientPhone').value.trim();
+
+      if (!newName || !newAge) {
+        alert('Veuillez remplir le nom et l\'âge du nouveau patient.');
+        return;
+      }
+
+      // Créer l'objet patient
+      const newPatient = {
+        id: Date.now(),               // ID unique
+        name: newName,
+        age: parseInt(newAge),
+        phone: newPhone || ''
+      };
+
+      // Récupérer la liste existante et ajouter
+      let patients = JSON.parse(localStorage.getItem('patients')) || [];
+      patients.push(newPatient);
+      localStorage.setItem('patients', JSON.stringify(patients));
+
+      selectedPatient = newPatient;
+    } else {
+      // Patient existant
+      if (!patientId) {
+        alert('Veuillez sélectionner un patient.');
+        return;
+      }
+      const patients = JSON.parse(localStorage.getItem('patients')) || [];
+      selectedPatient = patients.find(p => p.id == patientId);
+      if (!selectedPatient) {
+        alert('Patient introuvable.');
+        return;
+      }
+    }
+
+    // ===== CRÉATION DU RENDEZ-VOUS =====
+    // Ici, on fixe une heure par défaut (09:00) car vous n'avez pas encore intégré la sélection d'heure.
+    // Vous pourrez plus tard utiliser un créneau sélectionné dans #timeSlots.
+    const start = date + 'T09:00:00';
+    const end = date + 'T09:30:00';
 
     const newAppointment = {
-      id: generateId(),
-      patientId: patient.id,
-      patientName: patient.name,
-      start: date + "T09:00:00",
-      end: date + "T09:30:00",
-      status: "pending",
+      id: Date.now() + 1, // pour éviter le même ID que le patient
+      patientId: selectedPatient.id,
+      patientName: selectedPatient.name,
+      start: start,
+      end: end,
+      status: 'pending',
       type: type,
-      notes: ""
+      notes: notes || ''
     };
 
+    let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
     appointments.push(newAppointment);
-    localStorage.setItem("appointments", JSON.stringify(appointments));
+    localStorage.setItem('appointments', JSON.stringify(appointments));
 
+    // Recharger la page pour mettre à jour le calendrier et la liste des patients
     location.reload();
   }
 
