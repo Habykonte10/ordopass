@@ -1,57 +1,41 @@
-const express = require("express");
-const router = express.Router();
-const Ordonnance = require("../models/Ordonnance");
-
-/* CREATE ORDONNANCE (MEDECIN) */
 router.post("/", async (req, res) => {
   try {
+    const {
+      patientNom,
+      age,
+      genre,
+      adresse,
+      medicaments,
+      medecinNom,
+      pharmacieId,
+      pharmacieNom
+    } = req.body;
+
     const ordonnance = new Ordonnance({
-      code: "ORD-" + Date.now(),
+      code: "ORD" + Date.now(),
+      patientNom,
+      age,
+      genre,
+      adresse,
+      medicaments,
+      statut: "envoyee",
+      createdAt: new Date(),
 
       medecin: {
-        id: req.body.medecinId,
-        nom: req.body.medecinNom
+        nom: medecinNom
       },
 
       pharmacie: {
-        id: req.body.pharmacieId,
-        nom: req.body.pharmacieNom
-      },
-
-      patientNom: req.body.patientNom,
-      medicaments: req.body.medicaments
+        id: pharmacieId,
+        nom: pharmacieNom
+      }
     });
 
     await ordonnance.save();
-    res.json({ message: "✅ Ordonnance envoyée" });
+    res.json(ordonnance);
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ error: "Erreur création ordonnance" });
   }
 });
-
-/* ORDONNANCES D’UNE PHARMACIE */
-router.get("/pharmacie/:id", async (req, res) => {
-  try {
-    const ordonnances = await Ordonnance.find({
-      "pharmacie.id": req.params.id
-    }).sort({ createdAt: -1 });
-
-    res.json(ordonnances);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/* UPDATE STATUT */
-router.put("/:id/status", async (req, res) => {
-  try {
-    await Ordonnance.findByIdAndUpdate(req.params.id, {
-      statut: req.body.statut
-    });
-    res.json({ message: "Statut mis à jour" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-module.exports = router;
