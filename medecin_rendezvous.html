@@ -12,7 +12,7 @@
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet"/>
   
   <style>
-    /* ✅ VOS STYLES EXISTANTS POUR LES RENDEZ-VOUS */
+    /* Vos styles existants (inchangés) */
     * {
       margin: 0;
       padding: 0;
@@ -457,7 +457,7 @@
 
 <body class="dashboard-page">
 
-  <!-- ✅ SIDEBAR FIXE IDENTIQUE -->
+  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="logo">
       <i class="fa-solid fa-notes-medical"></i>
@@ -477,9 +477,8 @@
     </nav>
   </aside>
 
-  <!-- ✅ CONTENU PRINCIPAL -->
+  <!-- MAIN -->
   <main class="main-area">
-    <!-- TOPBAR -->
     <header class="topbar">
       <h1><i class="fa-solid fa-calendar-check"></i> Gestion des Rendez-vous</h1>
       <div class="user-info">
@@ -488,9 +487,7 @@
       </div>
     </header>
 
-    <!-- CONTENU DÉFILANT -->
     <section class="content">
-      <!-- ✅ VOTRE CONTENU EXISTANT POUR LES RENDEZ-VOUS -->
       <!-- Filtres -->
       <div class="filters">
         <div class="filter-group">
@@ -517,8 +514,7 @@
     </section>
   </main>
 
-  <!-- ✅ VOS MODALS ET CODE JAVASCRIPT EXISTANTS -->
-  <!-- Modal pour ajouter un rendez-vous -->
+  <!-- MODAL ADD -->
   <div id="addModal" class="modal">
     <div class="modal-content">
       <h3>Nouveau Rendez-vous</h3>
@@ -549,7 +545,7 @@
         </select>
       </div>
 
-      <!-- Champs pour nouveau patient -->
+      <!-- Champs nouveau patient -->
       <div id="newPatientFields" style="display: none;">
         <div class="form-group">
           <label class="form-label">Nom complet *</label>
@@ -589,13 +585,13 @@
     </div>
   </div>
 
-  <!-- Modal pour voir/modifier un rendez-vous -->
+  <!-- MODAL EDIT -->
   <div id="editModal" class="modal">
     <div class="modal-content">
       <h3>Détails du Rendez-vous</h3>
       
       <div class="event-details" id="eventDetails">
-        <!-- Les détails seront chargés dynamiquement -->
+        <!-- Dynamique -->
       </div>
       
       <div class="form-group">
@@ -624,13 +620,13 @@
     </div>
   </div>
 
-  <!-- Modal pour voir les rendez-vous d'un jour -->
+  <!-- MODAL DAY VIEW -->
   <div id="dayViewModal" class="modal">
     <div class="modal-content">
       <h3>Rendez-vous du <span id="dayViewDate"></span></h3>
       
       <div id="dayAppointmentsList">
-        <!-- Les rendez-vous seront chargés dynamiquement -->
+        <!-- Dynamique -->
       </div>
       
       <div class="modal-buttons">
@@ -642,269 +638,252 @@
     </div>
   </div>
 
-  <!-- FullCalendar JS -->
+  <!-- FullCalendar JS (une seule fois) -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
-<script>
-  let calendar;
-  let selectedDate = null;
-  let selectedEvent = null;
-
-  let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
-  let patients = JSON.parse(localStorage.getItem('patients')) || [];
-
-  document.addEventListener('DOMContentLoaded', function () {
-    console.log("✅ Page chargée");
-
-    initializeTestData();
-    loadPatients();
-    loadAppointments();
-    initializeCalendar();
-    setupEventListeners();
-  });
-
-  // ================= LOGOUT =================
-  function setupEventListeners() {
-    const logoutBtn = document.getElementById("logout");
-
-    if (logoutBtn) {
-      logoutBtn.addEventListener("click", function (e) {
-        e.preventDefault();
-
-        if (confirm("Êtes-vous sûr de vouloir vous déconnecter ?")) {
-          localStorage.removeItem("currentUser");
-          window.location.href = "login.html";
-        }
-      });
-    }
-  }
-
-  // ================= TEST DATA =================
-  function initializeTestData() {
-    if (patients.length === 0) {
-      patients = [
-        { id: 1, name: "Awa Diop", age: 32, phone: "771234567" },
-        { id: 2, name: "Leslie Alexander", age: 28, phone: "779876543" }
-      ];
-      localStorage.setItem("patients", JSON.stringify(patients));
-    }
-
-    if (appointments.length === 0) {
-      const today = new Date().toISOString().split("T")[0];
-
-      appointments = [
-        {
-          id: generateId(),
-          patientId: 1,
-          patientName: "Awa Diop",
-          start: today + "T10:00:00",
-          end: today + "T10:30:00",
-          status: "confirmed",
-          type: "Consultation standard",
-          notes: "Fièvre"
-        }
-      ];
-      localStorage.setItem("appointments", JSON.stringify(appointments));
-    }
-  }
-
-  // ================= CALENDAR =================
-  function initializeCalendar() {
-    const calendarEl = document.getElementById("calendar");
-
-    calendar = new FullCalendar.Calendar(calendarEl, {
-      initialView: "dayGridMonth",
-      locale: "fr",
-      selectable: true,
-
-      events: appointments.map(a => ({
-        id: a.id,
-        title: a.patientName,
-        start: a.start,
-        end: a.end,
-        className: a.status
-      })),
-
-      dateClick: function (info) {
-        selectedDate = info.dateStr;
-        openAddModal();
-      },
-
-      eventClick: function (info) {
-        selectedEvent = info.event;
-        openEditModal(info.event.id);
-      }
-    });
-
-    calendar.render();
-  }
-
-  function loadAppointments() {
-    appointments = JSON.parse(localStorage.getItem("appointments")) || [];
-  }
-
-  function loadPatients() {
-    const patientSelect = document.getElementById("patientSelect");
-    const patientFilter = document.getElementById("patientFilter");
-
-    patients.forEach(p => {
-      const opt1 = document.createElement("option");
-      opt1.value = p.id;
-      opt1.textContent = p.name;
-      patientSelect.appendChild(opt1);
-
-      const opt2 = document.createElement("option");
-      opt2.value = p.id;
-      opt2.textContent = p.name;
-      patientFilter.appendChild(opt2);
-    });
-  }
-
-  // ================= MODALS =================
-  function openAddModal() {
-    // Réinitialiser les champs nouveau patient
-    document.getElementById('newPatientName').value = '';
-    document.getElementById('newPatientAge').value = '';
-    document.getElementById('newPatientPhone').value = '';
-    document.getElementById('newPatientFields').style.display = 'none';
-    document.getElementById('patientSelect').value = '';
-
-    document.getElementById("addModal").style.display = "flex";
-  }
-
-  function closeAddModal() {
-    document.getElementById("addModal").style.display = "none";
-  }
-
-  function openEditModal(id) {
-    const appointment = appointments.find(a => a.id == id);
-
-    document.getElementById("eventDetails").innerHTML = `
-      <p><strong>Patient :</strong> ${appointment.patientName}</p>
-      <p><strong>Date :</strong> ${appointment.start}</p>
-      <p><strong>Type :</strong> ${appointment.type}</p>
-      <p><strong>Statut :</strong> ${appointment.status}</p>
-    `;
-
-    document.getElementById("editModal").style.display = "flex";
-  }
-
-  function closeEditModal() {
-    document.getElementById("editModal").style.display = "none";
-  }
-
-  // ================= NOUVEAU : Afficher/masquer les champs nouveau patient =================
-  function toggleNewPatientFields() {
-    const select = document.getElementById('patientSelect');
-    const newPatientDiv = document.getElementById('newPatientFields');
-    
-    if (select.value === 'new') {
-      newPatientDiv.style.display = 'block';
-      // Rendre les champs requis (optionnel mais conseillé)
-      document.getElementById('newPatientName').required = true;
-      document.getElementById('newPatientAge').required = true;
-    } else {
-      newPatientDiv.style.display = 'none';
-      document.getElementById('newPatientName').required = false;
-      document.getElementById('newPatientAge').required = false;
-    }
-  }
-
-  // ================= NOUVEAU : Fonction saveAppointment complète avec création patient =================
-  function saveAppointment() {
-    const patientSelect = document.getElementById('patientSelect');
-    const patientId = patientSelect.value;
-    const date = document.getElementById('selectedDateInput').value;
-    const type = document.getElementById('consultationType').value;
-    const notes = document.getElementById('appointmentNotes').value;
-
-    if (!date) {
-      alert('Veuillez sélectionner une date.');
-      return;
-    }
-
-    // ===== GESTION NOUVEAU PATIENT =====
-    let selectedPatient = null;
-
-    if (patientId === 'new') {
-      // Récupérer les valeurs du nouveau patient
-      const newName = document.getElementById('newPatientName').value.trim();
-      const newAge = document.getElementById('newPatientAge').value.trim();
-      const newPhone = document.getElementById('newPatientPhone').value.trim();
-
-      if (!newName || !newAge) {
-        alert('Veuillez remplir le nom et l\'âge du nouveau patient.');
-        return;
-      }
-
-      // Créer l'objet patient
-      const newPatient = {
-        id: Date.now(),               // ID unique
-        name: newName,
-        age: parseInt(newAge),
-        phone: newPhone || ''
-      };
-
-      // Récupérer la liste existante et ajouter
-      let patients = JSON.parse(localStorage.getItem('patients')) || [];
-      patients.push(newPatient);
-      localStorage.setItem('patients', JSON.stringify(patients));
-
-      selectedPatient = newPatient;
-    } else {
-      // Patient existant
-      if (!patientId) {
-        alert('Veuillez sélectionner un patient.');
-        return;
-      }
-      const patients = JSON.parse(localStorage.getItem('patients')) || [];
-      selectedPatient = patients.find(p => p.id == patientId);
-      if (!selectedPatient) {
-        alert('Patient introuvable.');
-        return;
-      }
-    }
-
-    // ===== CRÉATION DU RENDEZ-VOUS =====
-    // Ici, on fixe une heure par défaut (09:00) car vous n'avez pas encore intégré la sélection d'heure.
-    // Vous pourrez plus tard utiliser un créneau sélectionné dans #timeSlots.
-    const start = date + 'T09:00:00';
-    const end = date + 'T09:30:00';
-
-    const newAppointment = {
-      id: Date.now() + 1, // pour éviter le même ID que le patient
-      patientId: selectedPatient.id,
-      patientName: selectedPatient.name,
-      start: start,
-      end: end,
-      status: 'pending',
-      type: type,
-      notes: notes || ''
-    };
+  <script>
+    let calendar;
+    let selectedDate = null;
+    let selectedEvent = null;
 
     let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
-    appointments.push(newAppointment);
-    localStorage.setItem('appointments', JSON.stringify(appointments));
+    let patients = JSON.parse(localStorage.getItem('patients')) || [];
 
-    // Recharger la page pour mettre à jour le calendrier et la liste des patients
-    location.reload();
-  }
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log("✅ Page chargée");
 
-  // ================= DELETE =================
-  function deleteAppointment() {
-    if (!confirm("Supprimer ce rendez-vous ?")) return;
+      initializeTestData();
+      loadPatients();
+      loadAppointments();
+      initializeCalendar();
+      setupEventListeners();
+    });
 
-    appointments = appointments.filter(a => a.id != selectedEvent.id);
-    localStorage.setItem("appointments", JSON.stringify(appointments));
-    location.reload();
-  }
+    // ================= LOGOUT =================
+    function setupEventListeners() {
+      const logoutBtn = document.getElementById("logout");
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          if (confirm("Êtes-vous sûr de vouloir vous déconnecter ?")) {
+            localStorage.removeItem("currentUser");
+            window.location.href = "login.html";
+          }
+        });
+      }
+    }
 
-  // ================= UTILS =================
-  function generateId() {
-    return Date.now();
-  }
-</script>
+    // ================= TEST DATA =================
+    function initializeTestData() {
+      if (patients.length === 0) {
+        patients = [
+          { id: 1, name: "Awa Diop", age: 32, phone: "771234567" },
+          { id: 2, name: "Leslie Alexander", age: 28, phone: "779876543" }
+        ];
+        localStorage.setItem("patients", JSON.stringify(patients));
+      }
+
+      if (appointments.length === 0) {
+        const today = new Date().toISOString().split("T")[0];
+        appointments = [
+          {
+            id: generateId(),
+            patientId: 1,
+            patientName: "Awa Diop",
+            start: today + "T10:00:00",
+            end: today + "T10:30:00",
+            status: "confirmed",
+            type: "Consultation standard",
+            notes: "Fièvre"
+          }
+        ];
+        localStorage.setItem("appointments", JSON.stringify(appointments));
+      }
+    }
+
+    // ================= CALENDAR =================
+    function initializeCalendar() {
+      const calendarEl = document.getElementById("calendar");
+      calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: "dayGridMonth",
+        locale: "fr",
+        selectable: true,
+        events: appointments.map(a => ({
+          id: a.id,
+          title: a.patientName,
+          start: a.start,
+          end: a.end,
+          className: a.status
+        })),
+        dateClick: function (info) {
+          selectedDate = info.dateStr;
+          openAddModal();
+        },
+        eventClick: function (info) {
+          selectedEvent = info.event;
+          openEditModal(info.event.id);
+        }
+      });
+      calendar.render();
+    }
+
+    function loadAppointments() {
+      appointments = JSON.parse(localStorage.getItem("appointments")) || [];
+    }
+
+    function loadPatients() {
+      const patientSelect = document.getElementById("patientSelect");
+      const patientFilter = document.getElementById("patientFilter");
+      patients.forEach(p => {
+        const opt1 = document.createElement("option");
+        opt1.value = p.id;
+        opt1.textContent = p.name;
+        patientSelect.appendChild(opt1);
+        const opt2 = document.createElement("option");
+        opt2.value = p.id;
+        opt2.textContent = p.name;
+        patientFilter.appendChild(opt2);
+      });
+    }
+
+    // ================= MODALS =================
+    function openAddModal() {
+      // Réinitialiser les champs nouveau patient
+      document.getElementById('newPatientName').value = '';
+      document.getElementById('newPatientAge').value = '';
+      document.getElementById('newPatientPhone').value = '';
+      document.getElementById('newPatientFields').style.display = 'none';
+      document.getElementById('patientSelect').value = '';
+      document.getElementById("addModal").style.display = "flex";
+    }
+
+    function closeAddModal() {
+      document.getElementById("addModal").style.display = "none";
+    }
+
+    function openEditModal(id) {
+      const appointment = appointments.find(a => a.id == id);
+      document.getElementById("eventDetails").innerHTML = `
+        <p><strong>Patient :</strong> ${appointment.patientName}</p>
+        <p><strong>Date :</strong> ${appointment.start}</p>
+        <p><strong>Type :</strong> ${appointment.type}</p>
+        <p><strong>Statut :</strong> ${appointment.status}</p>
+      `;
+      document.getElementById("editModal").style.display = "flex";
+    }
+
+    function closeEditModal() {
+      document.getElementById("editModal").style.display = "none";
+    }
+
+    // ================= FONCTION POUR LE BOUTON AUJOURD'HUI =================
+    function useTodayDate() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('selectedDateInput').value = today;
+    }
+
+    // ================= AFFICHER / MASQUER CHAMPS NOUVEAU PATIENT =================
+    function toggleNewPatientFields() {
+      const select = document.getElementById('patientSelect');
+      const newPatientDiv = document.getElementById('newPatientFields');
+      
+      if (select.value === 'new') {
+        newPatientDiv.style.display = 'block';
+        document.getElementById('newPatientName').required = true;
+        document.getElementById('newPatientAge').required = true;
+      } else {
+        newPatientDiv.style.display = 'none';
+        document.getElementById('newPatientName').required = false;
+        document.getElementById('newPatientAge').required = false;
+      }
+    }
+
+    // ================= SAUVEGARDE RENDEZ-VOUS (avec création patient) =================
+    function saveAppointment() {
+      const patientSelect = document.getElementById('patientSelect');
+      const patientId = patientSelect.value;
+      const date = document.getElementById('selectedDateInput').value;
+      const type = document.getElementById('consultationType').value;
+      const notes = document.getElementById('appointmentNotes').value;
+
+      if (!date) {
+        alert('Veuillez sélectionner une date.');
+        return;
+      }
+
+      // GESTION NOUVEAU PATIENT
+      let selectedPatient = null;
+
+      if (patientId === 'new') {
+        const newName = document.getElementById('newPatientName').value.trim();
+        const newAge = document.getElementById('newPatientAge').value.trim();
+        const newPhone = document.getElementById('newPatientPhone').value.trim();
+
+        if (!newName || !newAge) {
+          alert('Veuillez remplir le nom et l\'âge du nouveau patient.');
+          return;
+        }
+
+        const newPatient = {
+          id: Date.now(),
+          name: newName,
+          age: parseInt(newAge),
+          phone: newPhone || ''
+        };
+
+        let patients = JSON.parse(localStorage.getItem('patients')) || [];
+        patients.push(newPatient);
+        localStorage.setItem('patients', JSON.stringify(patients));
+
+        selectedPatient = newPatient;
+      } else {
+        if (!patientId) {
+          alert('Veuillez sélectionner un patient.');
+          return;
+        }
+        const patients = JSON.parse(localStorage.getItem('patients')) || [];
+        selectedPatient = patients.find(p => p.id == patientId);
+        if (!selectedPatient) {
+          alert('Patient introuvable.');
+          return;
+        }
+      }
+
+      // CRÉATION DU RENDEZ-VOUS (heure par défaut 09:00)
+      const start = date + 'T09:00:00';
+      const end = date + 'T09:30:00';
+
+      const newAppointment = {
+        id: Date.now() + 1,
+        patientId: selectedPatient.id,
+        patientName: selectedPatient.name,
+        start: start,
+        end: end,
+        status: 'pending',
+        type: type,
+        notes: notes || ''
+      };
+
+      let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+      appointments.push(newAppointment);
+      localStorage.setItem('appointments', JSON.stringify(appointments));
+
+      location.reload(); // Recharge pour mettre à jour le calendrier et les listes
+    }
+
+    // ================= SUPPRESSION =================
+    function deleteAppointment() {
+      if (!confirm("Supprimer ce rendez-vous ?")) return;
+      appointments = appointments.filter(a => a.id != selectedEvent.id);
+      localStorage.setItem("appointments", JSON.stringify(appointments));
+      location.reload();
+    }
+
+    // ================= UTILS =================
+    function generateId() {
+      return Date.now();
+    }
+  </script>
   
 </body>
 </html>
