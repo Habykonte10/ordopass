@@ -1205,37 +1205,77 @@ function closeModal() {
   selectedPharmacie = null;
 }
 
-function sendToPharmacie() {
+// ===== Envoyer l'ordonnance à la pharmacie (version avec API) =====
+async function sendToPharmacie() {
   if (!selectedPharmacie || !currentOrdonnance) {
     showNotification('Veuillez sélectionner une pharmacie', 'error');
     return;
   }
-  
-  // Récupérer la pharmacie
+
   const pharmacie = allPharmacies.find(p => p.id === selectedPharmacie);
-  
   if (!pharmacie) {
     showNotification('Pharmacie non trouvée', 'error');
     return;
   }
-  
-  // Mettre à jour le statut de l'ordonnance
-  currentOrdonnance.statut = 'envoyee';
-  currentOrdonnance.pharmacieId = selectedPharmacie;
-  currentOrdonnance.pharmacieNom = pharmacie.nom;
-  currentOrdonnance.envoyeeLe = new Date().toISOString();
-  
-  // Sauvegarder les modifications
-  let ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
-  const index = ordonnances.findIndex(o => o.id === currentOrdonnanceId);
-  if (index !== -1) {
-    ordonnances[index] = currentOrdonnance;
-    localStorage.setItem('ordonnances', JSON.stringify(ordonnances));
+
+  // Préparer les données pour l'API (sans le code, le backend en générera un)
+  const ordonnanceData = {
+    patientNom: currentOrdonnance.patient,
+    age: currentOrdonnance.age,
+    genre: currentOrdonnance.genre,
+    adresse: currentOrdonnance.adresse,
+    medicaments: currentOrdonnance.medicaments,
+    medecinNom: currentOrdonnance.medecin,
+    pharmacieId: pharmacie.id,
+    pharmacieNom: pharmacie.nom
+    // Le code n'est pas envoyé ; le backend générera "ORD" + Date.now()
+  };
+
+  try {
+    // Afficher un indicateur de chargement (optionnel)
+    document.getElementById('confirmSendBtn').disabled = true;
+    document.getElementById('confirmSendBtn').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Envoi...';
+
+    const response = await fetch('/api/ordonnances', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(ordonnanceData)
+    });
+
+    if (!response.ok) {
+      throw new Error('Erreur lors de l\'envoi à la pharmacie');
+    }
+
+    const savedOrdonnance = await response.json();
+
+    // Mettre à jour le statut local de l'ordonnance
+    currentOrdonnance.statut = 'envoyee';
+    currentOrdonnance.pharmacieId = selectedPharmacie;
+    currentOrdonnance.pharmacieNom = pharmacie.nom;
+    currentOrdonnance.envoyeeLe = new Date().toISOString();
+    // Optionnel : conserver le code généré par le backend si souhaité
+    // currentOrdonnance.codeBackend = savedOrdonnance.code;
+
+    // Sauvegarder les modifications dans le localStorage
+    let ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
+    const index = ordonnances.findIndex(o => o.id === currentOrdonnanceId);
+    if (index !== -1) {
+      ordonnances[index] = currentOrdonnance;
+      localStorage.setItem('ordonnances', JSON.stringify(ordonnances));
+    }
+
+    showNotification(`Ordonnance envoyée avec succès à ${pharmacie.nom}`, 'success');
+    closeModal();
+    loadOrdonnances(); // Recharger la liste pour voir le nouveau statut
+
+  } catch (error) {
+    console.error('Erreur:', error);
+    showNotification('Erreur lors de l\'envoi à la pharmacie', 'error');
+  } finally {
+    // Rétablir le bouton
+    document.getElementById('confirmSendBtn').disabled = false;
+    document.getElementById('confirmSendBtn').innerHTML = '<i class="fa-solid fa-paper-plane"></i> Envoyer';
   }
-  
-  showNotification(`Ordonnance envoyée à ${pharmacie.nom}`, 'success');
-  closeModal();
-  loadOrdonnances();
 }
 
 /* ===== Envoyer une ordonnance existante à une pharmacie ===== */
