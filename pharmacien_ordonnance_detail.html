@@ -2,253 +2,70 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Détails Ordonnance - OrdoPass</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    body { 
-      background: #f5f7fa; 
-      color: #333; 
-      padding: 20px;
-      min-height: 100vh;
-    }
-    .prescription-details {
-      max-width: 1000px; 
-      margin: 0 auto; 
-      background: white;
-      border-radius: 12px; 
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-    }
-    .header {
-      background: linear-gradient(135deg, #2a5298, #3498db);
-      color: white; 
-      padding: 30px; 
-      text-align: center;
-      position: relative;
-    }
-    .header h1 { 
-      margin-bottom: 10px; 
-      font-size: 2em; 
-    }
-    .header .status-badge {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: bold;
-    }
-    .status-envoye { background: #ff9800; }
-    .status-en_cours { background: #2196f3; }
-    .status-pret { background: #4caf50; }
-    .status-delivree { background: #9c27b0; }
-    .content { padding: 30px; }
-    .section {
-      margin-bottom: 30px; 
-      padding-bottom: 20px;
-      border-bottom: 1px solid #eee;
-    }
-    .section:last-child {
-      border-bottom: none;
-    }
-    .section h3 {
-      color: #2a5298; 
-      margin-bottom: 15px; 
-      font-size: 1.3em;
-      display: flex; 
-      align-items: center; 
-      gap: 10px;
-    }
-    .info-grid {
-      display: grid; 
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-      gap: 15px;
-    }
-    .info-item { 
-      padding: 10px 0;
-    }
-    .info-item strong { 
-      color: #555; 
-      margin-bottom: 5px; 
-      display: block; 
-      font-size: 0.9em;
-    }
-    .info-item span {
-      font-size: 1.1em;
-      color: #333;
-      font-weight: 500;
-    }
-    .medicament-item {
-      background: #f8f9fa; 
-      padding: 20px; 
-      border-radius: 8px;
-      margin-bottom: 15px; 
-      border-left: 4px solid #3498db;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-    .medicament-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-    .medicament-header h4 {
-      color: #2a5298;
-      font-size: 1.2em;
-      margin: 0;
-    }
-    .medicament-number {
-      background: #e3f2fd;
-      color: #1976d2;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-    .medicament-details {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 10px;
-    }
-    .medicament-remarque {
-      margin-top: 10px;
-      padding: 10px;
-      background: #fff3cd;
-      border-left: 4px solid #ffc107;
-      border-radius: 4px;
-      font-size: 0.9em;
-    }
-    .instructions {
-      background: #e8f4fd; 
-      padding: 20px; 
-      border-radius: 8px;
-      font-size: 1em;
-      line-height: 1.6;
-    }
-    .actions {
-      display: flex; 
-      gap: 10px; 
-      justify-content: center; 
-      margin-top: 30px;
-      padding: 20px;
-      border-top: 1px solid #eee;
-    }
-    .btn { 
-      padding: 12px 25px; 
-      border-radius: 6px; 
-      cursor: pointer; 
-      border: none;
-      font-weight: 600;
-      font-size: 14px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.3s ease;
-    }
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    .btn-primary { 
-      background: #2a5298; 
-      color: white; 
-    }
-    .btn-primary:hover {
-      background: #1a4288;
-    }
-    .btn-warning { 
-      background: #ff9800; 
-      color: white; 
-    }
-    .btn-warning:hover {
-      background: #e68900;
-    }
-    .btn-success { 
-      background: #28a745; 
-      color: white; 
-    }
-    .btn-success:hover {
-      background: #218838;
-    }
-    .btn-danger { 
-      background: #dc3545; 
-      color: white; 
-    }
-    .btn-danger:hover {
-      background: #c82333;
-    }
-    .btn-info { 
-      background: #17a2b8; 
-      color: white; 
-    }
-    .btn-info:hover {
-      background: #138496;
-    }
-    .btn-outline { 
-      background: white;
-      border: 2px solid #2a5298; 
-      color: #2a5298; 
-    }
-    .btn-outline:hover {
-      background: #2a5298;
-      color: white;
-    }
-    .empty-state {
-      text-align: center; 
-      padding: 40px 20px; 
-      color: #666;
-      background: #f9f9f9;
-      border-radius: 8px;
-    }
-    .empty-state i {
-      font-size: 48px;
-      color: #ccc;
-      margin-bottom: 15px;
-    }
-    .loading {
-      text-align: center;
-      padding: 50px;
-      color: #666;
-    }
-    .error-message {
-      text-align: center;
-      padding: 40px;
-      background: #f8d7da;
-      border-radius: 8px;
-      color: #721c24;
-      border-left: 4px solid #f5c6cb;
-    }
-    .footer {
-      background: #f8f9fa;
-      padding: 20px;
-      border-top: 1px solid #eee;
-    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+    body { background:#f5f7fa; color:#333; padding:20px; min-height:100vh; }
+    .prescription-details { max-width:1000px; margin:0 auto; background:white; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1); overflow:hidden; }
+    .header { background:linear-gradient(135deg,#2a5298,#3498db); color:white; padding:30px; text-align:center; position:relative; }
+    .header h1 { margin-bottom:10px; font-size:2em; }
+    .header .status-badge { position:absolute; top:20px; right:20px; padding:5px 15px; border-radius:20px; font-size:14px; font-weight:bold; }
+    .status-envoyee { background:#ff9800; }
+    .status-en_cours { background:#2196f3; }
+    .status-pret { background:#4caf50; }
+    .status-delivree { background:#9c27b0; }
+    .content { padding:30px; }
+    .section { margin-bottom:30px; padding-bottom:20px; border-bottom:1px solid #eee; }
+    .section:last-child { border-bottom:none; }
+    .section h3 { color:#2a5298; margin-bottom:15px; font-size:1.3em; display:flex; align-items:center; gap:10px; }
+    .info-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:15px; }
+    .info-item { padding:10px 0; }
+    .info-item strong { color:#555; margin-bottom:5px; display:block; font-size:0.9em; }
+    .info-item span { font-size:1.1em; color:#333; font-weight:500; }
+    .medicament-item { background:#f8f9fa; padding:20px; border-radius:8px; margin-bottom:15px; border-left:4px solid #3498db; box-shadow:0 2px 5px rgba(0,0,0,0.05); }
+    .medicament-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+    .medicament-header h4 { color:#2a5298; font-size:1.2em; margin:0; }
+    .medicament-number { background:#e3f2fd; color:#1976d2; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:bold; }
+    .medicament-details { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; }
+    .medicament-remarque { margin-top:10px; padding:10px; background:#fff3cd; border-left:4px solid #ffc107; border-radius:4px; font-size:0.9em; }
+    .instructions { background:#e8f4fd; padding:20px; border-radius:8px; font-size:1em; line-height:1.6; }
+    .actions { display:flex; gap:10px; justify-content:center; margin-top:30px; padding:20px; border-top:1px solid #eee; }
+    .btn { padding:12px 25px; border-radius:6px; cursor:pointer; border:none; font-weight:600; font-size:14px; display:inline-flex; align-items:center; gap:8px; transition:all 0.3s ease; }
+    .btn:hover { transform:translateY(-2px); box-shadow:0 4px 8px rgba(0,0,0,0.1); }
+    .btn-primary { background:#2a5298; color:white; }
+    .btn-primary:hover { background:#1a4288; }
+    .btn-warning { background:#ff9800; color:white; }
+    .btn-warning:hover { background:#e68900; }
+    .btn-success { background:#28a745; color:white; }
+    .btn-success:hover { background:#218838; }
+    .btn-danger { background:#dc3545; color:white; }
+    .btn-danger:hover { background:#c82333; }
+    .btn-info { background:#17a2b8; color:white; }
+    .btn-info:hover { background:#138496; }
+    .btn-outline { background:white; border:2px solid #2a5298; color:#2a5298; }
+    .btn-outline:hover { background:#2a5298; color:white; }
+    .empty-state { text-align:center; padding:40px 20px; color:#666; background:#f9f9f9; border-radius:8px; }
+    .empty-state i { font-size:48px; color:#ccc; margin-bottom:15px; }
+    .loading { text-align:center; padding:50px; color:#666; }
+    .error-message { text-align:center; padding:40px; background:#f8d7da; border-radius:8px; color:#721c24; border-left:4px solid #f5c6cb; }
+    .footer { background:#f8f9fa; padding:20px; border-top:1px solid #eee; }
   </style>
 </head>
-
 <body>
   <div class="prescription-details" id="prescriptionContainer">
-    <!-- Le contenu sera chargé dynamiquement -->
     <div class="loading" id="loadingState">
       <i class="fas fa-spinner fa-spin fa-3x"></i>
-      <p style="margin-top: 20px; font-size: 1.1em;">Chargement des détails de l'ordonnance...</p>
+      <p style="margin-top:20px; font-size:1.1em;">Chargement des détails de l'ordonnance...</p>
     </div>
   </div>
 
 <script>
 let currentPrescription = null;
+const API_URL = window.location.origin;
 
-// Fonction principale de chargement
 async function loadPrescription() {
   const params = new URLSearchParams(location.search);
   const id = params.get("id");
@@ -259,392 +76,210 @@ async function loadPrescription() {
   }
 
   try {
-    // Récupérer l'utilisateur connecté
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser) {
-      showError("Vous devez être connecté pour voir les détails de l'ordonnance.");
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user || user.role !== "pharmacie") {
+      showError("Accès réservé aux pharmaciens. Veuillez vous connecter.");
       return;
     }
 
-    console.log(`🔍 Chargement ordonnance ${id} pour pharmacie: ${currentUser.nom}`);
-    
-    let response;
-    
-    // 1. Essayer d'abord la route spécifique pharmacien
-    try {
-      response = await fetch(`/api/pharmacien/ordonnances/${id}`);
-      
-      if (!response.ok) {
-        // 2. Si échec, essayer la route générale
-        console.log("⚠️ Route pharmacien échouée, tentative route générale...");
-        response = await fetch(`/api/ordonnances/${id}`);
-      }
-    } catch (apiError) {
-      console.error("❌ Erreur API:", apiError);
-      // Continuer avec localStorage
+    console.log(`🔍 Chargement ordonnance ${id} pour pharmacie: ${user.username}`);
+
+    // Utiliser la route générique /api/ordonnances/:id
+    const response = await fetch(`${API_URL}/api/ordonnances/${id}`);
+    if (!response.ok) {
+      throw new Error(`Erreur API: ${response.status}`);
+    }
+    currentPrescription = await response.json();
+    console.log("✅ Ordonnance chargée depuis l'API:", currentPrescription);
+
+    // Vérification optionnelle que l'ordonnance est destinée à cette pharmacie
+    if (currentPrescription.pharmacie && currentPrescription.pharmacie.nom !== user.username) {
+      console.warn(`⚠️ Ordonnance pour une autre pharmacie: ${currentPrescription.pharmacie.nom} vs ${user.username}`);
+      showWarning(`Cette ordonnance est destinée à la pharmacie: ${currentPrescription.pharmacie.nom}`);
     }
 
-    if (response && response.ok) {
-      currentPrescription = await response.json();
-      console.log("✅ Ordonnance chargée depuis l'API:", currentPrescription);
-      
-      // Vérifier que l'ordonnance est bien pour cette pharmacie
-      if (currentUser.role === "pharmacien" && 
-          currentPrescription.pharmacieNom !== currentUser.nom) {
-        console.warn(`⚠️ Ordonnance pour une autre pharmacie: ${currentPrescription.pharmacieNom} vs ${currentUser.nom}`);
-        showWarning(`Cette ordonnance est destinée à la pharmacie: ${currentPrescription.pharmacieNom}`);
-      }
-      
-      displayPrescription();
-    } else {
-      throw new Error(`Erreur API: ${response ? response.status : 'Pas de réponse'}`);
-    }
-    
+    displayPrescription();
+
   } catch (error) {
     console.error("❌ Erreur chargement API:", error);
-    
-    // Fallback: localStorage
+
+    // Fallback localStorage (au cas où)
     console.log("🔄 Tentative de chargement depuis localStorage...");
     const list = JSON.parse(localStorage.getItem("ordonnances")) || [];
-    
-    // Chercher par ID, _id ou code
-    currentPrescription = list.find(o => 
-      o.id == id || o._id == id || o.code === id
-    );
-    
+    currentPrescription = list.find(o => o.id == id || o._id == id || o.code === id);
+
     if (currentPrescription) {
       console.log("✅ Ordonnance trouvée dans localStorage");
       displayPrescription();
     } else {
-      showError(`Ordonnance non trouvée (ID: ${id}).<br><br>
-        <strong>Vérifiez que:</strong><br>
-        1. L'ordonnance existe dans la base de données<br>
-        2. Vous êtes connecté en tant que pharmacien<br>
-        3. L'ordonnance est bien destinée à votre pharmacie`);
+      showError(`Ordonnance non trouvée (ID: ${id}).`);
     }
   }
 }
 
-// Afficher l'ordonnance
 function displayPrescription() {
   const p = currentPrescription;
   if (!p) return;
 
-  // Déterminer la classe CSS pour le statut
   const statusClass = `status-${p.statut}`;
   const statusText = getStatusText(p.statut);
-  
-  // Construire le HTML de l'ordonnance
+
+  // Gérer les différentes structures possibles (API vs localStorage)
+  const medecinNom = p.medecin?.nom || p.medecinNom || "Non spécifié";
+  const pharmacieNom = p.pharmacie?.nom || p.pharmacieNom || "Non spécifié";
+  const patientNom = p.patientNom || "Non spécifié";
+  const patientAge = p.age || p.patientAge || "Non spécifié";
+  const patientGenre = p.genre || p.patientGenre || "Non spécifié";
+  const patientAdresse = p.adresse || p.patientAdresse || "Non spécifié";
+  const medicaments = p.medicaments || [];
+
   const html = `
     <div class="header">
       <h1><i class="fas fa-prescription"></i> ORDONNANCE MÉDICALE</h1>
-      <p style="font-size: 1.2em; margin-top: 10px;">N° ${p.code || p.id || "—"}</p>
+      <p style="font-size:1.2em; margin-top:10px;">N° ${p.code || p.id || "—"}</p>
       <div class="status-badge ${statusClass}">${statusText}</div>
     </div>
-
     <div class="content">
-      <!-- Informations pharmacie -->
       <div class="section">
         <h3><i class="fas fa-house-medical"></i> Informations Pharmacie</h3>
         <div class="info-grid">
-          <div class="info-item">
-            <strong>Pharmacie :</strong>
-            <span>${p.pharmacieNom || "Non spécifié"}</span>
-          </div>
-          <div class="info-item">
-            <strong>Date de réception :</strong>
-            <span>${formatDate(p.dateEnvoi || p.createdAt)}</span>
-          </div>
-          <div class="info-item">
-            <strong>Statut :</strong>
-            <span style="color: ${getStatusColor(p.statut)}; font-weight: bold;">${statusText}</span>
-          </div>
+          <div class="info-item"><strong>Pharmacie :</strong><span>${pharmacieNom}</span></div>
+          <div class="info-item"><strong>Date de réception :</strong><span>${formatDate(p.envoyeeLe || p.createdAt)}</span></div>
+          <div class="info-item"><strong>Statut :</strong><span style="color:${getStatusColor(p.statut)}; font-weight:bold;">${statusText}</span></div>
         </div>
       </div>
-
-      <!-- Informations patient -->
       <div class="section">
         <h3><i class="fas fa-user"></i> Informations Patient</h3>
         <div class="info-grid">
-          <div class="info-item">
-            <strong>Nom :</strong>
-            <span>${p.patientNom || "Non spécifié"}</span>
-          </div>
-          <div class="info-item">
-            <strong>Âge :</strong>
-            <span>${p.patientAge || "Non spécifié"}</span>
-          </div>
-          <div class="info-item">
-            <strong>Poids :</strong>
-            <span>${p.patientPoids || "Non spécifié"}</span>
-          </div>
-          <div class="info-item">
-            <strong>Genre :</strong>
-            <span>${p.patientGenre === 'F' ? 'Femme' : (p.patientGenre === 'M' ? 'Homme' : p.patientGenre) || "Non spécifié"}</span>
-          </div>
-          <div class="info-item">
-            <strong>Téléphone :</strong>
-            <span>${p.patientTelephone || "Non spécifié"}</span>
-          </div>
-          <div class="info-item">
-            <strong>Adresse :</strong>
-            <span>${p.patientAdresse || "Non spécifié"}</span>
-          </div>
+          <div class="info-item"><strong>Nom :</strong><span>${patientNom}</span></div>
+          <div class="info-item"><strong>Âge :</strong><span>${patientAge}</span></div>
+          <div class="info-item"><strong>Genre :</strong><span>${patientGenre === 'F' ? 'Femme' : (patientGenre === 'M' ? 'Homme' : patientGenre)}</span></div>
+          <div class="info-item"><strong>Adresse :</strong><span>${patientAdresse}</span></div>
         </div>
       </div>
-
-      <!-- Médicaments -->
       <div class="section">
         <h3><i class="fas fa-pills"></i> Médicaments Prescrits</h3>
-        <div id="medicamentsContainer">
-          ${displayMedicamentsHTML(p.medicaments)}
-        </div>
+        <div id="medicamentsContainer">${displayMedicamentsHTML(medicaments)}</div>
       </div>
-
-      <!-- Instructions -->
       <div class="section">
-        <h3><i class="fas fa-info-circle"></i> Instructions et Recommandations</h3>
-        <div class="instructions">
-          ${p.instructions || p.recommandations || p.pointsImportants || "Aucune instruction particulière"}
-        </div>
+        <h3><i class="fas fa-info-circle"></i> Instructions</h3>
+        <div class="instructions">${p.instructions || p.recommandations || "Aucune instruction particulière"}</div>
       </div>
-
-      <!-- Informations médecin -->
       <div class="section">
         <h3><i class="fas fa-stethoscope"></i> Informations Médecin</h3>
         <div class="info-grid">
-          <div class="info-item">
-            <strong>Nom médecin :</strong>
-            <span>${p.medecinNom || "Non spécifié"}</span>
-          </div>
-          <div class="info-item">
-            <strong>Spécialité :</strong>
-            <span>${p.medecinSpecialite || "Non spécifié"}</span>
-          </div>
-          <div class="info-item">
-            <strong>Date de prescription :</strong>
-            <span>${formatDate(p.dateOrd)}</span>
-          </div>
-          <div class="info-item">
-            <strong>Code ordonnance :</strong>
-            <span style="font-family: monospace; background: #f0f0f0; padding: 2px 6px; border-radius: 4px;">
-              ${p.code || "—"}
-            </span>
-          </div>
+          <div class="info-item"><strong>Nom médecin :</strong><span>${medecinNom}</span></div>
+          <div class="info-item"><strong>Date de prescription :</strong><span>${formatDate(p.date)}</span></div>
+          <div class="info-item"><strong>Code ordonnance :</strong><span style="font-family:monospace; background:#f0f0f0; padding:2px 6px; border-radius:4px;">${p.code || "—"}</span></div>
         </div>
       </div>
     </div>
-
     <div class="footer">
       <div class="actions">
-        <button class="btn btn-outline" onclick="history.back()">
-          <i class="fas fa-arrow-left"></i> Retour à la liste
-        </button>
-        ${getActionButtonsHTML(p.statut, p._id)}
+        <button class="btn btn-outline" onclick="history.back()"><i class="fas fa-arrow-left"></i> Retour</button>
+        ${getActionButtonsHTML(p.statut, p._id || p.id)}
       </div>
     </div>
   `;
 
-  // Remplacer le contenu de la page
   document.getElementById('prescriptionContainer').innerHTML = html;
-  
-  // Masquer l'état de chargement
   document.getElementById('loadingState').style.display = 'none';
 }
 
-// Générer le HTML pour les médicaments
 function displayMedicamentsHTML(medicaments) {
   if (!medicaments || medicaments.length === 0) {
-    return `
-      <div class="empty-state">
-        <i class="fas fa-prescription-bottle"></i>
-        <p style="margin-top: 10px;">Aucun médicament prescrit</p>
-      </div>
-    `;
+    // Si medicaments est une chaîne (ancien format), on l'affiche directement
+    if (typeof currentPrescription.medicaments === 'string') {
+      return `<div class="medicament-item"><pre style="white-space:pre-wrap;">${currentPrescription.medicaments}</pre></div>`;
+    }
+    return `<div class="empty-state"><i class="fas fa-prescription-bottle"></i><p>Aucun médicament prescrit</p></div>`;
   }
 
-  let html = '';
-  medicaments.forEach((med, index) => {
-    html += `
-      <div class="medicament-item">
-        <div class="medicament-header">
-          <h4>${med.medicament || med.nom || "Médicament sans nom"}</h4>
-          <span class="medicament-number">Médicament #${index + 1}</span>
-        </div>
-        <div class="medicament-details">
-          <div><strong>Dosage :</strong> ${med.dosage || "Non spécifié"}</div>
-          <div><strong>Posologie :</strong> ${med.posologie || "Non spécifié"}</div>
-          <div><strong>Durée :</strong> ${med.duree || "Non spécifié"}</div>
-          <div><strong>Quantité :</strong> ${med.quantite || "Non spécifié"}</div>
-        </div>
-        ${med.remarques ? `
-          <div class="medicament-remarque">
-            <strong>Remarques :</strong> ${med.remarques}
-          </div>
-        ` : ''}
+  return medicaments.map((med, idx) => `
+    <div class="medicament-item">
+      <div class="medicament-header"><h4>${med.medicament || med.nom || "Médicament sans nom"}</h4><span class="medicament-number">#${idx+1}</span></div>
+      <div class="medicament-details">
+        <div><strong>Dosage :</strong> ${med.dosage || "Non spécifié"}</div>
+        <div><strong>Posologie :</strong> ${med.posologie || "Non spécifié"}</div>
+        <div><strong>Durée :</strong> ${med.duree || "Non spécifié"}</div>
+        <div><strong>Quantité :</strong> ${med.quantite || "Non spécifié"}</div>
       </div>
-    `;
-  });
-  
-  return html;
+      ${med.remarques ? `<div class="medicament-remarque"><strong>Remarques :</strong> ${med.remarques}</div>` : ''}
+    </div>
+  `).join('');
 }
 
-// Générer les boutons d'action en fonction du statut
-function getActionButtonsHTML(statut, ordonnanceId) {
-  if (!ordonnanceId) return '';
-  
-  switch(statut) {
-    case 'envoyee':
-      return `
-        <button class="btn btn-success" onclick="updateOrdonnanceStatus('en_cours')">
-          <i class="fas fa-play"></i> Commencer le traitement
-        </button>
-      `;
-    case 'en_cours':
-      return `
-        <button class="btn btn-success" onclick="updateOrdonnanceStatus('pret')">
-          <i class="fas fa-check"></i> Marquer comme prête
-        </button>
-      `;
-    case 'pret':
-      return `
-        <button class="btn btn-success" onclick="updateOrdonnanceStatus('delivree')">
-          <i class="fas fa-check-double"></i> Confirmer la délivrance
-        </button>
-      `;
-    default:
-      return '';
-  }
+function getActionButtonsHTML(statut, id) {
+  if (!id) return '';
+  const baseActions = {
+    'envoyee': `<button class="btn btn-success" onclick="updateStatus('en_cours')"><i class="fas fa-play"></i> Commencer le traitement</button>`,
+    'en_cours': `<button class="btn btn-success" onclick="updateStatus('pret')"><i class="fas fa-check"></i> Marquer comme prête</button>`,
+    'pret': `<button class="btn btn-success" onclick="updateStatus('delivree')"><i class="fas fa-check-double"></i> Confirmer la délivrance</button>`
+  };
+  return baseActions[statut] || '';
 }
 
-// Mettre à jour le statut de l'ordonnance
-async function updateOrdonnanceStatus(newStatus) {
-  if (!currentPrescription || !currentPrescription._id) {
-    alert("❌ Impossible de mettre à jour le statut: ID manquant");
-    return;
-  }
-  
-  if (!confirm(`Êtes-vous sûr de vouloir changer le statut à "${getStatusText(newStatus)}" ?`)) {
-    return;
-  }
-  
+async function updateStatus(newStatus) {
+  if (!currentPrescription) return;
+  const id = currentPrescription._id || currentPrescription.id;
+  if (!id) { alert("ID manquant"); return; }
+  if (!confirm(`Changer le statut en "${getStatusText(newStatus)}" ?`)) return;
+
   try {
-    const response = await fetch(`/api/ordonnances/${currentPrescription._id}/status`, {
+    const res = await fetch(`${API_URL}/api/ordonnances/${id}/status`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ statut: newStatus })
     });
-    
-    if (response.ok) {
-      alert(`✅ Statut mis à jour avec succès !`);
-      
-      // Recharger la page pour voir les changements
-      setTimeout(() => {
-        location.reload();
-      }, 1000);
-      
+    if (res.ok) {
+      alert("Statut mis à jour !");
+      location.reload();
     } else {
-      const error = await response.json();
-      throw new Error(error.error || 'Erreur lors de la mise à jour');
+      throw new Error("Erreur lors de la mise à jour");
     }
-  } catch (error) {
-    console.error("❌ Erreur mise à jour statut:", error);
-    alert(`❌ ${error.message}`);
-  }
-}
-
-// Fonctions utilitaires
-function formatDate(date) {
-  if (!date) return "Non spécifié";
-  try {
-    return new Date(date).toLocaleDateString("fr-FR", {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
   } catch (e) {
-    return date.toString();
+    alert("Erreur : " + e.message);
   }
 }
 
-function getStatusText(statut) {
-  const statusMap = {
-    'active': 'Active',
-    'envoyee': 'À traiter',
-    'en_cours': 'En cours',
-    'pret': 'Prête',
-    'delivree': 'Délivrée',
-    'recuperee': 'Récupérée',
-    'annulee': 'Annulée',
-    'expiree': 'Expirée'
-  };
-  return statusMap[statut] || statut;
+function formatDate(d) {
+  if (!d) return "Non spécifié";
+  try { return new Date(d).toLocaleDateString("fr-FR"); } catch { return d; }
 }
 
-function getStatusColor(statut) {
-  const colorMap = {
-    'envoyee': '#ff9800',
-    'en_cours': '#2196f3',
-    'pret': '#4caf50',
-    'delivree': '#9c27b0',
-    'annulee': '#dc3545'
-  };
-  return colorMap[statut] || '#666';
+function getStatusText(s) {
+  const map = { 'envoyee':'À traiter','en_cours':'En cours','pret':'Prête','delivree':'Délivrée','annulee':'Annulée' };
+  return map[s] || s;
 }
 
-// Fonctions d'affichage d'erreur et d'avertissement
-function showError(message) {
-  const container = document.getElementById('prescriptionContainer');
-  container.innerHTML = `
-    <div class="error-message">
-      <i class="fas fa-exclamation-triangle fa-3x" style="margin-bottom: 20px;"></i>
-      <h3 style="margin-bottom: 15px;">Erreur de chargement</h3>
-      <div style="text-align: left; margin: 20px 0;">
-        ${message}
-      </div>
-      <div style="margin-top: 25px;">
-        <button class="btn btn-outline" onclick="window.history.back()" style="margin-right: 10px;">
-          <i class="fas fa-arrow-left"></i> Retour
-        </button>
-        <button class="btn btn-primary" onclick="location.reload()">
-          <i class="fas fa-sync-alt"></i> Réessayer
-        </button>
-      </div>
-    </div>
-  `;
+function getStatusColor(s) {
+  const map = { 'envoyee':'#ff9800','en_cours':'#2196f3','pret':'#4caf50','delivree':'#9c27b0' };
+  return map[s] || '#666';
 }
 
-function showWarning(message) {
-  // Affiche un avertissement mais continue l'affichage
-  const warningHTML = `
-    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px;">
-      <strong><i class="fas fa-exclamation-triangle"></i> Note :</strong> ${message}
-    </div>
-  `;
-  
-  // Insérer l'avertissement après l'en-tête
-  const header = document.querySelector('.header');
-  if (header) {
-    header.insertAdjacentHTML('afterend', warningHTML);
-  }
+function showError(msg) {
+  document.getElementById('prescriptionContainer').innerHTML = `
+    <div class="error-message"><i class="fas fa-exclamation-triangle fa-3x" style="margin-bottom:20px;"></i>
+    <h3>Erreur</h3><p>${msg}</p>
+    <button class="btn btn-outline" onclick="history.back()">Retour</button>
+    <button class="btn btn-primary" onclick="location.reload()">Réessayer</button></div>`;
 }
 
-// Initialisation
-window.onload = function() {
-  // Vérifier la connexion
-  const user = JSON.parse(localStorage.getItem("currentUser"));
-  if (!user || user.role !== "pharmacien") {
-    showError("Accès réservé aux pharmaciens. Veuillez vous connecter.");
+function showWarning(msg) {
+  const warning = document.createElement('div');
+  warning.style.cssText = 'background:#fff3cd; border-left:4px solid #ffc107; padding:15px; margin:20px; border-radius:4px;';
+  warning.innerHTML = `<strong><i class="fas fa-exclamation-triangle"></i> Note :</strong> ${msg}`;
+  document.querySelector('.content')?.prepend(warning);
+}
+
+window.onload = () => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user || user.role !== "pharmacie") {
+    showError("Accès réservé aux pharmaciens.");
     return;
   }
-  
   loadPrescription();
 };
 </script>
-
 </body>
 </html>
