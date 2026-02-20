@@ -41,6 +41,78 @@
     .status.en_cours { background:#FFF3E0;color:#FF9800; }
     .status.delivree { background:#F3E5F5;color:#9C27B0; }
     .status.pret { background:#E0F7FA;color:#00BCD4; }
+
+    /* Boutons d'action */
+    .btn-action {
+      padding: 5px 10px;
+      margin: 0 2px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .btn-detail {
+      background-color: #17a2b8;
+      color: white;
+    }
+    .btn-detail:hover {
+      background-color: #138496;
+    }
+    .btn-delete {
+      background-color: #dc3545;
+      color: white;
+    }
+    .btn-delete:hover {
+      background-color: #c82333;
+    }
+
+    /* Modal pour les détails */
+    .modal-detail {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content-detail {
+      background-color: white;
+      margin: 5% auto;
+      padding: 20px;
+      border-radius: 8px;
+      width: 80%;
+      max-width: 600px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+    .modal-header h3 {
+      margin: 0;
+    }
+    .modal-close {
+      cursor: pointer;
+      font-size: 24px;
+      color: #999;
+    }
+    .modal-close:hover {
+      color: #333;
+    }
+    .detail-item {
+      margin-bottom: 10px;
+    }
+    .detail-item strong {
+      display: inline-block;
+      width: 120px;
+    }
   </style>
 </head>
 
@@ -93,6 +165,22 @@
       </table>
     </section>
   </main>
+</div>
+
+<!-- Modal pour afficher les détails de l'ordonnance -->
+<div id="detailModal" class="modal-detail">
+  <div class="modal-content-detail">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-file-prescription"></i> Détails de l'ordonnance</h3>
+      <span class="modal-close" onclick="closeDetailModal()">&times;</span>
+    </div>
+    <div id="detailContent">
+      <!-- Les détails seront injectés ici -->
+    </div>
+    <div style="text-align: right; margin-top: 15px;">
+      <button class="btn-action btn-detail" onclick="closeDetailModal()">Fermer</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -149,11 +237,62 @@ document.addEventListener("DOMContentLoaded", async () => {
         <td>${o.medecin.nom}</td>
         <td><span class="status ${o.statut}">${o.statut}</span></td>
         <td>
-          <button onclick="updateStatus('${o._id}','en_cours')">Traiter</button>
+          <button class="btn-action btn-detail" onclick="showDetails('${o._id}')">Détail</button>
+          <button class="btn-action btn-delete" onclick="deleteOrdonnance('${o._id}')">Supprimer</button>
+          <button class="btn-action" onclick="updateStatus('${o._id}','en_cours')">Traiter</button>
         </td>
       </tr>`;
     });
   }
+
+  // Fonction pour afficher les détails dans la modale
+  window.showDetails = async (id) => {
+    try {
+      const res = await fetch(`${API_URL}/api/ordonnances/${id}`);
+      if (!res.ok) throw new Error('Erreur lors du chargement des détails');
+      const ord = await res.json();
+
+      const content = document.getElementById('detailContent');
+      content.innerHTML = `
+        <div class="detail-item"><strong>Code :</strong> ${ord.code}</div>
+        <div class="detail-item"><strong>Patient :</strong> ${ord.patientNom}</div>
+        <div class="detail-item"><strong>Âge :</strong> ${ord.age}</div>
+        <div class="detail-item"><strong>Sexe :</strong> ${ord.genre}</div>
+        <div class="detail-item"><strong>Adresse :</strong> ${ord.adresse}</div>
+        <div class="detail-item"><strong>Médecin :</strong> ${ord.medecin.nom}</div>
+        <div class="detail-item"><strong>Date :</strong> ${new Date(ord.createdAt).toLocaleDateString()}</div>
+        <div class="detail-item"><strong>Médicaments :</strong></div>
+        <div style="background:#f8f9fa; padding:10px; border-radius:4px; white-space:pre-wrap;">${ord.medicaments}</div>
+        <div class="detail-item"><strong>Statut :</strong> <span class="status ${ord.statut}">${ord.statut}</span></div>
+        ${ord.pharmacie ? `<div class="detail-item"><strong>Pharmacie :</strong> ${ord.pharmacie.nom}</div>` : ''}
+      `;
+
+      document.getElementById('detailModal').style.display = 'block';
+    } catch (error) {
+      showNotification('Erreur lors du chargement des détails', 'error');
+    }
+  };
+
+  // Fonction pour fermer la modale
+  window.closeDetailModal = () => {
+    document.getElementById('detailModal').style.display = 'none';
+  };
+
+  // Fonction pour supprimer une ordonnance
+  window.deleteOrdonnance = async (id) => {
+    if (!confirm('Voulez-vous vraiment supprimer cette ordonnance ?')) return;
+
+    try {
+      const res = await fetch(`${API_URL}/api/ordonnances/${id}`, {
+        method: 'DELETE'
+      });
+      if (!res.ok) throw new Error('Erreur lors de la suppression');
+      showNotification('Ordonnance supprimée avec succès', 'success');
+      loadOrdonnances(); // Recharger la liste
+    } catch (error) {
+      showNotification('Erreur lors de la suppression', 'error');
+    }
+  };
 
   window.updateStatus = async(id,statut)=>{
     await fetch(`${API_URL}/api/ordonnances/${id}/status`,{
