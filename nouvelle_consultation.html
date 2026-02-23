@@ -1192,7 +1192,7 @@ function savePatientAndConsultation() {
   patients.push(patient);
   localStorage.setItem('patients', JSON.stringify(patients));
   
-  // 2. Enregistrer la consultation
+  // 2. Enregistrer la consultation (avec patientName et image)
   const consultation = {
     id: Date.now(),
     patientId: patient.id,
@@ -1211,7 +1211,10 @@ function savePatientAndConsultation() {
       description: document.getElementById('factureDescription').value,
       montant: document.getElementById('factureMontant').value
     },
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    // 👇 AJOUTS NÉCESSAIRES POUR L’AFFICHAGE DANS LE DASHBOARD
+    patientName: patient.prenom + ' ' + patient.nom,
+    image: patient.image
   };
   
   let consultations = JSON.parse(localStorage.getItem('consultations')) || [];
