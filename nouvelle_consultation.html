@@ -1185,7 +1185,13 @@ function savePatientAndConsultation() {
     adresse: document.getElementById('adresse').value,
     poids: document.getElementById('poids').value,
     image: document.getElementById('image').value,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+
+    // 👇 AJOUT POUR PATIENTS : compatibilité avec patients.html
+    name: document.getElementById('prenom').value + ' ' + document.getElementById('nom').value,
+    phone: document.getElementById('telephone').value,
+    address: document.getElementById('adresse').value,
+    added: new Date().toLocaleDateString('fr-FR')  // format JJ/MM/AAAA
   };
   
   let patients = JSON.parse(localStorage.getItem('patients')) || [];
