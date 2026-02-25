@@ -1,261 +1,864 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Patients - OrdoPass</title>
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patients - OrdoPass (Médecin)</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* ===== STYLE AVANCÉ (fusionné) ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    
+    body {
+      background-color: #f5f5f5;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    .dashboard-page {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* SIDEBAR fixe */
+    .sidebar {
+      width: 250px;
+      background: #2a5298;
+      color: white;
+      padding: 20px 0;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 20px;
+    }
+    
+    .logo i {
+      font-size: 24px;
+    }
+    
+    .logo span {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+    .sidebar nav {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar nav a {
+      color: white;
+      text-decoration: none;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.3s;
+    }
+    
+    .sidebar nav a:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    
+    .sidebar nav a.active {
+      background: rgba(255,255,255,0.2);
+      border-left: 4px solid white;
+    }
+    
+    /* MAIN AREA */
+    .main-area {
+      flex: 1;
+      margin-left: 250px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .topbar {
+      background: white;
+      padding: 15px 30px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .topbar h1 {
+      color: #2a5298;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    
+    .content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 25px;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .card-header h2 {
+      color: #2a5298;
+      font-size: 20px;
+    }
+    
+    .btn-primary {
+      background: #2a5298;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary:hover {
+      background: #1e3c72;
+    }
+    
+    .btn-outline {
+      border: 1px solid #2a5298;
+      color: #2a5298;
+      background: white;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.3s;
+    }
+    
+    .btn-outline:hover {
+      background: #f0f5ff;
+    }
+    
+    .message-container {
+      margin-bottom: 20px;
+    }
+    
+    .message {
+      padding: 12px 15px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+    
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .message.info {
+      background: #cce7ff;
+      color: #004085;
+      border: 1px solid #b3d7ff;
+    }
+    
+    .filters-container {
+      display: flex;
+      gap: 15px;
+      align-items: end;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .filter-group label {
+      font-weight: bold;
+      color: #555;
+      font-size: 0.9rem;
+    }
+    
+    .filters-container input {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      min-width: 250px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    
+    .stat-card {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .stat-card h3 {
+      font-size: 32px;
+      color: #2a5298;
+      margin-bottom: 5px;
+    }
+    
+    .stat-card p {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    .stat-card.pending {
+      border-left: 4px solid #ffc107;
+    }
+    
+    .stat-card.completed {
+      border-left: 4px solid #28a745;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    
+    th {
+      background-color: #f8f9fa;
+      font-weight: bold;
+      color: #555;
+    }
+    
+    tr:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .loading, .no-data {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    
+    .no-data i {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      color: #ddd;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .btn-view {
+      background: #17a2b8;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .btn-view:hover {
+      background: #138496;
+    }
+    
+    .pagination-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+    }
+    
+    .pagination-info {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    .pagination-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .modal-content {
+      background: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+    }
+    
+    .modal-content h2 {
+      margin-bottom: 20px;
+      color: #2a5298;
+    }
+    
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+    
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
 
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial}
-body{background:#f5f5f5}
-.dashboard-page{display:flex;min-height:100vh}
-.sidebar{width:250px;background:#2a5298;color:#fff;padding:20px 0;position:fixed;height:100vh}
-.sidebar nav a{color:#fff;text-decoration:none;padding:12px 20px;display:flex;gap:10px}
-.sidebar nav a.active{background:rgba(255,255,255,.2)}
-.main-area{margin-left:250px;flex:1;display:flex;flex-direction:column}
-.topbar{background:#fff;padding:15px 30px;display:flex;justify-content:space-between}
-.content{padding:30px}
-.card{background:#fff;border-radius:8px;padding:25px}
-.btn-primary{background:#2a5298;color:#fff;border:none;padding:8px 15px;border-radius:5px;cursor:pointer}
-.btn-outline{border:1px solid #2a5298;color:#2a5298;padding:6px 12px;border-radius:5px;background:#fff;cursor:pointer}
-.avatar{width:40px;height:40px;border-radius:50%;object-fit:cover}
-table{width:100%;border-collapse:collapse;margin-top:20px}
-th,td{padding:10px;border-bottom:1px solid #eee}
-.stat-card{background:#fff;border:1px solid #eee;padding:15px;text-align:center;border-radius:6px}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:20px 0}
-.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);justify-content:center;align-items:center}
-.modal-content{background:#fff;padding:20px;border-radius:8px;width:90%;max-width:400px}
-.modal-content input{width:100%;padding:8px;margin-bottom:10px;border:1px solid #ddd;border-radius:4px}
-.action-buttons{display:flex;gap:5px}
-</style>
+    /* Styles complémentaires (conservés) */
+    .online-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+    .online { background-color: #28a745; }
+    .offline { background-color: #dc3545; }
+    
+    @media (max-width: 768px) {
+      .sidebar { width: 70px; }
+      .sidebar .logo span, .sidebar nav a span { display: none; }
+      .main-area { margin-left: 70px; }
+      .filters-container { flex-direction: column; align-items: stretch; }
+      .filters-container input { min-width: auto; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .action-buttons { flex-direction: column; }
+      table { display: block; overflow-x: auto; }
+    }
+  </style>
 </head>
-
 <body class="dashboard-page">
 
-<!-- SIDEBAR -->
-<aside class="sidebar">
-<nav>
-<a href="medecin_dashboard.html">Consultations</a>
-<a href="patients.html" class="active">Patients</a>
-<a href="medecin_ordonnance.html">Ordonnances</a>
-<a href="#" id="logout">Déconnexion</a>
-</nav>
-</aside>
+  <!-- SIDEBAR ENRICHIE (navigation complète) -->
+  <aside class="sidebar">
+    <div class="logo">
+      <i class="fa-solid fa-notes-medical"></i>
+      <span>ORDOPASS</span>
+    </div>
+    <nav>
+      <a href="medecin_dashboard.html"><i class="fa-solid fa-file-medical"></i> <span>Consultations</span></a>
+      <a href="patients.html" class="active"><i class="fa-solid fa-users"></i> <span>Patients</span></a>
+      <a href="teleconsultation.html"><i class="fa-solid fa-video"></i> <span>Téléconsultation</span></a>
+      <a href="pharmacies.html"><i class="fa-solid fa-prescription-bottle-medical"></i> <span>Pharmacies</span></a>
+      <a href="medecin_messagerie.html"><i class="fa-solid fa-comment-medical"></i> <span>Messagerie</span></a>
+      <a href="parametres.html"><i class="fa-solid fa-gear"></i> <span>Paramètres</span></a>
+      <a href="medecin_facturation.html"><i class="fa-solid fa-file-invoice-dollar"></i> <span>Facturation</span></a>
+      <a href="medecin_rendezvous.html"><i class="fa-solid fa-calendar-check"></i> <span>Rendez-vous</span></a>
+      <a href="medecin_ordonnance.html"><i class="fa-solid fa-prescription"></i> <span>Ordonnances sécurisées</span></a>
+      <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> <span>Déconnexion</span></a>
+    </nav>
+  </aside>
 
-<!-- MAIN -->
-<main class="main-area">
+  <!-- CONTENU PRINCIPAL -->
+  <main class="main-area">
+    <header class="topbar">
+      <h1><i class="fa-solid fa-users"></i> Liste des patients</h1>
+      <div class="user-info">
+        <img src="https://i.pravatar.cc/40" class="avatar" alt="profil">
+        <span id="usernameDisplay"></span>
+      </div>
+    </header>
 
-<header class="topbar">
-<h2>Liste des patients</h2>
-<span id="usernameDisplay"></span>
-</header>
+    <section class="content">
+      <div class="card">
+        <div class="card-header">
+          <h2>Gestion des patients</h2>
+          <button class="btn-primary" onclick="showAddForm()">
+            <i class="fa-solid fa-plus"></i> Nouveau patient
+          </button>
+        </div>
 
-<section class="content">
-<div class="card">
+        <div id="messageContainer" class="message-container"></div>
 
-<button class="btn-primary" onclick="showAddForm()">+ Nouveau patient</button>
+        <!-- Filtres -->
+        <div class="filters-container">
+          <div class="filter-group">
+            <label>Rechercher:</label>
+            <input type="text" id="searchInput" placeholder="Nom, téléphone ou adresse...">
+          </div>
+          <button class="btn-outline" onclick="clearSearch()">
+            <i class="fa-solid fa-times"></i> Effacer
+          </button>
+        </div>
 
-<!-- STATS -->
-<div class="stats-grid">
-<div class="stat-card"><h3 id="totalPatients">0</h3><p>Total</p></div>
-<div class="stat-card"><h3 id="adultPatients">0</h3><p>Adultes</p></div>
-<div class="stat-card"><h3 id="recentPatients">0</h3><p>Ce mois</p></div>
-</div>
+        <!-- Statistiques -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3 id="totalPatients">0</h3>
+            <p>Total patients</p>
+          </div>
+          <div class="stat-card pending">
+            <h3 id="recentPatients">0</h3>
+            <p>Ajoutés ce mois</p>
+          </div>
+          <div class="stat-card completed">
+            <h3 id="adultPatients">0</h3>
+            <p>Patients adultes</p>
+          </div>
+        </div>
 
-<table>
-<thead>
-<tr>
-<th>Image</th>
-<th>Nom</th>
-<th>Age</th>
-<th>Téléphone</th>
-<th>Adresse</th>
-<th>Date</th>
-<th>Actions</th>
-</tr>
-</thead>
-<tbody id="patientsBody"></tbody>
-</table>
+        <!-- Tableau des patients -->
+        <table>
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Nom</th>
+              <th>Âge</th>
+              <th>Téléphone</th>
+              <th>Adresse</th>
+              <th>Date ajout</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="patientsBody">
+            <tr>
+              <td colspan="7" class="loading">
+                <i class="fa-solid fa-spinner fa-spin"></i> Chargement...
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
-</div>
-</section>
-</main>
+        <!-- Pagination -->
+        <div class="pagination-container">
+          <div id="paginationInfo" class="pagination-info"></div>
+          <div class="pagination-buttons">
+            <button class="btn-outline" id="prevBtn" onclick="changePage(-1)">
+              <i class="fa-solid fa-chevron-left"></i> Précédent
+            </button>
+            <button class="btn-outline" id="nextBtn" onclick="changePage(1)">
+              Suivant <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 
-<!-- MODAL -->
-<div id="modal" class="modal">
-<div class="modal-content">
-<h3 id="modalTitle">Ajouter patient</h3>
-<input type="text" id="name" placeholder="Nom complet">
-<input type="number" id="age" placeholder="Age">
-<input type="text" id="phone" placeholder="Téléphone">
-<input type="text" id="address" placeholder="Adresse">
-<input type="text" id="image" placeholder="Image URL">
-<div style="display:flex;gap:10px;justify-content:end">
-<button class="btn-primary" onclick="savePatient()">Enregistrer</button>
-<button class="btn-outline" onclick="closeForm()">Annuler</button>
-</div>
-</div>
-</div>
+  <!-- MODAL PATIENT -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <h2 id="modalTitle">Ajouter patient</h2>
+      <input type="text" id="name" placeholder="Nom complet" required>
+      <input type="number" id="age" placeholder="Âge" required>
+      <input type="text" id="phone" placeholder="Téléphone">
+      <input type="text" id="address" placeholder="Adresse">
+      <input type="text" id="image" placeholder="URL de l'image (optionnel)">
+      <div class="modal-actions">
+        <button id="saveBtn" class="btn-primary">Enregistrer</button>
+        <button onclick="closeForm()" class="btn-outline">Annuler</button>
+      </div>
+    </div>
+  </div>
 
-<script>
-const user = JSON.parse(localStorage.getItem("user"));
-if(!user || user.role!=="medecin"){location.href="medecin_login.html";}
-document.getElementById("usernameDisplay").textContent=user.username;
+  <script>
+    (function() {
+      // --- AUTHENTIFICATION ---
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || user.role !== "medecin") {
+        alert("Accès réservé aux médecins. Veuillez vous connecter.");
+        window.location.href = "medecin_login.html";
+        return;
+      }
+      document.getElementById("usernameDisplay").textContent = user.username;
 
-let allPatients=[];
-let editingId=null;
+      // --- VARIABLES GLOBALES ---
+      let allPatients = [];           // tous les patients (format normalisé)
+      let filteredPatients = [];      // après recherche
+      let currentPage = 1;
+      const patientsPerPage = 10;
+      let editingPatientId = null;    // null = ajout, sinon modification
 
-/* =========================
-   LOAD PATIENTS CORRIGÉ
-========================= */
-function loadPatients(){
-let patients=JSON.parse(localStorage.getItem("patients"));
+      // --- FONCTION DE NORMALISATION (compatibilité ancien format) ---
+      function normalizePatient(p) {
+        // Assure que chaque patient possède : id, name, age, phone, address, image, added
+        const id = p.id || Date.now() + Math.random();
+        // Gestion du nom : priorité à name, sinon construction prenom + nom
+        let name = p.name;
+        if (!name && (p.prenom || p.nom)) {
+          name = (p.prenom || '') + ' ' + (p.nom || '');
+        }
+        name = name || 'Nom inconnu';
+        
+        const age = p.age || 0;
+        const phone = p.phone || p.telephone || '';
+        const address = p.address || p.adresse || '';
+        const image = p.image || `https://i.pravatar.cc/40?u=${id}`;
+        // Gestion de la date d'ajout
+        let added = p.added;
+        if (!added && p.createdAt) {
+          added = new Date(p.createdAt).toLocaleDateString('fr-FR');
+        } else if (!added) {
+          added = new Date().toLocaleDateString('fr-FR'); // date du jour par défaut
+        }
+        return { id, name, age, phone, address, image, added };
+      }
 
-if(!patients || patients.length===0){
-patients=[
-{id:1,name:"Diop Awa",age:32,phone:"+221771234567",address:"Dakar",image:"https://i.pravatar.cc/40?u=awa",added:"13/07/2025"}
-];
-localStorage.setItem("patients",JSON.stringify(patients));
-}
+      // --- CHARGEMENT AVEC MIGRATION SILENCIEUSE ---
+      function loadPatients() {
+        let rawPatients = JSON.parse(localStorage.getItem("patients"));
+        
+        // Si vide ou null, on initialise avec des exemples
+        if (!rawPatients || rawPatients.length === 0) {
+          rawPatients = [
+            { id: 1, name: "Diop Awa", age: 32, phone: "+221771234567", address: "Dakar", image: "https://i.pravatar.cc/40?u=awa", added: "13/07/2025" },
+            { id: 2, name: "Konte Habiba", age: 30, phone: "+221772345678", address: "Dakar", image: "https://i.pravatar.cc/40?u=habiba", added: "30/10/2025" },
+            { id: 3, name: "Ba Aicha", age: 28, phone: "+221773456789", address: "Thiès", image: "https://i.pravatar.cc/40?u=aicha", added: "29/10/2025" }
+          ];
+        } else {
+          // Normalisation de chaque patient (pour anciennes données)
+          rawPatients = rawPatients.map(p => normalizePatient(p));
+        }
 
-/* compatibilité consultation */
-patients=patients.map(p=>({
-id:p.id,
-name:p.name || (p.prenom? p.prenom+" "+p.nom:""),
-age:p.age||"",
-phone:p.phone||p.telephone||"",
-address:p.address||p.adresse||"",
-image:p.image||"https://i.pravatar.cc/40",
-added:p.added || (p.createdAt? new Date(p.createdAt).toLocaleDateString("fr-FR"):"")
-}));
+        // Sauvegarde du format normalisé propre
+        localStorage.setItem("patients", JSON.stringify(rawPatients));
+        allPatients = rawPatients;
+        filteredPatients = [...allPatients];
+        
+        updateStatistics();
+        renderPatients();
+      }
 
-allPatients=patients;
-renderPatients();
-updateStats();
-}
+      // --- STATISTIQUES ---
+      function updateStatistics() {
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
 
-/* ========================= */
-function renderPatients(){
-const tbody=document.getElementById("patientsBody");
-tbody.innerHTML="";
+        const total = allPatients.length;
+        const recent = allPatients.filter(p => {
+          if (!p.added) return false;
+          const parts = p.added.split('/');
+          if (parts.length !== 3) return false;
+          const d = parseInt(parts[0]), m = parseInt(parts[1]) - 1, y = parseInt(parts[2]);
+          return m === currentMonth && y === currentYear;
+        }).length;
+        const adult = allPatients.filter(p => p.age >= 18).length;
 
-allPatients.forEach(p=>{
-tbody.innerHTML+=`
-<tr>
-<td><img src="${p.image}" class="avatar"></td>
-<td>${p.name}</td>
-<td>${p.age}</td>
-<td>${p.phone}</td>
-<td>${p.address}</td>
-<td>${p.added}</td>
-<td class="action-buttons">
-<button class="btn-outline" onclick="editPatient(${p.id})">Modifier</button>
-<button class="btn-outline" style="color:red" onclick="deletePatient(${p.id})">Supprimer</button>
-</td>
-</tr>`;
-});
-}
+        document.getElementById("totalPatients").textContent = total;
+        document.getElementById("recentPatients").textContent = recent;
+        document.getElementById("adultPatients").textContent = adult;
+      }
 
-/* ========================= */
-function updateStats(){
-const total=allPatients.length;
-const adult=allPatients.filter(p=>p.age>=18).length;
+      // --- AFFICHAGE TABLE + PAGINATION ---
+      function renderPatients() {
+        const tbody = document.getElementById("patientsBody");
+        
+        if (filteredPatients.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="7" class="no-data">
+                <i class="fa-solid fa-user-slash"></i>
+                <p>Aucun patient trouvé</p>
+              </td>
+            </tr>
+          `;
+          updatePagination();
+          return;
+        }
 
-const now=new Date();
-const month=now.getMonth();
-const year=now.getFullYear();
+        const start = (currentPage - 1) * patientsPerPage;
+        const end = start + patientsPerPage;
+        const pagePatients = filteredPatients.slice(start, end);
 
-const recent=allPatients.filter(p=>{
-if(!p.added)return false;
-const [d,m,y]=p.added.split("/");
-return (parseInt(m)-1===month && parseInt(y)===year);
-}).length;
+        tbody.innerHTML = pagePatients.map(p => `
+          <tr>
+            <td><img src="${p.image || 'https://i.pravatar.cc/40'}" class="avatar" alt="${p.name}"></td>
+            <td>${p.name}</td>
+            <td>${p.age}</td>
+            <td>${p.phone}</td>
+            <td>${p.address}</td>
+            <td>${p.added}</td>
+            <td class="action-buttons">
+              <button class="btn-view" onclick="viewPatient(${p.id})">
+                <i class="fa-solid fa-eye"></i> Profil
+              </button>
+              <button class="btn-outline" onclick="editPatient(${p.id})">
+                <i class="fa-solid fa-edit"></i> Modifier
+              </button>
+              <button class="btn-outline" onclick="deletePatient(${p.id})" style="color: #dc3545; border-color: #dc3545;">
+                <i class="fa-solid fa-trash"></i> Supprimer
+              </button>
+            </td>
+          </tr>
+        `).join('');
+        
+        updatePagination();
+      }
 
-document.getElementById("totalPatients").textContent=total;
-document.getElementById("adultPatients").textContent=adult;
-document.getElementById("recentPatients").textContent=recent;
-}
+      function updatePagination() {
+        const totalPages = Math.ceil(filteredPatients.length / patientsPerPage) || 1;
+        const start = (currentPage - 1) * patientsPerPage + 1;
+        const end = Math.min(start + patientsPerPage - 1, filteredPatients.length);
+        
+        document.getElementById("paginationInfo").textContent = 
+          filteredPatients.length > 0 
+            ? `Affichage de ${start} à ${end} sur ${filteredPatients.length} patients`
+            : `Aucun patient`;
+        
+        document.getElementById("prevBtn").disabled = currentPage === 1;
+        document.getElementById("nextBtn").disabled = currentPage === totalPages || totalPages === 0;
+      }
 
-/* ========================= */
-function showAddForm(){
-editingId=null;
-document.getElementById("modalTitle").textContent="Ajouter patient";
-document.getElementById("modal").style.display="flex";
-}
+      // --- CHANGEMENT DE PAGE ---
+      function changePage(direction) {
+        const totalPages = Math.ceil(filteredPatients.length / patientsPerPage);
+        const newPage = currentPage + direction;
+        if (newPage >= 1 && newPage <= totalPages) {
+          currentPage = newPage;
+          renderPatients();
+        }
+      }
 
-/* ========================= */
-function editPatient(id){
-const p=allPatients.find(x=>x.id===id);
-if(!p)return;
+      // --- RECHERCHE EN TEMPS RÉEL ---
+      function filterPatients() {
+        const term = document.getElementById("searchInput").value.toLowerCase();
+        if (!term) {
+          filteredPatients = [...allPatients];
+        } else {
+          filteredPatients = allPatients.filter(p => 
+            p.name.toLowerCase().includes(term) ||
+            p.phone.includes(term) ||
+            p.address.toLowerCase().includes(term)
+          );
+        }
+        currentPage = 1;
+        renderPatients();
+      }
 
-editingId=id;
-document.getElementById("modalTitle").textContent="Modifier patient";
-document.getElementById("name").value=p.name;
-document.getElementById("age").value=p.age;
-document.getElementById("phone").value=p.phone;
-document.getElementById("address").value=p.address;
-document.getElementById("image").value=p.image;
+      function clearSearch() {
+        document.getElementById("searchInput").value = "";
+        filteredPatients = [...allPatients];
+        currentPage = 1;
+        renderPatients();
+      }
 
-document.getElementById("modal").style.display="flex";
-}
+      // --- MODAL (AJOUT / MODIFICATION) ---
+      function showAddForm() {
+        editingPatientId = null;
+        document.getElementById("modalTitle").textContent = "Ajouter patient";
+        document.getElementById("name").value = "";
+        document.getElementById("age").value = "";
+        document.getElementById("phone").value = "";
+        document.getElementById("address").value = "";
+        document.getElementById("image").value = "";
+        document.getElementById("modal").style.display = "flex";
+      }
 
-/* ========================= */
-function closeForm(){
-document.getElementById("modal").style.display="none";
-}
+      function editPatient(id) {
+        const patient = allPatients.find(p => p.id == id);
+        if (!patient) return;
+        editingPatientId = id;
+        document.getElementById("modalTitle").textContent = "Modifier patient";
+        document.getElementById("name").value = patient.name;
+        document.getElementById("age").value = patient.age;
+        document.getElementById("phone").value = patient.phone;
+        document.getElementById("address").value = patient.address;
+        document.getElementById("image").value = patient.image || "";
+        document.getElementById("modal").style.display = "flex";
+      }
 
-/* ========================= */
-function savePatient(){
-const name=document.getElementById("name").value;
-const age=document.getElementById("age").value;
-const phone=document.getElementById("phone").value;
-const address=document.getElementById("address").value;
-const image=document.getElementById("image").value;
+      function closeForm() {
+        document.getElementById("modal").style.display = "none";
+        editingPatientId = null;
+      }
 
-if(!name||!age){alert("Nom et age obligatoires");return;}
+      // --- SAUVEGARDE (AJOUT ou MODIFICATION) ---
+      function savePatient() {
+        const name = document.getElementById("name").value.trim();
+        const age = parseInt(document.getElementById("age").value);
+        const phone = document.getElementById("phone").value.trim();
+        const address = document.getElementById("address").value.trim();
+        const image = document.getElementById("image").value.trim();
 
-let patients=JSON.parse(localStorage.getItem("patients"))||[];
+        if (!name || !age || isNaN(age)) {
+          showMessage("Veuillez remplir au moins le nom et l'âge", "error");
+          return;
+        }
 
-if(editingId){
-const index=patients.findIndex(p=>p.id===editingId);
-patients[index]={...patients[index],name,age,phone,address,image};
-}else{
-patients.push({
-id:Date.now(),
-name,
-age,
-phone,
-address,
-image:image||"https://i.pravatar.cc/40",
-added:new Date().toLocaleDateString("fr-FR")
-});
-}
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        const added = `${day}/${month}/${year}`;
 
-localStorage.setItem("patients",JSON.stringify(patients));
-closeForm();
-loadPatients();
-}
+        if (editingPatientId) {
+          // MODIFICATION
+          const index = allPatients.findIndex(p => p.id == editingPatientId);
+          if (index !== -1) {
+            allPatients[index] = {
+              ...allPatients[index],
+              name,
+              age,
+              phone,
+              address,
+              image: image || allPatients[index].image
+              // on garde la date d'origine (added inchangée)
+            };
+            showMessage("Patient modifié avec succès", "success");
+          }
+        } else {
+          // AJOUT
+          const newId = allPatients.length > 0 ? Math.max(...allPatients.map(p => p.id)) + 1 : 1;
+          allPatients.push({
+            id: newId,
+            name,
+            age,
+            phone,
+            address,
+            image: image || `https://i.pravatar.cc/40?u=${newId}`,
+            added
+          });
+          showMessage("Patient ajouté avec succès", "success");
+        }
 
-/* ========================= */
-function deletePatient(id){
-if(!confirm("Supprimer ce patient ?"))return;
-let patients=JSON.parse(localStorage.getItem("patients"))||[];
-patients=patients.filter(p=>p.id!==id);
-localStorage.setItem("patients",JSON.stringify(patients));
-loadPatients();
-}
+        // Sauvegarde normalisée et mise à jour
+        localStorage.setItem("patients", JSON.stringify(allPatients));
+        filteredPatients = [...allPatients];
+        updateStatistics();
+        renderPatients();
+        closeForm();
+      }
 
-/* ========================= */
-document.getElementById("logout").onclick=()=>{
-localStorage.removeItem("user");
-location.href="medecin_login.html";
-}
+      // --- SUPPRESSION ---
+      function deletePatient(id) {
+        if (!confirm("Supprimer ce patient définitivement ?")) return;
+        allPatients = allPatients.filter(p => p.id != id);
+        localStorage.setItem("patients", JSON.stringify(allPatients));
+        filteredPatients = [...allPatients];
+        updateStatistics();
+        renderPatients();
+        showMessage("Patient supprimé", "success");
+      }
 
-/* ========================= */
-loadPatients();
-</script>
+      // --- MESSAGES FLOTTANTS ---
+      function showMessage(text, type) {
+        const container = document.getElementById("messageContainer");
+        container.innerHTML = `<div class="message ${type}">${text}</div>`;
+        setTimeout(() => container.innerHTML = "", 3000);
+      }
 
+      // --- PROFIL (redirection fictive, à adapter) ---
+      function viewPatient(id) {
+        alert(`Fiche détaillée du patient (id ${id}) – implémentez profil_patient.html`);
+        // window.location.href = `profil_patient.html?id=${id}`;
+      }
+
+      // --- DÉCONNEXION ---
+      document.getElementById("logout").addEventListener("click", (e) => {
+        e.preventDefault();
+        localStorage.removeItem("user");
+        window.location.href = "index.html";
+      });
+
+      // --- EVENT LISTENERS ---
+      document.getElementById("saveBtn").addEventListener("click", savePatient);
+      document.getElementById("searchInput").addEventListener("input", filterPatients);
+      
+      // Fermeture modale en cliquant sur l'overlay
+      document.getElementById("modal").addEventListener("click", (e) => {
+        if (e.target.id === "modal") closeForm();
+      });
+
+      // --- ATTACHEMENT DES FONCTIONS GLOBALES (pour les appels onclick) ---
+      window.showAddForm = showAddForm;
+      window.closeForm = closeForm;
+      window.editPatient = editPatient;          // <-- indispensable
+      window.deletePatient = deletePatient;
+      window.viewPatient = viewPatient;
+      window.filterPatients = filterPatients;
+      window.clearSearch = clearSearch;
+      window.changePage = changePage;
+
+      // --- INITIALISATION ---
+      loadPatients();
+    })();
+  </script>
 </body>
 </html>
