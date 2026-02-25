@@ -329,6 +329,18 @@
       background: #138496;
     }
     
+    /* === CORRECTION : forcer les boutons sur une ligne === */
+    .action-buttons {
+      flex-wrap: nowrap;               /* empêche le retour à la ligne */
+    }
+    .action-buttons .btn-outline,
+    .action-buttons .btn-view {
+      padding: 5px 8px;                /* réduit l'espace interne */
+      font-size: 11px;                 /* police plus petite */
+      white-space: nowrap;              /* texte sur une seule ligne */
+    }
+    /* ===================================================== */
+    
     .pagination-container {
       display: flex;
       justify-content: space-between;
@@ -408,7 +420,12 @@
       .filters-container { flex-direction: column; align-items: stretch; }
       .filters-container input { min-width: auto; }
       .stats-grid { grid-template-columns: 1fr; }
-      .action-buttons { flex-direction: column; }
+      .action-buttons { flex-wrap: wrap; }  /* sur mobile on autorise le retour à la ligne */
+      .action-buttons .btn-outline,
+      .action-buttons .btn-view {
+        padding: 5px 8px;
+        font-size: 11px;
+      }
       table { display: block; overflow-x: auto; }
     }
   </style>
