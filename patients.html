@@ -841,8 +841,8 @@
         setTimeout(() => container.innerHTML = "", 3000);
       }
 
-      function viewPatient(id) {
-  alert(`Fiche détaillée du patient (id ${id}) – implémentez profil_patient.html`);
+     function viewPatient(id) {
+  window.location.href = `profil_patient.html?id=${id}`;
 }
       // --- DÉCONNEXION ---
       document.getElementById("logout").addEventListener("click", (e) => {
