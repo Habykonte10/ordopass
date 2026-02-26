@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    /* VOTRE CSS EXISTANT */
+    /* === VOTRE CSS EXISTANT (inchangé) === */
     * {
       margin: 0;
       padding: 0;
@@ -513,7 +513,6 @@
       border-top: 2px solid #2a5298;
     }
 
-    /* Styles d'impression */
     @media print {
       .no-print, .action-buttons, .section-actions, .modal {
         display: none !important;
@@ -824,7 +823,6 @@
     const urlParams = new URLSearchParams(window.location.search);
     const consultationId = urlParams.get('id');
     let currentConsultation = null;
-    let currentPatient = null;
 
     // Afficher un message
     function showMessage(message, type = 'info') {
@@ -842,8 +840,8 @@
       }, 5000);
     }
 
-    // Charger les données de consultation depuis l'API
-    async function loadConsultation() {
+    // Charger les données de consultation
+    function loadConsultation() {
       if (!consultationId) {
         document.getElementById('consultationContent').innerHTML = `
           <div class="error">
@@ -856,20 +854,7 @@
         return;
       }
 
-      try {
-        console.log('Chargement de la consultation ID:', consultationId);
-        
-        // Essayer d'abord de charger depuis localStorage
-        loadConsultationFromLocalStorage();
-        
-      } catch (error) {
-        console.error("Erreur:", error);
-        showMessage('Erreur lors du chargement de la consultation', 'error');
-      }
-    }
-
-    // Charger depuis localStorage
-    function loadConsultationFromLocalStorage() {
+      // Charger depuis localStorage
       const consultations = JSON.parse(localStorage.getItem('consultations')) || [];
       currentConsultation = consultations.find(c => c.id == consultationId);
       
@@ -910,7 +895,7 @@
       console.log('Factures chargées:', currentConsultation.factures);
     }
 
-    // Afficher les données de consultation
+    // Afficher les données de consultation (version adaptée)
     function displayConsultationData() {
       if (!currentConsultation) return;
 
@@ -921,6 +906,12 @@
           default: return 'en-attente';
         }
       };
+
+      // Extraire nom et prénom depuis patientName (si présent)
+      const patientName = currentConsultation.patientName || 'Patient inconnu';
+      const nameParts = patientName.split(' ');
+      const prenom = nameParts[0] || '';
+      const nom = nameParts.slice(1).join(' ') || '';
 
       // Formater la date si nécessaire
       const formatDate = (dateStr) => {
@@ -946,12 +937,8 @@
                 <div class="form-control" style="background:#f9f9f9; border:1px solid #ddd;">${currentConsultation.ticket || '-'}</div>
               </div>
               <div class="form-group">
-                <div class="form-label">Nom du patient</div>
-                <div class="form-control" style="background:#f9f9f9; border:1px solid #ddd;">${currentConsultation.nom || ''}</div>
-              </div>
-              <div class="form-group">
-                <div class="form-label">Prénom du patient</div>
-                <div class="form-control" style="background:#f9f9f9; border:1px solid #ddd;">${currentConsultation.prenom || ''}</div>
+                <div class="form-label">Nom complet du patient</div>
+                <div class="form-control" style="background:#f9f9f9; border:1px solid #ddd;">${patientName}</div>
               </div>
               <div class="form-group">
                 <div class="form-label">Date</div>
@@ -974,7 +961,7 @@
             </div>
           </div>
 
-          <!-- Symptômes -->
+          <!-- Symptômes (si présents) -->
           <div class="form-section">
             <div class="section-header">
               <h3 style="margin: 0;">Symptômes</h3>
@@ -1065,7 +1052,7 @@
                       </div>
                     </div>
                     <div><strong>Médecin:</strong> ${ordonnance.medecinNom || 'Dr. Non spécifié'}</div>
-                    <div><strong>Patient:</strong> ${ordonnance.patientNom || currentConsultation.patientName || currentConsultation.prenom + ' ' + currentConsultation.nom}</div>
+                    <div><strong>Patient:</strong> ${ordonnance.patientNom || patientName}</div>
                     <div><strong>Code:</strong> ${ordonnance.code || 'N/A'}</div>
                   </div>
                 `).join('') 
@@ -1099,7 +1086,7 @@
                         </button>
                       </div>
                     </div>
-                    <div><strong>Patient:</strong> ${facture.patient || facture.patientName || currentConsultation.patientName || currentConsultation.prenom + ' ' + currentConsultation.nom}</div>
+                    <div><strong>Patient:</strong> ${facture.patient || facture.patientName || patientName}</div>
                     <div><strong>Statut:</strong> ${facture.statut || 'En attente'}</div>
                     <div><strong>Date:</strong> ${facture.date ? new Date(facture.date).toLocaleDateString('fr-FR') : 'N/A'}</div>
                   </div>
@@ -1114,12 +1101,12 @@
       document.getElementById('consultationContent').innerHTML = content;
       
       // Pré-remplir les formulaires avec les données du patient
-      document.getElementById('ordPatientNom').value = currentConsultation.patientName || `${currentConsultation.prenom} ${currentConsultation.nom}`;
-      document.getElementById('facturePatient').value = currentConsultation.patientName || `${currentConsultation.prenom} ${currentConsultation.nom}`;
-      document.getElementById('factureConsultation').value = `Consultation ${formatDate(currentConsultation.date)} - ${currentConsultation.motif}`;
+      document.getElementById('ordPatientNom').value = patientName;
+      document.getElementById('facturePatient').value = patientName;
+      document.getElementById('factureConsultation').value = `Consultation ${formatDate(currentConsultation.date)} - ${currentConsultation.motif || ''}`;
     }
 
-    // Fonctions pour les modals
+    // Fonctions pour les modals (inchangées)
     function openModal(modalId) {
       document.getElementById(modalId).style.display = 'flex';
     }
@@ -1161,12 +1148,10 @@
         patientPoids: document.getElementById('ordPatientPoids').value,
         medicaments: document.getElementById('ordMedicaments').value,
         dateOrd: new Date().toLocaleDateString('fr-FR'),
-        consultationId: consultationId,
-        patientId: currentConsultation.patientId || null
+        consultationId: consultationId
       };
       
       try {
-        // Sauvegarder dans localStorage
         saveOrdonnanceToLocalStorage(ordonnanceData);
       } catch (error) {
         console.error('Erreur sauvegarde ordonnance:', error);
@@ -1174,7 +1159,6 @@
       }
     }
 
-    // Sauvegarder dans localStorage
     function saveOrdonnanceToLocalStorage(ordonnanceData) {
       const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
       const newId = ordonnances.length > 0 ? Math.max(...ordonnances.map(o => o.id)) + 1 : 1;
@@ -1195,7 +1179,6 @@
     function deleteOrdonnance(ordonnanceId) {
       if (confirm('Supprimer cette ordonnance ?')) {
         try {
-          // Supprimer de localStorage
           deleteOrdonnanceFromLocalStorage(ordonnanceId);
         } catch (error) {
           console.error('Erreur suppression ordonnance:', error);
@@ -1204,7 +1187,6 @@
       }
     }
 
-    // Supprimer de localStorage
     function deleteOrdonnanceFromLocalStorage(ordonnanceId) {
       const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
       const updatedOrdonnances = ordonnances.filter(o => o.id != ordonnanceId);
@@ -1214,13 +1196,11 @@
       loadConsultation();
     }
 
-    // Voir une ordonnance
     function viewOrdonnance(ordonnanceId) {
       const ordonnances = JSON.parse(localStorage.getItem('ordonnances')) || [];
       const ordonnance = ordonnances.find(o => o.id == ordonnanceId);
       
       if (ordonnance) {
-        // Remplir le modal avec les données de l'ordonnance
         document.getElementById('ordMedecinNom').value = ordonnance.medecinNom || '';
         document.getElementById('ordPatientNom').value = ordonnance.patientNom || '';
         document.getElementById('ordPatientAge').value = ordonnance.patientAge || '';
@@ -1229,10 +1209,7 @@
         document.getElementById('ordPatientPoids').value = ordonnance.patientPoids || '';
         document.getElementById('ordMedicaments').value = ordonnance.medicaments || '';
         
-        // Générer l'aperçu
         generateOrdonnance();
-        
-        // Ouvrir le modal
         openModal('addOrdonnanceModal');
       } else {
         alert('Ordonnance non trouvée');
@@ -1302,7 +1279,6 @@
     function saveFacture() {
       const factureData = {
         consultationId: consultationId,
-        patientId: currentConsultation.patientId || null,
         patientName: document.getElementById('facturePatient').value,
         numero: document.getElementById('factureNumero').value,
         date: document.getElementById('factureDate').value,
@@ -1312,7 +1288,6 @@
         createdAt: new Date().toISOString()
       };
       
-      // Calculer le total
       let total = 0;
       const items = [];
       document.querySelectorAll('#factureItems .facture-item').forEach(item => {
@@ -1326,7 +1301,6 @@
       factureData.items = items;
       
       try {
-        // Sauvegarder dans localStorage
         saveFactureToLocalStorage(factureData);
       } catch (error) {
         console.error('Erreur sauvegarde facture:', error);
@@ -1334,7 +1308,6 @@
       }
     }
 
-    // Sauvegarder facture dans localStorage
     function saveFactureToLocalStorage(factureData) {
       const factures = JSON.parse(localStorage.getItem('factures')) || [];
       const newId = factures.length > 0 ? Math.max(...factures.map(f => f.id)) + 1 : 1;
@@ -1351,7 +1324,6 @@
     function deleteFacture(factureId) {
       if (confirm('Supprimer cette facture ?')) {
         try {
-          // Supprimer de localStorage
           deleteFactureFromLocalStorage(factureId);
         } catch (error) {
           console.error('Erreur suppression facture:', error);
@@ -1360,7 +1332,6 @@
       }
     }
 
-    // Supprimer facture de localStorage
     function deleteFactureFromLocalStorage(factureId) {
       const factures = JSON.parse(localStorage.getItem('factures')) || [];
       const updatedFactures = factures.filter(f => f.id != factureId);
@@ -1541,9 +1512,7 @@
     function removeAnalysis(analysisName) {
       if (confirm(`Supprimer l'analyse "${analysisName}" ?`)) {
         try {
-          // Créer un nouveau tableau sans l'analyse à supprimer
           const nouvellesAnalyses = currentConsultation.analyses.filter(a => a !== analysisName);
-          
           currentConsultation.analyses = nouvellesAnalyses;
           const consultations = JSON.parse(localStorage.getItem('consultations')) || [];
           const consultationIndex = consultations.findIndex(c => c.id == consultationId);
@@ -1565,13 +1534,9 @@
       const user = JSON.parse(localStorage.getItem('currentUser')) || { username: 'Dr. Diallo' };
       document.getElementById('usernameDisplay').textContent = user.username;
       
-      // Initialiser la date de la facture à aujourd'hui
       document.getElementById('factureDate').valueAsDate = new Date();
-      
-      // Générer un numéro de facture unique
       document.getElementById('factureNumero').value = 'FAC-' + Date.now().toString().slice(-6);
       
-      // Charger les données de consultation
       loadConsultation();
     });
   </script>
